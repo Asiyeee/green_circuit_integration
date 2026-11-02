@@ -12,13 +12,13 @@ const PROMPT_DIR = path.join(__dirname, '..', 'prompts');
 const MANUAL_PATH = path.join(__dirname, '..', 'data', '스마트폰_처리_매뉴얼.md');
 const CODES = CONDITIONS.map((c) => c.code);
 const DAMAGED = ['rear_damage', 'display_fault', 'damage_or_fault'];
-// ponytail: 팀 합의 전 임시 기준. 업체 매입 최고가가 이보다 낮으면 기부·배출을 먼저 권합니다.
-const DONATE_BELOW_KRW = 30000;
+// 과거 export 호환용. 금액으로 판매/폐기를 자동 분기하지 않습니다.
+const DONATE_BELOW_KRW = 30000; // 이전 소비자와의 export 호환용. 분기에는 사용하지 않음.
 // Apple 은 최대 용량 80% 미만을 배터리 성능 저하로 안내합니다. 갤럭시도 같은 기준으로 표시만 합니다.
 const BATTERY_LOW_PCT = 80;
 
 const ACTIONS = {
-  sell: { label_ko: '판매', manual: ['1. 판매하기'] },
+  sell: { label_ko: '우리 플랫폼에 상태를 공개하고 판매 등록', manual: ['1. 판매하기'] },
   sell_parts: { label_ko: '파손폰 업체 매입', manual: ['1. 판매하기', '화면이 깨졌거나 전원이 켜지지 않을 때'] },
   donate: { label_ko: '기부·배출', manual: ['2. 폐기: 나눔폰 기부·재활용', '3. 폐기: 지역 수거함에 배출'] },
 };
@@ -82,29 +82,24 @@ function manualSection(title) {
 function recommend({ brand, conditionCode, price, report, battery }) {
   const reasons = [];
   const ok = price && price.status === 'ok';
-  const lowPrice = ok && price.maxKrw < DONATE_BELOW_KRW;
-  let action;
+  const action = 'sell';
   if (DAMAGED.includes(conditionCode)) {
-    action = ok && !lowPrice ? 'sell_parts' : 'donate';
-    reasons.push(ok && !lowPrice ? '파손·화면 이상 상태에도 업체 매입 시세 있음' : ok ? `파손 상태 매입 참고가 ${DONATE_BELOW_KRW.toLocaleString('ko-KR')}원 미만` : '파손 상태 시세 정보 없음');
-  } else if (lowPrice) {
-    action = 'donate';
-    reasons.push(`매입 참고가 ${DONATE_BELOW_KRW.toLocaleString('ko-KR')}원 미만`);
-  } else {
-    action = 'sell';
-    reasons.push(ok ? '정상 사용 상태, 업체 매입 시세 있음' : '시세 정보 없음. 판매는 가능하나 가격은 직접 확인');
+    reasons.push('파손·화면 이상과 미확인 기능을 공개하고 판매 희망가를 정해 등록할 수 있음');
   }
+  reasons.push(ok ? '업체 매입 참고가이며 개인 거래 적정가·보장 판매가가 아님' : '시세 자료 부족은 가치 없음·매입 불가를 뜻하지 않음. 희망가 직접 입력 가능');
   const s = (report && report.summary) || {};
   if (!s.completed) reasons.push('미완료 점검 항목 있음. 판매글에 미확인으로 표시');
   else if (!s.allPassed) reasons.push('일부 점검 미통과. 권한 문제일 수 있어 고장으로 단정하지 않음');
-  if (battery && battery.low) reasons.push(`배터리 최대 용량 ${battery.healthPct}% (판매자 캡처). 매입가가 낮아질 수 있음`);
+  if (battery && battery.healthPct !== null) reasons.push(`배터리 최대 용량 ${battery.healthPct}% (판매자 캡처 판독, 직접 측정 아님). 참고가는 배터리별 보정 가격이 아님`);
   if (action === 'donate') reasons.push('나눔폰은 입고 후 반환되지 않음. 판매 원하면 기부하지 않기');
 
-  const sections = [...(WIPE[brand] ? [WIPE[brand]] : []), ...ACTIONS[action].manual];
+  const sections = [...(WIPE[brand] ? [WIPE[brand]] : []), ...ACTIONS[action].manual,
+    ...(DAMAGED.includes(conditionCode) ? ['화면이 깨졌거나 전원이 켜지지 않을 때'] : []), ...ACTIONS.donate.manual];
   return {
     action,
+    registrationUrl: '/seller',
     label_ko: ACTIONS[action].label_ko,
-    alternatives: Object.keys(ACTIONS).filter((a) => a !== action), // 강제하지 않고 사용자가 고름 (매뉴얼 원칙)
+    alternatives: ['donate', 'recycle'],
     reasons_ko: reasons,
     manualSections: sections,
     basis: 'rule',
@@ -118,9 +113,9 @@ if (require.main === module) {
   const assert = require('assert');
   const rep = { summary: { completed: true, allPassed: true } };
   assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'clean', price: { status: 'ok', maxKrw: 290000 }, report: rep }).action, 'sell');
-  assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'rear_damage', price: { status: 'ok', maxKrw: 90000 }, report: rep }).action, 'sell_parts');
-  assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'display_fault', price: { status: 'no_data' }, report: rep }).action, 'donate');
-  assert.strictEqual(recommend({ brand: 'Samsung', conditionCode: 'minor_wear', price: { status: 'ok', maxKrw: 20000 }, report: rep }).action, 'donate');
+  assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'rear_damage', price: { status: 'ok', maxKrw: 90000 }, report: rep }).action, 'sell');
+  assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'display_fault', price: { status: 'no_data' }, report: rep }).action, 'sell');
+  assert.strictEqual(recommend({ brand: 'Samsung', conditionCode: 'minor_wear', price: { status: 'ok', maxKrw: 20000 }, report: rep }).action, 'sell');
   assert.strictEqual(recommend({ brand: 'X', conditionCode: 'clean', price: { status: 'needs_check' }, report: rep }).action, 'sell');
   const n = normalize({ condition: { code: 'unknown', confidence: 'zzz' }, battery: { isBatteryScreen: true, healthPct: 76, osHint: 'ios' } }, 'm');
   assert.strictEqual(n.condition.code, null);

@@ -10,6 +10,7 @@ const path = require('path');
 const { loadEnv } = require('../../server.js');
 const { createStore } = require('../../common/lib/certificate-store.js');
 const { createSellerService } = require('../lib/seller-routes.js');
+const { secret, hash } = require('../lib/market.js');
 
 const ROOT = path.join(__dirname, '..', '..'); // 저장소 루트
 const BASE = JSON.parse(fs.readFileSync(path.join(ROOT, 'part1_hardware_test', 'sample-result.json'), 'utf8'));
@@ -58,6 +59,7 @@ async function main() {
       const c = JSON.parse(fs.readFileSync(path.join(dir, 'certificates', f), 'utf8'));
       if (!c.demo) continue;
       fs.rmSync(path.join(dir, 'certificates', f));
+      fs.rmSync(path.join(dir, 'market', `${c.id}.json`), { force: true });
       fs.rmSync(path.join(dir, 'photos', c.id), { recursive: true, force: true });
     }
     for (const name of new Set(DEMOS.map((d) => d.seller))) {
@@ -71,6 +73,7 @@ async function main() {
   const service = createSellerService({ cfg: {}, store, httpError });
 
   for (const [i, d] of DEMOS.entries()) {
+    const ownerToken = secret();
     const cert = await service.createCertificate({
       report: reportFor(d, i),
       storage: d.storage,
@@ -78,8 +81,8 @@ async function main() {
       knownFault: d.fault,
       nickname: d.seller,
       askingPriceKrw: d.ask,
-    }, { demo: true });
-    if (d.outcome) await service.recordOutcome(cert.id, d.outcome);
+    }, { demo: true, ownerHash: hash(ownerToken) });
+    if (d.outcome) await service.recordOutcome(cert.id, d.outcome, ownerToken);
   }
   const port = Number(process.env.PORT) || 3000;
   console.log(`\n데모 보증서 ${DEMOS.length}장을 만들었습니다 (저장소: ${store.where}).`);

@@ -123,12 +123,14 @@ function render({ certificate: c, verified, expired, seller }) {
   // 시세 막대: 같은 기종 범위 안에서 최저~최고를 0~100% 로
   const priceHtml = p.status === 'ok' ? `
     <div class="price">${p.singleAmount ? won(p.minKrw) : `${man(p.minKrw)} ~ ${man(p.maxKrw)}`}</div>
-    <div class="price-sub">${p.singleAmount ? '업체 1곳 매입가' : `업체 ${p.vendorCount}곳 · 견적 ${p.quoteCount}건`} · ${esc(c.device.storage)} · ${esc(c.condition.label_ko)}</div>
+    <div class="price-sub">${esc(p.label_ko)} · 업체 ${p.vendorCount}곳 · 견적 ${p.quoteCount}건 · ${esc(c.device.storage)} · ${esc(c.condition.label_ko)}</div>
+    <p class="price-sub">업체 검수·조건에 따라 실제 매입가가 달라집니다. 개인 간 실거래가·보장 판매가가 아닙니다. ${esc(p.notice_ko)}</p>
+    <p class="price-sub">업체 등급을 자체 상태로 연결했으며 평가 조건은 서로 다릅니다. 배터리별 정밀 보정 가격이 아닙니다.</p>
     <details style="margin-top:14px"><summary>업체별 견적</summary>
       <table><tr><th>업체</th><th>업체 등급</th><th class="r">금액</th></tr>
-      ${p.quotes.map((q) => `<tr><td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a></td><td>${esc(q.grade)}<small>${esc(q.conditions_ko)}</small></td><td class="r">${q.minKrw === q.maxKrw ? won(q.minKrw) : won(q.minKrw) + '~' + won(q.maxKrw)}</td></tr>`).join('')}
+      ${p.quotes.map((q) => `<tr><td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a><small>원문 기준일: ${esc(q.priceDate || q.priceDateSource || '미표시')}</small></td><td>${esc(q.grade)}<small>${esc(q.conditions_ko)}</small></td><td class="r">${q.minKrw === q.maxKrw ? won(q.minKrw) : won(q.minKrw) + '~' + won(q.maxKrw)}</td></tr>`).join('')}
       </table>
-      <p class="muted" style="margin:10px 0 0">${esc(p.checkedOn)} 조사 기준. 실시간 가격 아님.</p>
+      <p class="muted" style="margin:10px 0 0">자료 확인일 ${esc(p.checkedOn)}. 원문 가격 기준일과 다름. 실시간 가격 아님.</p>
     </details>`
     : `<div class="price" style="font-size:18px;font-weight:700">시세 정보 없음</div><div class="price-sub">${esc(p.message_ko)}</div>`;
 
@@ -168,7 +170,10 @@ function render({ certificate: c, verified, expired, seller }) {
   </section>
 
   <section class="section">
-    <h2 class="section-label">업체 매입 시세</h2>
+    <h2 class="section-label">판매 희망가</h2>
+    <div class="price">${c.askingPriceKrw ? won(c.askingPriceKrw) : '가격 미정 (이전 매물)'}</div>
+    <p class="price-sub">판매자가 정한 플랫폼 등록 가격입니다.</p>
+    <h2 class="section-label" style="margin-top:20px">업체 매입 참고가</h2>
     ${priceHtml}
   </section>
 
@@ -251,30 +256,12 @@ function render({ certificate: c, verified, expired, seller }) {
     </div>
   </section>
 
-  <section class="section demo" id="demo">
-    <h2 class="section-label">거래 처리 · 판매자 전용</h2>
-    <p class="small" style="margin:0">처리하면 판매자 환경 온도가 오르고 보증서가 판매 종료 상태로 바뀝니다. 한 번만 할 수 있어요.</p>
-    <div class="btn-row">
-      <button class="btn btn-primary" data-type="sold">판매 완료</button>
-      <button class="btn btn-secondary" data-type="donated">기부</button>
-      <button class="btn btn-secondary" data-type="recycled">분리배출</button>
-    </div>
-    <p class="err" id="demo-err"></p>
-  </section>`;
+  <section class="section" id="market-controls"></section>`;
 
   const share = location.origin + location.pathname;
   if (window.QRCode) new QRCode($('#qr'), { text: share, width: 96, height: 96 });
   $('#copy').onclick = () => navigator.clipboard.writeText(share).then(() => { $('#copy').textContent = '복사됨'; });
-  if (T && c.status === 'listed') {
-    $('#demo').style.display = 'block';
-    document.querySelectorAll('#demo button').forEach((b) => b.onclick = async () => {
-      b.disabled = true;
-      const r = await fetch(`/api/certificates/${encodeURIComponent(c.id)}/outcome`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-access-token': T }, body: JSON.stringify({ type: b.dataset.type }) });
-      const j = await r.json();
-      if (!r.ok) { $('#demo-err').textContent = j.error || 'HTTP ' + r.status; b.disabled = false; return; }
-      load();
-    });
-  }
+  window.renderMarketControls({ certificate: c, expired, token: T, reload: load });
 }
 
 async function load() {
@@ -287,8 +274,10 @@ async function load() {
     $('#app').innerHTML = `<p class="err" style="padding:40px 0">보증서를 불러오지 못함: ${esc(e.message)}</p>`;
   }
 }
-load();
+// 관리 스크립트 로드 뒤 시작.
 </script>
+<script src="/assets/market.js"></script>
+<script>load();</script>
 <script src="/assets/nav.js"></script>
 </body>
 </html>

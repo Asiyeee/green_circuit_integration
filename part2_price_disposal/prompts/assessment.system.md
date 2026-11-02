@@ -27,6 +27,7 @@ Rules:
 - `damages`: list each visible defect with where it is (e.g. "후면 좌상단 유리 금"). Empty if none.
 - `evidence_ko`: one short Korean sentence explaining the choice.
 - Do NOT use the camera/photo quality of the image as the phone's condition.
+- Photos cannot prove internal functions are normal. Never infer functional health from exterior appearance. The seller must explicitly confirm the proposed state.
 
 # Task 2: battery screenshot (`battery`)
 - `screenType`: which screen the battery image shows.

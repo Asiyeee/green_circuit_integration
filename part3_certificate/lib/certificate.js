@@ -167,12 +167,12 @@ function factsFor(cert) {
       label_ko: cert.condition.label_ko,
       knownFault: cert.condition.knownFaultLabel_ko,
       exteriorSource: cert.condition.verified && cert.condition.verified.exterior ? 'AI 사진 판별과 판매자 선택 일치 (확인됨)' : '판매자 선택',
-      faultSource: cert.condition.verified && cert.condition.verified.fault ? '하드웨어 점검 5/5 정상 (확인됨)' : '판매자 입력',
+      faultSource: cert.condition.verified && cert.condition.verified.fault ? '판매자 없음 응답 + 5가지 웹 점검 통과. 나머지 기능은 미검증' : '판매자 입력',
     },
     aiExterior: cert.assessment && cert.assessment.ai && cert.assessment.ai.condition.code
       ? { label_ko: cert.assessment.ai.condition.label_ko, confidence: cert.assessment.ai.condition.confidence, damages: cert.assessment.ai.condition.damages, agreesWithSeller: cert.assessment.sellerAgreesWithAi }
       : null,
-    battery: cert.assessment && cert.assessment.battery ? { healthPct: cert.assessment.battery.healthPct, statusLabel: cert.assessment.battery.statusLabel, cycleCount: cert.assessment.battery.cycleCount, low: cert.assessment.battery.low, source: '기기 배터리 성능 화면에서 AI 판독 (확인됨)' } : null,
+    battery: cert.assessment && cert.assessment.battery ? { healthPct: cert.assessment.battery.healthPct, statusLabel: cert.assessment.battery.statusLabel, cycleCount: cert.assessment.battery.cycleCount, low: cert.assessment.battery.low, source: '판매자 제공 캡처 AI 판독. 직접 측정·기기 일치 검증 아님' } : null,
     price: cert.price.status === 'ok'
       ? { status: 'ok', label_ko: cert.price.label_ko, minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, vendorCount: cert.price.vendorCount }
       : { status: cert.price.status, message_ko: cert.price.message_ko },
@@ -189,7 +189,7 @@ function ruleSummary(cert) {
   const bad = KEYS.filter((k) => t.items[k].status !== 'pass').map((k) => TEST_LABEL[k]);
   const p = cert.price;
   const priceText = p.status === 'ok'
-    ? (p.singleAmount ? `업체 매입가 ${won(p.minKrw)}.` : `업체 매입 참고 범위 ${won(p.minKrw)}~${won(p.maxKrw)}.`)
+    ? `${p.label_ko} ${won(p.minKrw)}${p.singleAmount ? '' : '~' + won(p.maxKrw)}. 검수·조건에 따라 상이하며 개인 거래 보장가 아님.`
     : '해당 조건 시세 정보 없음.';
   const strengths = [];
   if (t.passedCount) strengths.push(`하드웨어 점검 ${t.passedCount}/${t.totalCount} 정상`);
@@ -197,9 +197,10 @@ function ruleSummary(cert) {
   const v = cert.condition.verified || {};
   if (cert.condition.code === 'clean') strengths.push(`흠집·파손·잔상 없음 (${v.exterior ? 'AI 사진 판별 일치' : '판매자 입력'})`);
   const bat = cert.assessment && cert.assessment.battery;
-  if (bat && bat.healthPct !== null && !bat.low) strengths.push(`배터리 최대 용량 ${bat.healthPct}%`);
+  if (bat && bat.healthPct !== null && !bat.low) strengths.push(`배터리 최대 용량 ${bat.healthPct}% (판매자 캡처)`);
   if ((t.items.touch.maxSimultaneousTouches || 0) > 1) strengths.push('멀티터치 정상 인식');
   const cautions = [];
+  if (cert.condition.knownFault === 'unknown') cautions.push('알려진 기능 이상 모름 (판매자 입력). 웹 점검 통과가 전체 기능 정상을 보장하지 않음');
   if (bad.length) cautions.push(`이상·미점검 항목: ${bad.join(', ')}`);
   if (!bat || bat.healthPct === null) cautions.push('배터리 상태 미점검');
   else if (bat.low) cautions.push(`배터리 최대 용량 ${bat.healthPct}% (80% 미만)`);

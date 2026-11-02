@@ -145,7 +145,10 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
       minKrw: q.min_krw,
       maxKrw: q.max_krw,
       conditions_ko: q.conditions_ko,
-      priceDate: q.price_date || q.price_date_source || null,
+      priceDate: q.price_date || null,
+      priceDateSource: q.price_date_source || null,
+      conditionSourceUrl: q.condition_source_url || null,
+      verificationMethod: q.verification_method || null,
       url: q.source_url,
     })),
   };

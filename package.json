@@ -13,7 +13,8 @@
     "validate": "node common/scripts/validate.js",
     "summary": "node part1_hardware_test/summary.js",
     "seed": "node part3_certificate/scripts/seed-demo.js",
-    "test": "node part2_price_disposal/lib/assessment.js && node part4_buyer/lib/buyer.js"
+    "test": "node part2_price_disposal/lib/assessment.js && node part4_buyer/lib/buyer.js && node --test tests/*.test.js",
+    "price:validate": "node part2_price_disposal/scripts/price-refresh.js validate"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",

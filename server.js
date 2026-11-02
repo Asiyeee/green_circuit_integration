@@ -401,11 +401,11 @@ async function checkGemini(cfg) {
   }
 }
 
-function start() {
+function start(options = {}) {
   loadEnv();
-  const cfg = getConfig();
+  const cfg = { ...getConfig(), ...(options.config || {}) };
   const state = { calls: [], planIdx: 0, textPlanIdx: 0 };
-  const store = createStore();
+  const store = options.store || createStore();
   state.store = store;
   state.buyerRoutes = createBuyerRoutes({ store, listItem, readJson, sendJson });
   state.sellerRoutes = createSellerRoutes({

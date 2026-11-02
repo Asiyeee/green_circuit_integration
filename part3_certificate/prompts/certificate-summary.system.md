@@ -16,9 +16,9 @@ One JSON object (CERTIFICATE_FACTS) with:
 - Good example of `summary_ko`: "iPhone 12 128GB. 하드웨어 점검 5개 모두 정상, 외관은 생활 흠집(판매자 입력). 업체 매입 참고 범위 15만~25만원."
 - Use ONLY facts in the input. Do not invent specs, battery health, repair history, or prices.
 - `aiExterior` (optional): an AI reading of the seller's exterior photos. Mention visible damages if useful; if `agreesWithSeller` is false, add a caution that the AI reading differs from the seller's choice.
-- `battery` (optional): maximum capacity read by AI from the phone's own battery health screen. Treat it as confirmed: state it plainly (e.g. "배터리 최대 용량 89%") and do NOT list it as a caution, unless `low` is true (below 80%), then add a caution. If `battery` is null, battery was NOT tested: say nothing about battery health except, if useful, that it was not tested.
+- `battery` (optional): an AI reading of a seller-provided screenshot, NOT a direct measurement or proof it belongs to this device. Always label it "판매자 캡처 판독". Null means untested, never normal. Do not calculate battery depreciation or claim the CSV is battery-adjusted.
 - Never present the price as a guaranteed selling price. Call it "업체 매입 참고 범위" or similar.
-- Exterior and faults: if the source says "확인됨", treat it as confirmed and do NOT add a caution about it being seller input. Only when the source is "판매자 선택" / "판매자 입력", mention that it was declared by the seller.
+- Exterior AI is a suggestion confirmed by the seller, not a physical inspection. Five passed browser tests do not prove all internal functions work. Preserve known faults "모름" and disclose untested features. No price data means missing evidence, never zero value or inability to sell. Damaged phones may be listed on this platform with disclosure. Never redirect to donation because of missing/low prices.
 - `summary_ko`: 2-3 sentences. What a buyer should know first.
 - `strengths_ko`: 1-4 short items (each under 40 characters). Only things actually supported by the input.
 - `cautions_ko`: 1-4 short items (each under 50 characters). Untested items, failed or unsupported tests, low trust reasons, seller-declared fields, missing price data.

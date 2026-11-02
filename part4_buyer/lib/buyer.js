@@ -11,7 +11,7 @@ const { START: ECO_BASE } = require('../../part3_certificate/lib/eco-temperature
 // ---------- 설정값 (여기만 바꿔서 튜닝) ----------
 const TESTS = ['camera', 'mic', 'speaker', 'gyro', 'touch'];
 const RANK_WEIGHTS = [0.5, 0.3, 0.2]; // 1순위, 2순위, 3순위 가중치 (합 = 1)
-const W_PERF = 0.4, W_PRICE = 0.35, W_ECO = 0.25; // 최종 점수 비중 (합 = 1)
+const W_PERF = 0.4, W_ECO = 0.25; // 가격 제외 후 합계 0.65로 나눠 재정규화
 const MIN_PRIORITY_SCORE = 60; // 선택한 3개 항목 중 이 점수 미만이면 제외
 const TEST_KEY = { camera: 'camera', mic: 'microphone', speaker: 'speaker', gyro: 'gyro', touch: 'touch' };
 // 점검 pass → 100점, 그 외 → null(미확인). 카메라는 촬영 사진 화질 등급으로 차등 (외관 등급과 무관)
@@ -23,11 +23,6 @@ const normalize = (text) =>
   String(text || '').toLowerCase().replace(/갤럭시/g, 'galaxy').replace(/아이폰/g, 'iphone').replace(/\+/g, 'plus').replace(/\s+/g, '');
 const clamp = (x, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
 const round1 = (x) => Math.round(x * 10) / 10;
-function median(nums) {
-  const s = [...nums].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}
 
 // c: seller-routes listItem() 결과
 function toListing(c, temperature) {
@@ -42,8 +37,10 @@ function toListing(c, temperature) {
     brand: c.device.brand,
     storage: c.device.storage,
     condition: c.condition.label_ko,
+    knownFault: c.condition.knownFault,
+    knownFaultLabel: c.condition.knownFaultLabel_ko,
     price: c.askingPriceKrw, // 판매 희망가. 없으면 null
-    reference: c.price.status === 'ok' ? { minKrw: c.price.minKrw, maxKrw: c.price.maxKrw, label_ko: c.price.label_ko } : null,
+    reference: c.price.status === 'ok' ? { minKrw: c.price.minKrw, maxKrw: c.price.maxKrw, label_ko: c.price.label_ko, vendorCount: c.price.vendorCount } : null,
     battery: c.battery,
     trust: c.trust,
     seller: c.seller,
@@ -63,31 +60,24 @@ function recommend(listings, deviceModel, priorities) {
   candidates = candidates.filter((l) => priorities.every((p) => l.scores[p] !== null && l.scores[p] >= MIN_PRIORITY_SCORE));
   if (!candidates.length) return [];
 
-  // 3) 가격 기준선: 업체 매입 참고 최고가. 시세가 없으면 후보 희망가의 중앙값
-  // ponytail: 매입가 최고가를 개인 거래 기준으로 씀. 실거래가 자료가 생기면 교체
-  const asks = candidates.map((l) => l.price).filter(Boolean);
-  const fallbackRef = asks.length ? median(asks) : null;
-
+  // 검증된 개인 간 실거래 비교 자료가 없어 모든 매물에서 가격 점수를 제외.
+  // 업체 매입 참고가나 서로 다른 매물의 희망가 중앙값은 거래 적정가의 근거가 아님.
   return candidates.map((l) => {
     const perf = priorities.reduce((sum, p, i) => sum + RANK_WEIGHTS[i] * l.scores[p], 0) / 100;
-    // 가격 점수: 기준가 대비 0.7배 이하 1점, 1.3배 이상 0점. 희망가가 없으면 빼고 나머지 비중으로 다시 계산
-    const ref = l.reference ? l.reference.maxKrw : fallbackRef;
-    const price = l.price && ref ? clamp(1 - (l.price / ref - 0.7) / 0.6) : null;
     const eco = clamp((l.eco_temp - ECO_BASE) / (ECO_TARGET - ECO_BASE));
-    const final = price === null
-      ? (W_PERF * perf + W_ECO * eco) / (W_PERF + W_ECO)
-      : W_PERF * perf + W_PRICE * price + W_ECO * eco;
+    const final = (W_PERF * perf + W_ECO * eco) / (W_PERF + W_ECO);
     return {
       ...l,
       final_score: round1(final * 100),
-      breakdown: { performance: round1(perf * 100), price: price === null ? null : round1(price * 100), eco: round1(eco * 100) },
+      priceScoreNote: '검증된 개인 거래 비교 자료 부족으로 가격 점수 제외. 성능 61.5%, 환경온도 38.5%로 환산 (환경온도 기준은 데모용)',
+      breakdown: { performance: round1(perf * 100), price: null, eco: round1(eco * 100) },
     };
   }).sort((a, b) => b.final_score - a.final_score);
 }
 
 function createBuyerRoutes({ store, listItem, readJson, sendJson }) {
   async function listings() {
-    const items = (await store.listCertificates({ limit: 200 })).map(listItem).filter((c) => c.status === 'listed');
+    const items = (await store.listCertificates({ limit: 200, activeOnly: true })).map(listItem).filter((c) => c.status === 'listed');
     const temps = {};
     await Promise.all([...new Set(items.map((c) => c.seller))].map(async (n) => { temps[n] = (await store.getUser(n))?.temperature; }));
     return items.map((c) => toListing(c, temps[c.seller]));
@@ -132,7 +122,7 @@ if (require.main === module) {
   });
   const r = recommend([L('Galaxy S23', 300000, 320000), L('Galaxy S23', 400000, 320000), L('Galaxy S23', 200000, 320000, { mic: 'fail' })], '갤럭시 s23', ['camera', 'mic', 'touch']);
   assert.strictEqual(r.length, 2, '마이크 미확인 매물 제외');
-  assert.strictEqual(r[0].price, 300000, '싼 매물이 위');
+  assert.strictEqual(r[0].final_score, r[1].final_score, '희망가·매입 참고가로 가격 점수를 만들지 않음');
   assert.strictEqual(recommend([L('iPhone 13', null, null)], '아이폰', ['camera', 'mic', 'touch'])[0].breakdown.price, null, '희망가 없으면 가격 점수 없음');
   assert.strictEqual(recommend([L('iPhone 13', 1, 1)], 'galaxy', ['camera', 'mic', 'touch']).length, 0);
   console.log('buyer.js OK');

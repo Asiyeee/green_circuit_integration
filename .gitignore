@@ -7,3 +7,7 @@ node_modules/
 .DS_Store
 store/
 firebase-service-account*.json
+part2_price_disposal/data/refresh-backups/
+part2_price_disposal/data/refresh-staging/
+part2_price_disposal/data/*.next
+part2_price_disposal/data/*.lock

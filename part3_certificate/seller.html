@@ -47,7 +47,9 @@
   <div class="page-head">
     <p class="eyebrow">점검 결과로 만드는 보증서</p>
     <h1 class="title">구매자가 믿을 수 있는<br>보증서를 만들어요</h1>
-    <p class="lead">점검 결과에 용량·외관 상태·사진을 더하면 시세와 탄소 감축량이 함께 들어가요.</p>
+    <p class="lead">점검 결과에 용량·상태를 더하고 희망가를 정해 우리 플랫폼에 등록하세요. 파손·미확인 기기도 공개하고 등록할 수 있어요.</p>
+    <p class="notice">해커톤 데모: 공용 접속 토큰과 매물별 관리키를 사용해요. 닉네임은 계정 인증이 아니며, 관리키를 보관한 브라우저에서 문의와 완료 처리를 관리해요. 결제·배송·에스크로·실시간 채팅은 제공하지 않아요.</p>
+    <div id="my-listings" class="btn-row"></div>
   </div>
 
   <section class="section">
@@ -92,14 +94,14 @@
 
   <section class="section">
     <div class="step-no">3</div>
-    <h2 class="section-title">예상 시세와 탄소 감축</h2>
+    <h2 class="section-title">업체 매입 참고가와 탄소 감축</h2>
     <div id="quote" class="muted" style="margin-top:10px">용량과 상태를 고르면 보여요.</div>
   </section>
 
   <section class="section">
     <div class="step-no">4</div>
     <!-- ② 시세·처분 판단 담당 구역: 외관 사진·배터리 캡처 → /api/assess (part2_price_disposal) -->
-    <h2 class="section-title">외관 사진 · 배터리 캡처</h2>
+    <h2 class="section-title">외관 사진 · 배터리 캡처 (선택)</h2>
     <p class="section-sub">점검 때 찍은 사진은 자동으로 들어가요. 화면을 켠 채로 찍으면 잔상·화면 불량도 봐요. 판매하는 폰으로 직접 찍기 어려우면 다른 기기로 찍어 갤러리에서 올려도 돼요. 배터리 캡처는 '사용량' 화면이 아니라 최대 용량이 보이는 화면이어야 해요: 아이폰 '설정 → 배터리 → 배터리 성능 상태', 갤럭시 '설정 → 배터리 → 배터리 정보'. 개인정보가 보이지 않게 해 주세요.</p>
     <div class="photos" style="margin-top:14px">
       <div class="photo" data-kind="front"><span><span class="plus">+</span>앞면</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
@@ -117,9 +119,9 @@
     <p class="section-sub">환경 온도가 이 닉네임으로 쌓여요.</p>
     <div class="field" style="margin-top:12px"><input class="input" type="text" id="nickname" maxlength="20" placeholder="닉네임"></div>
     <div class="field">
-      <label class="field-label" for="asking">희망 판매가 (선택)</label>
-      <input class="input" type="number" id="asking" inputmode="numeric" min="1000" max="10000000" step="1000" placeholder="예: 250000">
-      <p class="muted" style="margin:6px 0 0">구매자 추천에서 업체 매입 시세와 비교해 가격 합리성을 계산해요.</p>
+      <label class="field-label" for="asking">판매 희망가 (원)</label>
+      <input class="input" type="number" id="asking" inputmode="numeric" min="1" step="1" placeholder="예: 250000">
+      <p class="muted" style="margin:6px 0 0">판매자가 정하는 플랫폼 등록 가격이에요. 참고가가 없어도, 범위 밖이어도 등록할 수 있어요. 업체 매입 참고가로 개인 거래 적정가를 판단하지 않아요.</p>
     </div>
   </section>
 
@@ -127,18 +129,21 @@
 
   <section class="section" id="done">
     <p class="eyebrow">발급 완료</p>
-    <h2 class="section-title">보증서가 만들어졌어요</h2>
-    <p class="section-sub">링크나 QR을 판매글에 붙여 주세요.</p>
+    <h2 class="section-title">보증서와 매물이 등록됐어요</h2>
+    <p class="section-sub">구매자 목록에 공개됐어요. 상세 페이지에서 문의를 확인하고 판매 완료를 처리하세요. 중요: 관리키는 링크에 포함되지 않으며 이 브라우저에 저장돼요. 아래 키를 별도로 안전하게 보관하세요.</p>
+    <input class="input" id="owner-key" type="password" readonly aria-label="판매자 관리키">
+    <button class="btn btn-secondary" id="copy-owner">관리키 복사</button>
     <div id="qr"></div>
     <p id="link"></p>
     <div class="btn-row">
-      <a id="open" class="btn btn-primary" target="_blank">보증서 보기</a>
+      <a id="open" class="btn btn-primary" target="_blank">내 매물 · 문의 관리</a>
+      <a class="btn btn-secondary" href="/buyer">구매자 목록 보기</a>
       <button class="btn btn-secondary" id="copy">링크 복사</button>
     </div>
   </section>
 </main>
 
-<div class="cta"><div class="cta-in"><button class="btn btn-primary btn-block" id="issue" disabled>보증서 발급하기</button></div></div>
+<div class="cta"><div class="cta-in"><button class="btn btn-primary btn-block" id="issue" disabled>보증서 연결 매물 등록하기</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -220,7 +225,7 @@ async function loadOptions() {
   $('#model-note').textContent = '시세 자료에 없는 기종이에요. 보증서는 만들 수 있지만 시세는 비어 있어요.';
   const st = $('#storage'), prev = st.value;
   st.innerHTML = '<option value="">선택</option>';
-  (o.found ? o.storages : FALLBACK_STORAGES).forEach((s) => st.append(new Option(s, s)));
+  [...new Set([...o.storages, ...FALLBACK_STORAGES, '2TB'])].forEach((s) => st.append(new Option(s, s)));
   st.append(new Option('모름', 'unknown'));
   if ([...st.options].some((x) => x.value === prev)) st.value = prev;
   const checked = (document.querySelector('input[name=cond]:checked') || {}).value;
@@ -235,18 +240,18 @@ async function loadOptions() {
 async function quote() {
   const body = form();
   validate();
-  if (!body.storage || !body.conditionCode) return;
+  if (!body.storage || !body.conditionCode) { $('#quote').textContent = '용량과 상태를 고르면 보여요.'; return; }
   const r = await api('/api/price/quote', { method: 'POST', body: JSON.stringify({ ...body, assessId, testSummary: report && report.summary }) });
   const { price: p, carbon: c, disposal: dp } = await r.json();
   const priceHtml = p.status === 'ok'
-    ? `<div><div class="k">업체 매입 시세</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + '~'}</div><div class="s">${p.singleAmount ? '업체 1곳' : won(p.maxKrw) + '까지 · ' + p.vendorCount + '곳'}</div></div>`
-    : `<div><div class="k">업체 매입 시세</div><div class="v" style="font-size:15px;font-weight:600;color:var(--ink-2)">${esc(p.message_ko)}</div></div>`;
+    ? `<div><div class="k">${esc(p.label_ko)}</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + ' ~ ' + won(p.maxKrw)}</div><div class="s">업체 ${p.vendorCount}곳 · 자료 확인일 ${esc(p.checkedOn)} (원문 가격 기준일과 다름, 실시간 아님)</div><p class="s">업체 검수·조건에 따라 실제 매입가가 달라져요. 개인 간 실거래가·보장가가 아니에요.</p><p class="s">${esc(p.notice_ko)}</p><details><summary>업체·원래 등급·조건·출처</summary>${p.quotes.map(q => `<p class="s"><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a> · ${esc(q.grade)} · ${won(q.minKrw)}~${won(q.maxKrw)}<br>${esc(q.conditions_ko)}<br>원문 기준일: ${esc(q.priceDate || q.priceDateSource || '미표시')}</p>`).join('')}<p class="s">업체별 등급을 서비스 상태로 연결했으며 업체 평가 조건은 서로 달라요. 배터리별 정밀 보정 가격이 아니에요.</p></details></div>`
+    : `<div><div class="k">업체 매입 참고가</div><div class="v" style="font-size:15px;font-weight:600;color:var(--ink-2)">${esc(p.message_ko)}</div><p class="s">가격을 추정하지 않아요. 상태 공개 후 희망가를 정해 등록할 수 있어요.</p></div>`;
   $('#quote').className = '';
   $('#quote').innerHTML = `<div class="quote-grid">${priceHtml}
     <div><div class="k">재사용 시 탄소 감축${c.basis === 'estimate' ? ' (추정)' : ''}</div><div class="v">${c.avoidedKg}kg</div><div class="s">나무 ${c.equivalence.oakTreesYear}그루가 1년간 흡수하는 양</div></div></div>
     ${dp ? `<div class="notice info manual" style="margin-top:12px"><b>추천 처리: ${esc(dp.label_ko)}</b>
       <ul style="margin:6px 0 0;padding-left:18px">${dp.reasons_ko.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <p class="muted" style="margin:6px 0 0">추천일 뿐이에요. 판매·기부·배출은 직접 고르세요.</p>
+      <p class="muted" style="margin:6px 0 0">판매하려면 아래 희망가 입력 후 매물 등록을 누르세요. 기부·배출은 별도의 선택이에요. 안내 열람만으로 완료되지 않으며 매물 상세에서 실제 처리 후 완료를 기록해요.</p>
       ${dp.manual.map((m) => `<details><summary>${esc(m.title)}</summary><div class="md">${md(m.markdown)}</div></details>`).join('')}</div>` : ''}`;
 }
 
@@ -262,7 +267,8 @@ function form() {
 
 function validate() {
   const f = form();
-  $('#issue').disabled = !(report && f.brand && f.model && f.storage && f.conditionCode && $('#nickname').value.trim());
+  const ask = Number($('#asking').value);
+  $('#issue').disabled = !(report && f.brand && f.model && f.storage && f.conditionCode && $('#nickname').value.trim() && Number.isSafeInteger(ask) && ask > 0);
 }
 
 // 사진은 긴 변 1280px JPEG 로 줄여서 보냅니다 (Firestore 문서 한도 대비)
@@ -288,6 +294,7 @@ document.querySelectorAll('.photo').forEach((el) => {
     if (!f) return;
     const dataUrl = await resize(f, el.dataset.kind === 'battery' ? 2000 : 1280); // 캡처 글씨가 뭉개지지 않게 크게
     if (el.dataset.kind === 'battery') batteryShot = dataUrl; else photos[el.dataset.kind] = dataUrl;
+    assessSeq++; // 새 판별 대기 중에도 이전 사진의 응답을 적용하지 않음
     assessId = null; // 사진이 바뀌면 다시 판별
     $('#assess').disabled = false;
     // 여러 장을 연달아 올리면 마지막 사진 뒤 1.2초에 한 번만 판별
@@ -311,6 +318,7 @@ $('#upload').addEventListener('change', async (e) => {
 $('#storage').addEventListener('change', quote);
 document.addEventListener('change', (e) => { if (e.target.name === 'cond' || e.target.name === 'fault') quote(); });
 $('#nickname').addEventListener('input', validate);
+$('#asking').addEventListener('input', validate);
 
 $('#issue').addEventListener('click', async () => {
   const btn = $('#issue');
@@ -325,16 +333,21 @@ $('#issue').addEventListener('click', async () => {
     const j = await r.json();
     if (!r.ok) throw new Error((j.error || 'HTTP ' + r.status) + (j.details ? '\n' + j.details.join('\n') : ''));
     const full = location.origin + j.url;
+    $('#owner-key').value = j.ownerToken;
+    try {
+      localStorage.setItem('gc-owner-' + j.id, j.ownerToken);
+      renderMine();
+    } catch { $('#err').textContent = '브라우저에 관리키를 저장하지 못했어요. 표시된 관리키를 반드시 별도 보관하세요.'; }
     $('#done').style.display = 'block';
     $('#link').textContent = full;
     $('#open').href = j.url + '?t=' + encodeURIComponent(T);
     $('#qr').innerHTML = '';
     if (window.QRCode) new QRCode($('#qr'), { text: full, width: 168, height: 168 });
     $('#done').scrollIntoView({ behavior: 'smooth' });
-    btn.textContent = '보증서 발급하기';
+    btn.textContent = '등록 완료';
   } catch (e) {
     $('#err').textContent = '발급하지 못했어요: ' + e.message;
-    btn.textContent = '보증서 발급하기';
+    btn.textContent = '보증서 연결 매물 등록하기';
     validate();
   }
 });
@@ -356,7 +369,7 @@ async function runAssess() {
     const { condition: c, battery: b } = j.analysis;
     aiCode = c.code;
     const picked = (document.querySelector('input[name=cond]:checked') || {}).value;
-    if (c.code && !picked) { const el = document.querySelector(`input[name=cond][value=${c.code}]`); if (el) el.checked = true; }
+    // 제안만 표시. 판매자가 직접 선택하거나 적용 버튼을 눌러 확인해야 함.
     const bat = b
       ? (b.healthPct !== null ? `최대 용량 ${b.healthPct}%${b.low ? ' (저하)' : ''}` : '퍼센트 없음') + (b.statusLabel ? ` · ${esc(b.statusLabel)}` : '') + (b.cycleCount !== null ? ` · 사이클 ${b.cycleCount}회` : '')
       : ({ usage: "배터리 '사용량' 화면이라 최대 용량을 확인할 수 없어요. 아이폰은 '배터리 성능 상태', 갤럭시는 '배터리 정보' 화면을 캡처해 주세요.",
@@ -366,9 +379,9 @@ async function runAssess() {
       <b>외관 AI 판별:</b> ${c.code ? `${esc(c.label_ko)} (확신 ${CONF[c.confidence]})` : '판단 어려움'}${c.evidence_ko ? ` · ${esc(c.evidence_ko)}` : ''}
       ${c.damages.length ? `<br>보이는 손상: ${c.damages.map(esc).join(', ')}` : ''}
       ${c.caveats_ko.length ? `<br><span class="muted">${c.caveats_ko.map(esc).join(' · ')}</span>` : ''}
-      ${c.code && picked && picked !== c.code ? `<br>선택한 상태와 달라요. <button class="btn btn-secondary" id="apply-ai" style="padding:2px 10px;margin-top:4px">AI 제안으로 바꾸기</button>` : ''}
+      ${c.code && picked !== c.code ? `<br><button class="btn btn-secondary" id="apply-ai" style="padding:2px 10px;margin-top:4px">상태를 확인했고 AI 제안 적용</button>` : ''}
       <br><b>배터리:</b> ${bat}
-      <br><span class="muted">AI 판별은 참고용이에요. 최종 상태는 직접 골라 주세요.</span></div>`;
+      <br><span class="muted">AI 판별은 참고용이에요. 사진으로 내부 기능 정상 여부는 판단하지 않아요. 최종 상태는 직접 골라 주세요. 배터리는 판매자 캡처 판독이며 직접 측정이 아니에요.</span></div>`;
     const ap = $('#apply-ai');
     if (ap) ap.addEventListener('click', () => { document.querySelector(`input[name=cond][value=${c.code}]`).checked = true; ap.remove(); loadOptions(); });
     loadOptions(); // 배지 표시 + 시세·추천 다시 계산
@@ -380,6 +393,13 @@ async function runAssess() {
 }
 $('#assess').addEventListener('click', runAssess);
 $('#copy').addEventListener('click', () => navigator.clipboard.writeText($('#link').textContent));
+$('#copy-owner').addEventListener('click', () => navigator.clipboard.writeText($('#owner-key').value));
+function renderMine() {
+  try {
+    $('#my-listings').innerHTML = Object.keys(localStorage).filter(k => /^gc-owner-[A-Za-z0-9]+$/.test(k)).map(k => `<a class="btn btn-secondary" href="/c/${k.slice(9)}?t=${encodeURIComponent(T)}">내 매물 ${esc(k.slice(9))} 관리</a>`).join('');
+  } catch {}
+}
+renderMine();
 
 loadList();
 </script>
