@@ -6,7 +6,7 @@
 
 ```bash
 npm install
-cp .env.example .env        # GEMINI_API_KEY 입력 (없으면 AI 없이 규칙 기반으로 동작)
+cp .env.example .env        # 복사해서 새로 만든 .env 파일에 GEMINI_API_KEY=본인키 입력
 npm run share               # 서버 + 폰용 HTTPS 터널(cloudflared) + QR
 npm run seed                # (선택) 데모 보증서 9장
 npm test                    # ②·④ 자체 점검
@@ -18,6 +18,8 @@ npm test                    # ②·④ 자체 점검
 | ②③ 판매자 (AI 판별·시세·보증서 발급) | `/seller?t=토큰` | 필요 |
 | ③ 보증서 | `/c/{id}` | 없음 |
 | ④ 구매자 추천 | `/buyer` | 없음 |
+
+> **API 키는 `.env` 에만 넣으세요.** 서버는 `.env` 만 읽습니다. `.env.example` 은 깃헙에 올라가는 예시 파일이라 키를 넣으면 공개됩니다. `.env` 는 `.gitignore` 에 있어 올라가지 않습니다. 키가 없으면 AI 없이 규칙 기반으로 동작합니다.
 
 모든 화면 위에 판매자 / 구매자 탭이 있습니다. 토큰은 서버 시작 때 터미널에 나옵니다 (`.env` 의 `ACCESS_TOKEN` 으로 고정 가능).
 배포는 [`common/docs/DEPLOY.md`](common/docs/DEPLOY.md) (Cloud Run + Firestore).
