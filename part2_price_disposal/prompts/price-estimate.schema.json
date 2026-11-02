@@ -1,0 +1,12 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "possible": { "type": "BOOLEAN" },
+    "minKrw": { "type": "INTEGER", "nullable": true },
+    "maxKrw": { "type": "INTEGER", "nullable": true },
+    "confidence": { "type": "STRING", "enum": ["high", "medium", "low"] },
+    "basis_ko": { "type": "STRING" }
+  },
+  "required": ["possible", "minKrw", "maxKrw", "confidence", "basis_ko"],
+  "propertyOrdering": ["possible", "minKrw", "maxKrw", "confidence", "basis_ko"]
+}

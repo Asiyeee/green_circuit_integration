@@ -7,6 +7,7 @@
 //  - GET  /api/public/certificates        : 보증서 목록 (구매자 비교용)
 //  - GET  /api/public/certificates/{id}   : 보증서 JSON + 무결성 확인 결과 + 판매자 환경 온도
 //  - GET  /api/public/users/{nickname}    : 환경 온도와 행동 기록
+//  - GET  /api/public/manual?type&brand   : 판매 완료·기부·분리배출 처리 매뉴얼 (② 처리 매뉴얼)
 // 토큰(?t=)이 필요한 경로 (판매자 화면)
 //  - GET  /seller                         : 보증서 발급 페이지 (seller.html, 페이지 자체는 공개, API 는 토큰 필요)
 //  - GET  /api/results/file?name=...      : results/ 의 특정 테스트 결과
@@ -24,6 +25,8 @@ const carbon = require('./carbon.js');
 const eco = require('./eco-temperature.js');
 const certificate = require('./certificate.js');
 const assessment = require('../../part2_price_disposal/lib/assessment.js');
+const priceEstimate = require('../../part2_price_disposal/lib/price-estimate.js');
+const faultAdjust = require('../../part2_price_disposal/lib/fault-adjust.js');
 const { validateReport } = require('../../common/scripts/validate.js');
 const { FIRESTORE_PHOTO_LIMIT } = require('../../common/lib/certificate-store.js');
 
@@ -140,6 +143,23 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
   }
   const analysisOf = (id) => (id && analyses.has(id) ? analyses.get(id).a : null);
 
+  // 시세: CSV 에 있으면 그대로, 없으면(no_data) Gemini 추정 (키가 없으면 no_data 그대로)
+  async function priceOf(input) {
+    const ai = !!(cfg.key && geminiJson);
+    // 고장 내용이 있으면: 고른 외관 그대로의 '기능 정상' 시세 − 그 고장만큼 차감 (AI)
+    if (ai && input.knownFault === 'yes' && input.faultDetail_ko) {
+      const normal = { ...input, knownFault: 'none', faultDetail_ko: null }; // 기준가는 고장 내용과 무관 (캐시 공유)
+      let base = price.lookup(normal);
+      if (base.status === 'no_data') base = await priceEstimate.estimate({ looked: base, input: normal, geminiJson, model: cfg.model });
+      const adjusted = await faultAdjust.adjust({ base, input, geminiJson, model: cfg.model });
+      if (adjusted) return adjusted;
+    }
+    // 그 외(고장 내용 없음·AI 판단 실패): 고장이면 '파손 또는 기능 이상' 분류, 자료에 없으면 AI 추정
+    const looked = price.lookup(input);
+    if (looked.status !== 'no_data' || !ai) return looked;
+    return priceEstimate.estimate({ looked, input, geminiJson, model: cfg.model });
+  }
+
   // 시세 미리보기와 보증서 발급이 같은 규칙을 쓰도록 한 곳에 둡니다.
   function disposalFor({ brand, conditionCode, price: p, report, analysis }) {
     return assessment.recommend({ brand, conditionCode, price: p, report, battery: analysis && analysis.battery });
@@ -168,6 +188,7 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
     const fault = resolveFault(input.knownFault, report.summary);
     input.knownFault = fault.knownFault;
     input.knownFaultSource = fault.source;
+    input.faultDetail_ko = input.knownFault === 'yes' ? (String(body.faultDetail || '').normalize('NFC').trim().slice(0, 200) || null) : null;
     if (!input.nickname) throw httpError(400, '닉네임이 필요합니다');
     if (!price.CONDITIONS.some((c) => c.code === input.conditionCode)) throw httpError(400, '외관·화면 상태(conditionCode)를 골라 주세요');
     if (!input.storage) throw httpError(400, '저장 용량을 골라 주세요');
@@ -192,7 +213,7 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
       skipped: store.kind === 'firestore' && p.buffer.length > FIRESTORE_PHOTO_LIMIT,
     }));
 
-    const priceResult = price.lookup(input);
+    const priceResult = await priceOf(input);
     const carbonResult = carbon.receipt(input);
     let analysis = analysisOf(body.assessId);
     if (!analysis && cfg.key && geminiJson && (body.batteryShot || (Array.isArray(body.photos) && body.photos.length))) {
@@ -249,11 +270,11 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
     return { certificate: updated, user };
   }
 
-  return { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor };
+  return { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor, priceOf };
 }
 
 function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJson }) {
-  const { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor } = createSellerService({ cfg, store, httpError, geminiJson });
+  const { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor, priceOf } = createSellerService({ cfg, store, httpError, geminiJson });
 
   // 처리했으면 true
   return async function handle(req, res, url, tokenValid) {
@@ -297,6 +318,13 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
       return true;
     }
 
+    if (req.method === 'GET' && p === '/api/public/manual') {
+      const type = url.searchParams.get('type');
+      if (!assessment.OUTCOME_MANUAL[type]) { sendJson(res, 400, { error: 'type 은 sold / donated / recycled 중 하나입니다' }); return true; }
+      sendJson(res, 200, { type, sections: assessment.manualFor(type, url.searchParams.get('brand')) });
+      return true;
+    }
+
     const sellerApi = p === '/api/results/file' || p.startsWith('/api/price/') || p.startsWith('/api/certificates') || p === '/api/assess';
     if (!sellerApi) return false;
     if (!tokenValid) { sendJson(res, 401, { error: '접속 토큰이 없거나 틀립니다. 터미널에 출력된 URL(?t=...)로 접속하세요.' }); return true; }
@@ -311,8 +339,9 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
     }
     if (req.method === 'POST' && p === '/api/price/quote') {
       const b = await readJson(req);
-      const input = { brand: b.brand, model: b.model, storage: b.storage, conditionCode: b.conditionCode, knownFault: resolveFault(b.knownFault, b.testSummary).knownFault };
-      const pr = price.lookup(input);
+      const kf = resolveFault(b.knownFault, b.testSummary).knownFault;
+      const input = { brand: b.brand, model: b.model, storage: b.storage, conditionCode: b.conditionCode, knownFault: kf, faultDetail_ko: kf === 'yes' ? String(b.faultDetail || '').trim().slice(0, 200) || null : null };
+      const pr = await priceOf(input);
       const disposal = disposalFor({ brand: b.brand, conditionCode: b.conditionCode, price: pr, report: { summary: b.testSummary }, analysis: analysisOf(b.assessId) });
       sendJson(res, 200, { price: pr, carbon: carbon.receipt(input), disposal: { ...disposal, manual: disposal.manualSections.map(assessment.manualSection).filter(Boolean) } });
       return true;

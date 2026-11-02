@@ -13,7 +13,7 @@ const SCHEMA = 'seller-certificate/v1';
 const VALID_DAYS = 30;
 const KEYS = ['camera', 'microphone', 'speaker', 'touch', 'gyro'];
 const TEST_LABEL = { camera: '카메라', microphone: '마이크', speaker: '스피커', touch: '터치', gyro: '자이로' };
-const FAULT_LABEL = { none: '없음', yes: '있음', unknown: '모름' };
+const FAULT_LABEL = { none: '없음', yes: '있음', unknown: '모름' }; // 알려진 기능 고장
 
 const newId = () => crypto.randomBytes(8).toString('base64url').replace(/[-_]/g, '').slice(0, 10);
 
@@ -75,7 +75,7 @@ function trustOf(report, test, input) {
   else if (declared.matchesUserAgent === false) reasons.push('선택 기종과 접속 기기 정보 불일치');
   if (!test.completed) reasons.push('미완료 점검 항목 있음');
   else if (!test.allPassed) reasons.push(`이상·미지원 점검 항목 ${test.totalCount - test.passedCount}개`);
-  if (input.knownFault !== 'none') reasons.push(`알려진 고장: ${FAULT_LABEL[input.knownFault]} (판매자 입력)`);
+  if (input.knownFault !== 'none') reasons.push(`알려진 기능 고장: ${FAULT_LABEL[input.knownFault]}${input.faultDetail_ko ? ` (${input.faultDetail_ko})` : ''} (판매자 입력)`);
   const camWarn = report.results?.camera?.checks?.warnings || [];
   if (camWarn.length) reasons.push('카메라 AI 판정과 실측값 불일치');
   if (!v.exterior && !v.fault) reasons.push('외관 상태·고장 여부는 판매자 입력값');
@@ -137,6 +137,7 @@ function build({ id, demo, report, input, price, carbon, photos, sellerTemperatu
       knownFault: input.knownFault,
       knownFaultLabel_ko: FAULT_LABEL[input.knownFault] + (input.knownFaultSource === 'hardware_test' ? ' (하드웨어 점검 5/5 정상)' : ''),
       knownFaultSource: input.knownFaultSource || 'seller_declared', // hardware_test = '모름'이었지만 점검 결과로 판단
+      faultDetail_ko: input.faultDetail_ko || null, // 판매자가 적은 기능 고장 내용
       source: 'seller_declared',
       verified: verifiedOf(input, test), // { exterior: AI 판별 일치, fault: 점검 5/5 정상 }
     },
@@ -168,13 +169,14 @@ function factsFor(cert) {
       knownFault: cert.condition.knownFaultLabel_ko,
       exteriorSource: cert.condition.verified && cert.condition.verified.exterior ? 'AI 사진 판별과 판매자 선택 일치 (확인됨)' : '판매자 선택',
       faultSource: cert.condition.verified && cert.condition.verified.fault ? '하드웨어 점검 5/5 정상 (확인됨)' : '판매자 입력',
+      faultDetail_ko: cert.condition.faultDetail_ko || null,
     },
     aiExterior: cert.assessment && cert.assessment.ai && cert.assessment.ai.condition.code
       ? { label_ko: cert.assessment.ai.condition.label_ko, confidence: cert.assessment.ai.condition.confidence, damages: cert.assessment.ai.condition.damages, agreesWithSeller: cert.assessment.sellerAgreesWithAi }
       : null,
     battery: cert.assessment && cert.assessment.battery ? { healthPct: cert.assessment.battery.healthPct, statusLabel: cert.assessment.battery.statusLabel, cycleCount: cert.assessment.battery.cycleCount, low: cert.assessment.battery.low, source: '기기 배터리 성능 화면에서 AI 판독 (확인됨)' } : null,
     price: cert.price.status === 'ok'
-      ? { status: 'ok', label_ko: cert.price.label_ko, minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, vendorCount: cert.price.vendorCount }
+      ? { status: 'ok', label_ko: cert.price.label_ko, minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, vendorCount: cert.price.vendorCount, basis_ko: cert.price.reclassified_ko || null, aiEstimate: cert.price.estimated ? { confidence: cert.price.confidence, basis_ko: cert.price.basis_ko } : null, faultDeduction: cert.price.faultAdjusted ? { basePrice: cert.price.basePrice, deduction: cert.price.deduction } : null }
       : { status: cert.price.status, message_ko: cert.price.message_ko },
     carbon: { avoidedKg: cert.carbon.avoidedKg, basis: cert.carbon.basis, oakTreesYear: cert.carbon.equivalence.oakTreesYear },
     trust: cert.trust,
@@ -189,7 +191,7 @@ function ruleSummary(cert) {
   const bad = KEYS.filter((k) => t.items[k].status !== 'pass').map((k) => TEST_LABEL[k]);
   const p = cert.price;
   const priceText = p.status === 'ok'
-    ? (p.singleAmount ? `업체 매입가 ${won(p.minKrw)}.` : `업체 매입 참고 범위 ${won(p.minKrw)}~${won(p.maxKrw)}.`)
+    ? (p.faultAdjusted ? `기능 정상 기준가에서 '${p.deduction.faultLabel_ko}' 차감 반영 ${won(p.minKrw)}~${won(p.maxKrw)}.` : p.estimated ? `AI 추정 참고가 ${won(p.minKrw)}~${won(p.maxKrw)} (시세 자료 없음).` : p.singleAmount ? `업체 매입가 ${won(p.minKrw)}.` : `업체 매입 참고 범위 ${won(p.minKrw)}~${won(p.maxKrw)}.`)
     : '해당 조건 시세 정보 없음.';
   const strengths = [];
   if (t.passedCount) strengths.push(`하드웨어 점검 ${t.passedCount}/${t.totalCount} 정상`);

@@ -81,12 +81,13 @@
       <div class="choices" id="conditions"></div>
     </div>
     <div class="field">
-      <span class="field-label">알고 있는 고장</span>
+      <span class="field-label">알고 있는 기능 고장</span>
       <div class="seg" id="fault">
         <label><input type="radio" name="fault" value="none">없음</label>
         <label><input type="radio" name="fault" value="yes">있음</label>
         <label><input type="radio" name="fault" value="unknown" checked>모름</label>
       </div>
+      <textarea class="input" id="fault-detail" maxlength="200" rows="2" placeholder="어떤 고장인지 적어 주세요 (예: 페이스ID 안 됨, 충전 단자 접촉 불량). 적으면 그 고장만큼만 시세에서 빼요" style="display:none;margin-top:8px;resize:vertical"></textarea>
     </div>
   </section>
 
@@ -157,7 +158,7 @@ const md = (t) => esc(t)
   .replace(/\n/g, '<br>');
 const when = (d) => d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-let report = null, resultFile = null;
+let report = null, resultFile = null, quoteSeq = 0;
 const photos = {};
 let batteryShot = null, assessId = null, aiCode = null;
 
@@ -236,10 +237,14 @@ async function quote() {
   const body = form();
   validate();
   if (!body.storage || !body.conditionCode) return;
+  const seq = ++quoteSeq;
+  const wait = setTimeout(() => { if (seq === quoteSeq) $('#quote').insertAdjacentHTML('afterbegin', '<p class="muted" id="quote-wait" style="margin:0 0 8px">시세 확인 중… 자료에 없는 조합이나 고장 차감은 AI가 계산해요 (보통 몇 초, 붐비면 30초 이상)</p>'); }, 600);
   const r = await api('/api/price/quote', { method: 'POST', body: JSON.stringify({ ...body, assessId, testSummary: report && report.summary }) });
   const { price: p, carbon: c, disposal: dp } = await r.json();
+  clearTimeout(wait);
+  if (seq !== quoteSeq) return; // 그 사이 입력이 바뀜
   const priceHtml = p.status === 'ok'
-    ? `<div><div class="k">업체 매입 시세</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + '~'}</div><div class="s">${p.singleAmount ? '업체 1곳' : won(p.maxKrw) + '까지 · ' + p.vendorCount + '곳'}</div></div>`
+    ? `<div><div class="k">${p.faultAdjusted ? '고장 차감 반영 시세' : p.estimated ? 'AI 추정 시세' : '업체 매입 시세'}</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + '~'}</div><div class="s">${p.faultAdjusted ? `${won(p.maxKrw)}까지` : p.estimated ? `${won(p.maxKrw)}까지 · 시세 자료 없음, AI 추정 (확신 ${({ high: '높음', medium: '보통', low: '낮음' })[p.confidence]})` : p.singleAmount ? '업체 1곳' : won(p.maxKrw) + '까지 · ' + p.vendorCount + '곳'}</div>${p.faultAdjusted ? `<div class="s">기능 정상 기준 ${won(p.basePrice.minKrw)}~${won(p.basePrice.maxKrw)}${p.basePrice.estimated ? ' (AI 추정)' : ''} − ${esc(p.deduction.faultLabel_ko)} ${won(p.deduction.minKrw)}~${won(p.deduction.maxKrw)} (${({ minor: '가벼움', moderate: '보통', severe: '심각' })[p.deduction.severity]})</div><div class="s">${esc(p.deduction.basis_ko)}</div>` : ''}${p.estimated && p.basis_ko && !p.faultAdjusted ? `<div class="s">${esc(p.basis_ko)}</div>` : ''}${p.reclassified_ko ? `<div class="s">${esc(p.reclassified_ko)}</div>` : ''}</div>`
     : `<div><div class="k">업체 매입 시세</div><div class="v" style="font-size:15px;font-weight:600;color:var(--ink-2)">${esc(p.message_ko)}</div></div>`;
   $('#quote').className = '';
   $('#quote').innerHTML = `<div class="quote-grid">${priceHtml}
@@ -257,6 +262,7 @@ function form() {
     storage: $('#storage').value,
     conditionCode: (document.querySelector('input[name=cond]:checked') || {}).value || '',
     knownFault: (document.querySelector('input[name=fault]:checked') || {}).value || 'unknown',
+    faultDetail: $('#fault-detail').value.trim(),
   };
 }
 
@@ -309,7 +315,11 @@ $('#upload').addEventListener('change', async (e) => {
 });
 ['#brand', '#model'].forEach((s) => $(s).addEventListener('input', () => { clearTimeout(optTimer); optTimer = setTimeout(loadOptions, 400); }));
 $('#storage').addEventListener('change', quote);
-document.addEventListener('change', (e) => { if (e.target.name === 'cond' || e.target.name === 'fault') quote(); });
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'fault') $('#fault-detail').style.display = e.target.value === 'yes' ? 'block' : 'none';
+  if (e.target.name === 'cond' || e.target.name === 'fault') quote();
+});
+$('#fault-detail').addEventListener('change', quote); // 고장 내용이 AI 추정에 반영됨
 $('#nickname').addEventListener('input', validate);
 
 $('#issue').addEventListener('click', async () => {

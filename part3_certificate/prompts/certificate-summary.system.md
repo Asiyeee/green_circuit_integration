@@ -18,6 +18,10 @@ One JSON object (CERTIFICATE_FACTS) with:
 - `aiExterior` (optional): an AI reading of the seller's exterior photos. Mention visible damages if useful; if `agreesWithSeller` is false, add a caution that the AI reading differs from the seller's choice.
 - `battery` (optional): maximum capacity read by AI from the phone's own battery health screen. Treat it as confirmed: state it plainly (e.g. "배터리 최대 용량 89%") and do NOT list it as a caution, unless `low` is true (below 80%), then add a caution. If `battery` is null, battery was NOT tested: say nothing about battery health except, if useful, that it was not tested.
 - Never present the price as a guaranteed selling price. Call it "업체 매입 참고 범위" or similar.
+- If `price.basis_ko` is present (a known function fault moved the price to the "파손 또는 기능 이상" category), say so in `summary_ko` right next to the price, e.g. "기능 고장으로 '파손 또는 기능 이상' 기준 업체 매입 참고 범위 41만~78만원".
+- If `price.faultDeduction` is present, the price is the normal-function price minus an AI-judged deduction for the seller's described fault: say e.g. "기능 정상 기준 60만~85만원에서 충전 단자 고장 차감 반영 51만~80만원" and add a caution that the deduction is an AI judgment.
+- If `price.aiEstimate` is present, the price is NOT from shop data but an AI estimate: call it "AI 추정 참고가" and add a caution that it is an estimate (no shop data for this combination). Never call it 업체 매입 참고 범위.
+- `condition.faultDetail_ko` (optional) is the seller's own description of a known function fault; mention it briefly in cautions.
 - Exterior and faults: if the source says "확인됨", treat it as confirmed and do NOT add a caution about it being seller input. Only when the source is "판매자 선택" / "판매자 입력", mention that it was declared by the seller.
 - `summary_ko`: 2-3 sentences. What a buyer should know first.
 - `strengths_ko`: 1-4 short items (each under 40 characters). Only things actually supported by the input.

@@ -23,6 +23,16 @@ const ACTIONS = {
   donate: { label_ko: '기부·배출', manual: ['2. 폐기: 나눔폰 기부·재활용', '3. 폐기: 지역 수거함에 배출'] },
 };
 const WIPE = { Apple: '아이폰: 데이터 삭제 방법', Samsung: '삼성 갤럭시' };
+// 보증서에서 판매 완료·기부·분리배출을 눌렀을 때 보여 줄 매뉴얼 (데이터 삭제 안내가 먼저)
+const OUTCOME_MANUAL = {
+  sold: ['1. 판매하기'],
+  donated: ['2. 폐기: 나눔폰 기부·재활용'],
+  recycled: ['3. 폐기: 지역 수거함에 배출', '4. 폐기: 다른 폐가전과 함께 방문수거 신청'],
+};
+function manualFor(type, brand) {
+  if (!OUTCOME_MANUAL[type]) return [];
+  return [...(WIPE[brand] ? [WIPE[brand]] : ['모든 경로에 공통으로 필요한 준비']), ...OUTCOME_MANUAL[type]].map(manualSection).filter(Boolean);
+}
 
 function loadPrompt() {
   return {
@@ -79,21 +89,27 @@ function manualSection(title) {
 }
 
 // conditionCode: 판매자가 확정한 상태 · price: price.lookup() 결과 · report: device-hw-test/v1
-function recommend({ brand, conditionCode, price, report, battery }) {
+function recommend({ brand, conditionCode: declaredCode, price, report, battery }) {
   const reasons = [];
+  // 알려진 고장으로 시세 분류가 '파손 또는 기능 이상'으로 바뀌었으면 그 상태로 판단
+  // 고장 차감 시세에서 심한 고장(severe)이면 파손폰으로 봄
+  const conditionCode = (price && price.appliedConditionCode)
+    || (price && price.faultAdjusted && price.deduction.severity === 'severe' ? 'damage_or_fault' : declaredCode);
   const ok = price && price.status === 'ok';
   const lowPrice = ok && price.maxKrw < DONATE_BELOW_KRW;
+  const src = price && price.estimated ? 'AI 추정 시세' : '업체 매입 시세';
   let action;
   if (DAMAGED.includes(conditionCode)) {
     action = ok && !lowPrice ? 'sell_parts' : 'donate';
-    reasons.push(ok && !lowPrice ? '파손·화면 이상 상태에도 업체 매입 시세 있음' : ok ? `파손 상태 매입 참고가 ${DONATE_BELOW_KRW.toLocaleString('ko-KR')}원 미만` : '파손 상태 시세 정보 없음');
+    reasons.push(ok && !lowPrice ? `파손·고장 상태에도 ${src} 있음` : ok ? `파손 상태 매입 참고가 ${DONATE_BELOW_KRW.toLocaleString('ko-KR')}원 미만` : '파손 상태 시세 정보 없음');
   } else if (lowPrice) {
     action = 'donate';
     reasons.push(`매입 참고가 ${DONATE_BELOW_KRW.toLocaleString('ko-KR')}원 미만`);
   } else {
     action = 'sell';
-    reasons.push(ok ? '정상 사용 상태, 업체 매입 시세 있음' : '시세 정보 없음. 판매는 가능하나 가격은 직접 확인');
+    reasons.push(ok ? `정상 사용 상태, ${src} 있음` : '시세 정보 없음. 판매는 가능하나 가격은 직접 확인');
   }
+  if (price && price.faultAdjusted) reasons.push(`'${price.deduction.faultLabel_ko}' 차감 반영. 판매 시 고장 내용 고지`);
   const s = (report && report.summary) || {};
   if (!s.completed) reasons.push('미완료 점검 항목 있음. 판매글에 미확인으로 표시');
   else if (!s.allPassed) reasons.push('일부 점검 미통과. 권한 문제일 수 있어 고장으로 단정하지 않음');
@@ -111,7 +127,7 @@ function recommend({ brand, conditionCode, price, report, battery }) {
   };
 }
 
-module.exports = { DAMAGED, DONATE_BELOW_KRW, BATTERY_LOW_PCT, ACTIONS, loadPrompt, normalize, manualSection, recommend };
+module.exports = { DAMAGED, DONATE_BELOW_KRW, BATTERY_LOW_PCT, ACTIONS, OUTCOME_MANUAL, loadPrompt, normalize, manualSection, manualFor, recommend };
 
 // 자체 점검: node lib/assessment.js
 if (require.main === module) {
@@ -122,6 +138,15 @@ if (require.main === module) {
   assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'display_fault', price: { status: 'no_data' }, report: rep }).action, 'donate');
   assert.strictEqual(recommend({ brand: 'Samsung', conditionCode: 'minor_wear', price: { status: 'ok', maxKrw: 20000 }, report: rep }).action, 'donate');
   assert.strictEqual(recommend({ brand: 'X', conditionCode: 'clean', price: { status: 'needs_check' }, report: rep }).action, 'sell');
+  assert.strictEqual(recommend({ brand: 'Apple', conditionCode: 'clean', price: { status: 'ok', maxKrw: 500000, appliedConditionCode: 'damage_or_fault' }, report: rep }).action, 'sell_parts', '고장 있으면 파손폰 매입');
+  const pr = require('./price.js');
+  const yes = pr.lookup({ brand: 'Apple', model: 'iPhone 16 Pro', storage: '256GB', conditionCode: 'clean', knownFault: 'yes' });
+  assert.strictEqual(yes.status, 'ok', '알려진 고장 있음 → 파손·기능 이상 시세');
+  assert.strictEqual(yes.appliedConditionCode, 'damage_or_fault');
+  const noRow = pr.lookup({ brand: 'Apple', model: 'iPhone 11', storage: '128GB', conditionCode: 'burn_in', knownFault: 'yes' });
+  assert.strictEqual(noRow.status, 'ok', '고른 상태 행이 없어도 고장 행으로 조회'); assert.strictEqual(noRow.estimated, undefined);
+  assert.strictEqual(pr.lookup({ brand: 'Apple', model: 'iPhone 16 Pro', storage: '256GB', conditionCode: 'clean', knownFault: 'unknown' }).status, 'needs_check');
+  assert.strictEqual(pr.lookup({ brand: 'Apple', model: 'iPhone 16 Pro', storage: '256GB', conditionCode: 'clean', knownFault: 'none' }).appliedConditionCode, undefined);
   const n = normalize({ condition: { code: 'unknown', confidence: 'zzz' }, battery: { isBatteryScreen: true, healthPct: 76, osHint: 'ios' } }, 'm');
   assert.strictEqual(n.condition.code, null);
   assert.strictEqual(n.condition.confidence, 'low');
@@ -131,6 +156,8 @@ if (require.main === module) {
   const usage = normalize({ battery: { screenType: 'usage', isBatteryScreen: false, healthPct: null } });
   assert.strictEqual(usage.battery, null);
   assert.strictEqual(usage.batteryScreen, 'usage');
-  for (const t of [...Object.values(WIPE), ...Object.values(ACTIONS).flatMap((a) => a.manual)]) assert.ok(manualSection(t), `매뉴얼 섹션 없음: ${t}`);
+  for (const t of [...Object.values(WIPE), ...Object.values(ACTIONS).flatMap((a) => a.manual), ...Object.values(OUTCOME_MANUAL).flat(), '모든 경로에 공통으로 필요한 준비']) assert.ok(manualSection(t), `매뉴얼 섹션 없음: ${t}`);
+  assert.strictEqual(manualFor('recycled', 'Apple').length, 3, '분리배출: 삭제 안내 + 수거함 + 방문수거');
+  assert.strictEqual(manualFor('donated', 'Google')[0].title, '모든 경로에 공통으로 필요한 준비');
   console.log('assessment.js OK');
 }

@@ -129,7 +129,7 @@ function bar(label, v, eco) {
 function card(item, i) {
   const b = item.breakdown;
   const tests = picked.map(k => `<span class="tag">${LABEL[k]} ${item.scores[k] ?? "미확인"}</span>`).join("");
-  const ref = item.reference ? `업체 매입 참고 ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""}` : "시세 정보 없음";
+  const ref = item.reference ? `${item.reference.label_ko === '업체 매입 참고 범위' || item.reference.label_ko === '단일 업체 참고가' ? '업체 매입 참고' : item.reference.label_ko} ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""}` : "시세 정보 없음";
   const facts = [item.storage, item.condition, item.battery && item.battery.healthPct != null ? `배터리 ${item.battery.healthPct}% (판매자 캡처)` : "배터리 미점검", `신뢰도 ${TRUST[item.trust] || item.trust}`];
   return `
   <article class="result ${i === 0 ? "top" : ""}">

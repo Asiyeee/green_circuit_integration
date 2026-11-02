@@ -1,5 +1,5 @@
 > **이 폴더: ② 시세·처분 판단** · 담당 신현서 · 서석훈
-> 파일: `lib/price.js`(시세 CSV 조회) · `lib/assessment.js`(Gemini 외관·배터리 판별 정리, 처분 추천 규칙, 매뉴얼 섹션) · `prompts/assessment.*` · `data/`(시세 CSV, 처리 매뉴얼, `raw/` 업체별 원자료)
+> 파일: `lib/price.js`(시세 CSV 조회) · `lib/fault-adjust.js` + `prompts/fault-deduction.*`(알려진 기능 고장 내용이 있으면 '기능 정상' 기준 시세에서 그 고장만큼 Gemini 가 판단해 차감) · `lib/price-estimate.js` + `prompts/price-estimate.*`(CSV 에 없는 조합을 같은 CSV 의 같은 기종·같은 제조사 행 근거로 Gemini 추정, 'AI 추정 참고가' 로 표시) · `lib/assessment.js`(Gemini 외관·배터리 판별 정리, 처분 추천 규칙, 매뉴얼 섹션) · `prompts/assessment.*` · `data/`(시세 CSV, 처리 매뉴얼, `raw/` 업체별 원자료)
 > ③ 과 겹치는 곳: API 라우트(`/api/assess`, `/api/price/quote` 의 `disposal`)와 발급 시 `assessment` 저장은 `part3_certificate/lib/seller-routes.js` 에, 판별 UI 는 `part3_certificate/seller.html` 4단계에 있습니다.
 > 자체 점검: 루트에서 `npm test`
 

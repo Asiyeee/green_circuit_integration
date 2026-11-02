@@ -4,6 +4,8 @@
 //  - 조회 키: brand + model_key + storage + condition_code 정확히 일치
 //  - 없으면 가격을 추정하지 않고 no_data (0원 반환 금지, 다른 용량·상태로 대체 금지)
 //  - requires_no_known_function_fault=true 인 상태는 '알려진 기능 이상 없음'일 때만 조회
+//  - 알려진 고장 '있음'이면 그 기기는 정의상 '파손 또는 기능 이상'(damage_or_fault) 분류이므로 그 행으로 조회
+//    (데이터가 없어서 다른 상태로 채우는 것이 아니라 상태 분류 자체가 바뀌는 경우. appliedConditionCode 로 표시)
 
 const fs = require('fs');
 const path = require('path');
@@ -88,7 +90,8 @@ function load() {
     models.get(mk).storages.add(row.storage);
     models.get(mk).conditions.add(row.conditionCode);
   }
-  cache = { index, models };
+  const faultFree = new Set([...index.values()].filter((r) => r.requiresNoKnownFault).map((r) => r.conditionCode));
+  cache = { index, models, faultFree };
   return cache;
 }
 
@@ -112,17 +115,26 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
   if (!storage || storage === 'unknown') {
     return { ...base, status: 'needs_input', message_ko: '저장 용량 미확인. 시세 추정 안 함' };
   }
+  // 고장 재분류를 먼저: 고른 외관 상태의 행이 없어도 '파손 또는 기능 이상' 행이 있으면 그 값을 씀
+  if (appliedCode(conditionCode, knownFault) !== conditionCode) {
+    const faultRow = load().index.get([brand, base.modelKey, storage, 'damage_or_fault'].join('|'));
+    if (!faultRow) return { ...base, status: 'no_data', message_ko: "알려진 기능 고장 있음. '파손 또는 기능 이상' 시세 정보 없음" };
+    const declared = CONDITIONS.find((c) => c.code === conditionCode);
+    return {
+      ...okResult(base, faultRow),
+      appliedConditionCode: 'damage_or_fault',
+      reclassified_ko: `알려진 기능 고장이 있어 '파손 또는 기능 이상' 기준 시세 (외관: ${declared ? declared.label_ko : conditionCode})`,
+    };
+  }
   const row = load().index.get([brand, base.modelKey, storage, conditionCode].join('|'));
   if (!row) return { ...base, status: 'no_data', message_ko: '해당 조건의 시세 정보 없음' };
   if (row.requiresNoKnownFault && knownFault !== 'none') {
-    return {
-      ...base,
-      status: 'needs_check',
-      message_ko: knownFault === 'yes'
-        ? "알려진 고장 있음. '파손 또는 기능 이상' 상태로만 시세 조회 가능"
-        : '고장 여부 미확인. 상태별 시세 미확정',
-    };
+    return { ...base, status: 'needs_check', message_ko: '고장 여부 미확인. 상태별 시세 미확정' };
   }
+  return okResult(base, row);
+}
+
+function okResult(base, row) {
   const single = row.vendorCount === 1;
   return {
     ...base,
@@ -151,4 +163,8 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
   };
 }
 
-module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup };
+const allRows = () => [...load().index.values()];
+// 알려진 기능 고장 '있음'이면 '기능 정상 전제' 상태는 '파손 또는 기능 이상' 으로 분류
+const appliedCode = (conditionCode, knownFault) => (knownFault === 'yes' && load().faultFree.has(conditionCode) ? 'damage_or_fault' : conditionCode);
+
+module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup, allRows, appliedCode };
