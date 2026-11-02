@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>판매 보증서 만들기</title>
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+  .result-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--surface-2);margin-top:12px}
+  .result-card b{display:block;font-size:15px}
+  .test-list{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+  .test-list div{background:var(--surface-2);border-radius:10px;padding:10px 4px;text-align:center;font-size:12px;color:var(--ink-3)}
+  .test-list div b{display:block;font-size:13px;color:var(--ink);margin-bottom:2px}
+  .test-list .pass{color:var(--primary)} .test-list .fail{color:var(--danger)} .test-list .unsupported,.test-list .pending{color:var(--warn)}
+  .upload{font-size:13px;color:var(--ink-3);margin-top:10px}
+  .upload label{color:var(--ink-2);text-decoration:underline;cursor:pointer}
+  .upload input{display:none}
+  .quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quote-grid>div{background:var(--surface-2);border-radius:12px;padding:14px}
+  .quote-grid .k{font-size:13px;color:var(--ink-3)}
+  .quote-grid .v{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .quote-grid .s{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ai-badge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent,#1a7f5a);color:#fff;vertical-align:1px}
+  .manual details{margin-top:8px}.manual summary{cursor:pointer;font-weight:600}.manual .md{font-size:14px;line-height:1.7;margin:8px 0 0;color:var(--ink-2)}
+  .photo{position:relative;aspect-ratio:3/4;border:1.5px dashed var(--line-strong);border-radius:12px;display:grid;place-items:center;overflow:hidden;color:var(--ink-3);font-size:14px;font-weight:600;background:var(--surface-2)}
+  .photo-actions{position:absolute;left:6px;right:6px;bottom:6px;display:flex;gap:6px;z-index:1}
+  .photo-actions label{flex:1;text-align:center;padding:6px 0;border-radius:8px;background:var(--surface,#fff);border:1px solid var(--line-strong);font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer}
+  .photo input{display:none}
+  .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .photo .plus{display:block;font-size:26px;font-weight:300;line-height:1;margin-bottom:6px;text-align:center}
+  .err{color:var(--danger);font-size:14px;white-space:pre-wrap;margin:12px 0 0}
+  .err:empty{display:none}
+  #done{display:none;text-align:center}
+  #qr{display:inline-block;background:#fff;padding:12px;border-radius:12px;margin:8px 0 4px;box-shadow:inset 0 0 0 1px var(--line)}
+  #link{word-break:break-all;font-size:13px;color:var(--ink-3)}
+  #incomplete{margin-top:12px}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="appbar-in">
+  <span class="brand"><span class="brand-mark"></span>판매 보증서</span>
+  <span class="appbar-meta">판매자용</span>
+</div></header>
+
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">점검 결과로 만드는 보증서</p>
+    <h1 class="title">구매자가 믿을 수 있는<br>보증서를 만들어요</h1>
+    <p class="lead">점검 결과에 용량·외관 상태·사진을 더하면 시세와 탄소 감축량이 함께 들어가요.</p>
+  </div>
+
+  <section class="section">
+    <div class="step-no">1</div>
+    <h2 class="section-title">점검 결과</h2>
+    <div class="field" style="margin-top:12px">
+      <select class="select" id="file"><option value="">불러오는 중</option></select>
+    </div>
+    <div class="result-card" id="result-card" style="display:none">
+      <div><b id="result-device"></b><span class="muted" id="result-date"></span></div>
+      <span class="status" id="result-status"></span>
+    </div>
+    <div class="test-list" id="result-tests"></div>
+    <div class="upload">목록에 없나요? <label>결과 파일 직접 올리기<input type="file" id="upload" accept="application/json,.json"></label></div>
+  </section>
+
+  <section class="section">
+    <div class="step-no">2</div>
+    <h2 class="section-title">기기 정보</h2>
+    <div class="grid-2" style="margin-top:12px">
+      <div><label class="field-label" for="brand">제조사</label><input class="input" type="text" id="brand" placeholder="Apple"></div>
+      <div><label class="field-label" for="model">모델</label><input class="input" type="text" id="model" placeholder="iPhone 12"></div>
+    </div>
+    <div class="notice info" id="model-note" style="display:none;margin-top:10px"></div>
+    <div class="field">
+      <label class="field-label" for="storage">저장 용량</label>
+      <select class="select" id="storage"></select>
+    </div>
+    <div class="field">
+      <span class="field-label">외관·화면 상태</span>
+      <div class="choices" id="conditions"></div>
+    </div>
+    <div class="field">
+      <span class="field-label">알고 있는 고장</span>
+      <div class="seg" id="fault">
+        <label><input type="radio" name="fault" value="none">없음</label>
+        <label><input type="radio" name="fault" value="yes">있음</label>
+        <label><input type="radio" name="fault" value="unknown" checked>모름</label>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="step-no">3</div>
+    <h2 class="section-title">예상 시세와 탄소 감축</h2>
+    <div id="quote" class="muted" style="margin-top:10px">용량과 상태를 고르면 보여요.</div>
+  </section>
+
+  <section class="section">
+    <div class="step-no">4</div>
+    <!-- ② 시세·처분 판단 담당 구역: 외관 사진·배터리 캡처 → /api/assess (part2_price_disposal) -->
+    <h2 class="section-title">외관 사진 · 배터리 캡처</h2>
+    <p class="section-sub">점검 때 찍은 사진은 자동으로 들어가요. 화면을 켠 채로 찍으면 잔상·화면 불량도 봐요. 판매하는 폰으로 직접 찍기 어려우면 다른 기기로 찍어 갤러리에서 올려도 돼요. 배터리 캡처는 '사용량' 화면이 아니라 최대 용량이 보이는 화면이어야 해요: 아이폰 '설정 → 배터리 → 배터리 성능 상태', 갤럭시 '설정 → 배터리 → 배터리 정보'. 개인정보가 보이지 않게 해 주세요.</p>
+    <div class="photos" style="margin-top:14px">
+      <div class="photo" data-kind="front"><span><span class="plus">+</span>앞면</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
+      <div class="photo" data-kind="back"><span><span class="plus">+</span>뒷면</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
+      <div class="photo" data-kind="battery"><span><span class="plus">+</span>배터리 캡처</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label></div></div>
+    </div>
+    <p class="muted" style="margin:12px 0 0">사진을 올리면 AI가 자동으로 외관 상태와 배터리를 판별해요.</p>
+    <div class="btn-row" style="margin-top:8px"><button class="btn btn-secondary" id="assess" disabled>AI로 다시 판별</button></div>
+    <div id="ai" style="margin-top:10px"></div>
+  </section>
+
+  <section class="section">
+    <div class="step-no">5</div>
+    <h2 class="section-title">판매자 닉네임</h2>
+    <p class="section-sub">환경 온도가 이 닉네임으로 쌓여요.</p>
+    <div class="field" style="margin-top:12px"><input class="input" type="text" id="nickname" maxlength="20" placeholder="닉네임"></div>
+    <div class="field">
+      <label class="field-label" for="asking">희망 판매가 (선택)</label>
+      <input class="input" type="number" id="asking" inputmode="numeric" min="1000" max="10000000" step="1000" placeholder="예: 250000">
+      <p class="muted" style="margin:6px 0 0">구매자 추천에서 업체 매입 시세와 비교해 가격 합리성을 계산해요.</p>
+    </div>
+  </section>
+
+  <p id="err" class="err"></p>
+
+  <section class="section" id="done">
+    <p class="eyebrow">발급 완료</p>
+    <h2 class="section-title">보증서가 만들어졌어요</h2>
+    <p class="section-sub">링크나 QR을 판매글에 붙여 주세요.</p>
+    <div id="qr"></div>
+    <p id="link"></p>
+    <div class="btn-row">
+      <a id="open" class="btn btn-primary" target="_blank">보증서 보기</a>
+      <button class="btn btn-secondary" id="copy">링크 복사</button>
+    </div>
+  </section>
+</main>
+
+<div class="cta"><div class="cta-in"><button class="btn btn-primary btn-block" id="issue" disabled>보증서 발급하기</button></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const T = new URLSearchParams(location.search).get('t') || '';
+const api = (p, o = {}) => fetch(p, { ...o, headers: { 'Content-Type': 'application/json', 'x-access-token': T, ...(o.headers || {}) } });
+const STATUS = { pass: '통과', fail: '실패', unsupported: '미지원', pending: '미완료' };
+const LABEL = { camera: '카메라', microphone: '마이크', speaker: '스피커', touch: '터치', gyro: '센서' };
+const FALLBACK_STORAGES = ['16GB', '32GB', '64GB', '128GB', '256GB', '512GB', '1TB'];
+const won = (n) => n.toLocaleString('ko-KR') + '원';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// 매뉴얼 마크다운 최소 렌더 (링크·굵게·줄바꿈만)
+const md = (t) => esc(t)
+  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+  .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+  .replace(/\n/g, '<br>');
+const when = (d) => d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+let report = null, resultFile = null;
+const photos = {};
+let batteryShot = null, assessId = null, aiCode = null;
+
+try { $('#nickname').value = localStorage.getItem('seller-nickname') || ''; } catch {}
+
+// results/ 파일 이름(2026-11-02T04-54-31_이름_세션.json)을 읽기 쉬운 이름으로
+function fileLabel(f) {
+  const m = f.match(/^(\d{4}-\d\d-\d\d)T(\d\d)-(\d\d)-(\d\d)_(.+?)_[^_]+\.json$/);
+  if (!m) return f;
+  return `${when(new Date(`${m[1]}T${m[2]}:${m[3]}:${m[4]}Z`))} · ${m[5] === 'anon' ? '이름 없음' : m[5]}`;
+}
+
+async function loadList() {
+  if (!T) { $('#err').textContent = '접속 정보가 없어요. 서버를 켠 터미널에 나온 /seller?t=... 주소로 열어 주세요.'; return; }
+  const r = await api('/api/results');
+  if (!r.ok) { $('#err').textContent = `점검 결과를 불러오지 못했어요 (HTTP ${r.status})`; return; }
+  const { files } = await r.json();
+  const sel = $('#file');
+  sel.innerHTML = files.length ? '' : '<option value="">아직 점검 결과가 없어요. 폰에서 먼저 점검해 주세요.</option>';
+  files.forEach((f, i) => sel.append(new Option(fileLabel(f) + (i === 0 ? ' (최근)' : ''), f)));
+  if (files.length) await pick(files[0]);
+}
+
+async function pick(name) {
+  const r = await api('/api/results/file?name=' + encodeURIComponent(name));
+  if (!r.ok) { $('#err').textContent = '점검 결과 파일을 읽지 못했어요'; return; }
+  resultFile = name;
+  setReport(await r.json());
+}
+
+function setReport(rep) {
+  report = rep;
+  const old = $('#incomplete');
+  if (old) old.remove();
+  const d = rep.device && rep.device.declared;
+  const passed = Object.keys(LABEL).filter((k) => (rep.results[k] || {}).status === 'pass').length;
+  $('#result-card').style.display = 'flex';
+  $('#result-device').textContent = d ? `${d.brand} ${d.model}` : '기종 선택 안 함';
+  $('#result-date').textContent = `${when(new Date(rep.testedAt))} 점검${d && d.matchesUserAgent === false ? ' · 접속 기기와 다름' : ''}`;
+  $('#result-status').className = 'status ' + (passed === 5 ? 'pass' : rep.summary && rep.summary.completed ? 'fail' : 'warn');
+  $('#result-status').textContent = `${passed}/5 통과`;
+  $('#result-tests').innerHTML = Object.keys(LABEL).map((k) => {
+    const s = (rep.results[k] || {}).status || 'pending';
+    return `<div><b>${LABEL[k]}</b><span class="${s}">${STATUS[s] || s}</span></div>`;
+  }).join('');
+  if (!rep.summary || !rep.summary.completed) {
+    $('#result-tests').insertAdjacentHTML('afterend', '<div class="notice" id="incomplete">끝내지 않은 점검이 있으면 보증서 신뢰도가 낮게 표시돼요. 가능하면 5가지를 모두 마친 결과를 골라 주세요.</div>');
+  }
+  if (d) { $('#brand').value = d.brand; $('#model').value = d.model; }
+  loadOptions();
+}
+
+let optTimer;
+async function loadOptions() {
+  const brand = $('#brand').value.trim(), model = $('#model').value.trim();
+  if (!brand || !model) return;
+  const r = await api(`/api/price/options?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}`);
+  const o = await r.json();
+  $('#model-note').style.display = o.found ? 'none' : 'block';
+  $('#model-note').textContent = '시세 자료에 없는 기종이에요. 보증서는 만들 수 있지만 시세는 비어 있어요.';
+  const st = $('#storage'), prev = st.value;
+  st.innerHTML = '<option value="">선택</option>';
+  (o.found ? o.storages : FALLBACK_STORAGES).forEach((s) => st.append(new Option(s, s)));
+  st.append(new Option('모름', 'unknown'));
+  if ([...st.options].some((x) => x.value === prev)) st.value = prev;
+  const checked = (document.querySelector('input[name=cond]:checked') || {}).value;
+  $('#conditions').innerHTML = o.conditions.map((c) => `
+    <label class="choice ${o.found && !c.available ? 'is-muted' : ''}">
+      <input type="radio" name="cond" value="${c.code}" ${c.code === checked ? 'checked' : ''}>
+      <span><span class="choice-title">${esc(c.label_ko)}${c.code === aiCode ? '<span class="ai-badge">AI 제안</span>' : ''}</span><span class="choice-desc">${esc(c.hint_ko)}${o.found && !c.available ? ' · 이 기종은 시세 없음' : ''}</span></span>
+    </label>`).join('');
+  quote();
+}
+
+async function quote() {
+  const body = form();
+  validate();
+  if (!body.storage || !body.conditionCode) return;
+  const r = await api('/api/price/quote', { method: 'POST', body: JSON.stringify({ ...body, assessId, testSummary: report && report.summary }) });
+  const { price: p, carbon: c, disposal: dp } = await r.json();
+  const priceHtml = p.status === 'ok'
+    ? `<div><div class="k">업체 매입 시세</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + '~'}</div><div class="s">${p.singleAmount ? '업체 1곳' : won(p.maxKrw) + '까지 · ' + p.vendorCount + '곳'}</div></div>`
+    : `<div><div class="k">업체 매입 시세</div><div class="v" style="font-size:15px;font-weight:600;color:var(--ink-2)">${esc(p.message_ko)}</div></div>`;
+  $('#quote').className = '';
+  $('#quote').innerHTML = `<div class="quote-grid">${priceHtml}
+    <div><div class="k">재사용 시 탄소 감축${c.basis === 'estimate' ? ' (추정)' : ''}</div><div class="v">${c.avoidedKg}kg</div><div class="s">나무 ${c.equivalence.oakTreesYear}그루가 1년간 흡수하는 양</div></div></div>
+    ${dp ? `<div class="notice info manual" style="margin-top:12px"><b>추천 처리: ${esc(dp.label_ko)}</b>
+      <ul style="margin:6px 0 0;padding-left:18px">${dp.reasons_ko.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="muted" style="margin:6px 0 0">추천일 뿐이에요. 판매·기부·배출은 직접 고르세요.</p>
+      ${dp.manual.map((m) => `<details><summary>${esc(m.title)}</summary><div class="md">${md(m.markdown)}</div></details>`).join('')}</div>` : ''}`;
+}
+
+function form() {
+  return {
+    brand: $('#brand').value.trim(),
+    model: $('#model').value.trim(),
+    storage: $('#storage').value,
+    conditionCode: (document.querySelector('input[name=cond]:checked') || {}).value || '',
+    knownFault: (document.querySelector('input[name=fault]:checked') || {}).value || 'unknown',
+  };
+}
+
+function validate() {
+  const f = form();
+  $('#issue').disabled = !(report && f.brand && f.model && f.storage && f.conditionCode && $('#nickname').value.trim());
+}
+
+// 사진은 긴 변 1280px JPEG 로 줄여서 보냅니다 (Firestore 문서 한도 대비)
+function resize(file, maxSide = 1280) {
+  return new Promise((ok, bad) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      ok(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = bad;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+document.querySelectorAll('.photo').forEach((el) => {
+  el.querySelectorAll('input').forEach((inp) => inp.addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const dataUrl = await resize(f, el.dataset.kind === 'battery' ? 2000 : 1280); // 캡처 글씨가 뭉개지지 않게 크게
+    if (el.dataset.kind === 'battery') batteryShot = dataUrl; else photos[el.dataset.kind] = dataUrl;
+    assessId = null; // 사진이 바뀌면 다시 판별
+    $('#assess').disabled = false;
+    // 여러 장을 연달아 올리면 마지막 사진 뒤 1.2초에 한 번만 판별
+    clearTimeout(assessTimer);
+    assessTimer = setTimeout(runAssess, 1200);
+    let img = el.querySelector('img');
+    if (!img) { img = document.createElement('img'); el.append(img); }
+    img.src = dataUrl;
+    e.target.value = ''; // 같은 파일을 다시 골라도 반영되게
+  }));
+});
+
+$('#file').addEventListener('change', (e) => e.target.value && pick(e.target.value));
+$('#upload').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try { resultFile = null; setReport(JSON.parse(await f.text())); $('#err').textContent = ''; }
+  catch { $('#err').textContent = '결과 파일을 읽지 못했어요'; }
+});
+['#brand', '#model'].forEach((s) => $(s).addEventListener('input', () => { clearTimeout(optTimer); optTimer = setTimeout(loadOptions, 400); }));
+$('#storage').addEventListener('change', quote);
+document.addEventListener('change', (e) => { if (e.target.name === 'cond' || e.target.name === 'fault') quote(); });
+$('#nickname').addEventListener('input', validate);
+
+$('#issue').addEventListener('click', async () => {
+  const btn = $('#issue');
+  btn.disabled = true; btn.textContent = '보증서 만드는 중';
+  $('#err').textContent = '';
+  const nickname = $('#nickname').value.trim();
+  try { localStorage.setItem('seller-nickname', nickname); } catch {}
+  const body = { ...form(), nickname, assessId, batteryShot, askingPriceKrw: Number($('#asking').value) || null, photos: Object.entries(photos).map(([kind, dataUrl]) => ({ kind, dataUrl })) };
+  if (resultFile) body.resultFile = resultFile; else body.report = report;
+  try {
+    const r = await api('/api/certificates', { method: 'POST', body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) throw new Error((j.error || 'HTTP ' + r.status) + (j.details ? '\n' + j.details.join('\n') : ''));
+    const full = location.origin + j.url;
+    $('#done').style.display = 'block';
+    $('#link').textContent = full;
+    $('#open').href = j.url + '?t=' + encodeURIComponent(T);
+    $('#qr').innerHTML = '';
+    if (window.QRCode) new QRCode($('#qr'), { text: full, width: 168, height: 168 });
+    $('#done').scrollIntoView({ behavior: 'smooth' });
+    btn.textContent = '보증서 발급하기';
+  } catch (e) {
+    $('#err').textContent = '발급하지 못했어요: ' + e.message;
+    btn.textContent = '보증서 발급하기';
+    validate();
+  }
+});
+const CONF = { high: '높음', medium: '보통', low: '낮음' };
+let assessTimer, assessSeq = 0;
+async function runAssess() {
+  clearTimeout(assessTimer);
+  const seq = ++assessSeq;
+  const btn = $('#assess');
+  btn.disabled = true; btn.textContent = 'AI가 보는 중';
+  $('#ai').innerHTML = '<div class="notice info">AI가 사진을 보는 중이에요… (몇 초 걸려요)</div>';
+  try {
+    const f = form();
+    const r = await api('/api/assess', { method: 'POST', body: JSON.stringify({ brand: f.brand, model: f.model, batteryShot, photos: Object.entries(photos).map(([kind, dataUrl]) => ({ kind, dataUrl })) }) });
+    const j = await r.json();
+    if (seq !== assessSeq) return; // 그 사이 사진이 바뀌어 새 판별이 시작됨
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    assessId = j.assessId;
+    const { condition: c, battery: b } = j.analysis;
+    aiCode = c.code;
+    const picked = (document.querySelector('input[name=cond]:checked') || {}).value;
+    if (c.code && !picked) { const el = document.querySelector(`input[name=cond][value=${c.code}]`); if (el) el.checked = true; }
+    const bat = b
+      ? (b.healthPct !== null ? `최대 용량 ${b.healthPct}%${b.low ? ' (저하)' : ''}` : '퍼센트 없음') + (b.statusLabel ? ` · ${esc(b.statusLabel)}` : '') + (b.cycleCount !== null ? ` · 사이클 ${b.cycleCount}회` : '')
+      : ({ usage: "배터리 '사용량' 화면이라 최대 용량을 확인할 수 없어요. 아이폰은 '배터리 성능 상태', 갤럭시는 '배터리 정보' 화면을 캡처해 주세요.",
+           other: '배터리 성능 상태 화면이 아니에요. 최대 용량(%)이 보이는 화면을 캡처해 주세요.' }[j.analysis.batteryScreen]
+         || (batteryShot ? '배터리 화면을 읽지 못했어요' : '캡처 없음'));
+    $('#ai').innerHTML = `<div class="notice info">
+      <b>외관 AI 판별:</b> ${c.code ? `${esc(c.label_ko)} (확신 ${CONF[c.confidence]})` : '판단 어려움'}${c.evidence_ko ? ` · ${esc(c.evidence_ko)}` : ''}
+      ${c.damages.length ? `<br>보이는 손상: ${c.damages.map(esc).join(', ')}` : ''}
+      ${c.caveats_ko.length ? `<br><span class="muted">${c.caveats_ko.map(esc).join(' · ')}</span>` : ''}
+      ${c.code && picked && picked !== c.code ? `<br>선택한 상태와 달라요. <button class="btn btn-secondary" id="apply-ai" style="padding:2px 10px;margin-top:4px">AI 제안으로 바꾸기</button>` : ''}
+      <br><b>배터리:</b> ${bat}
+      <br><span class="muted">AI 판별은 참고용이에요. 최종 상태는 직접 골라 주세요.</span></div>`;
+    const ap = $('#apply-ai');
+    if (ap) ap.addEventListener('click', () => { document.querySelector(`input[name=cond][value=${c.code}]`).checked = true; ap.remove(); loadOptions(); });
+    loadOptions(); // 배지 표시 + 시세·추천 다시 계산
+  } catch (e) {
+    if (seq !== assessSeq) return;
+    $('#ai').innerHTML = `<div class="notice">AI 판별 실패: ${esc(e.message)}</div>`;
+  }
+  btn.disabled = false; btn.textContent = 'AI로 다시 판별';
+}
+$('#assess').addEventListener('click', runAssess);
+$('#copy').addEventListener('click', () => navigator.clipboard.writeText($('#link').textContent));
+
+loadList();
+</script>
+<script src="/assets/nav.js"></script>
+</body>
+</html>

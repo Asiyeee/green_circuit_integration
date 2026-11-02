@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>내게 맞는 중고폰 찾기 · Green Circuit</title>
+<!-- 공통 디자인: 판매자 파트와 같은 ui.css (static/assets/ui.css) -->
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+  /* 구매자 화면 전용. --eco 는 환경 관련 강조색(구리색) */
+  :root{--eco:#9a5b1e;--eco-weak:#f8eee4}
+  @media (prefers-color-scheme:dark){:root{--eco:#e2a66b;--eco-weak:#3a2a1c}}
+  .brand-logo{width:22px;height:22px;color:var(--primary);flex:none}
+
+  /* 성능 선택 칩 (순위 표시) */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--surface-2);color:var(--ink-2);font-size:15px;font-weight:600;cursor:pointer;box-shadow:inset 0 0 0 1px var(--line);transition:background .15s,box-shadow .15s}
+  .chip .rank{display:none;width:22px;height:22px;border-radius:50%;background:var(--primary);color:var(--on-primary);font-size:12px;font-weight:700;align-items:center;justify-content:center}
+  .chip[aria-pressed=true]{background:var(--primary-weak);color:var(--primary);box-shadow:inset 0 0 0 1.5px var(--primary)}
+  .chip[aria-pressed=true] .rank{display:inline-flex}
+  .chip[disabled]{opacity:.4;cursor:default}
+
+  #msg{margin:20px 0 4px;font-size:15px;font-weight:700;color:var(--ink)}
+  #msg:empty{display:none}
+  #msg.error{color:var(--danger);font-weight:600}
+
+  /* 추천 결과 카드 */
+  .result{background:var(--surface);border-radius:var(--radius);padding:18px;margin-top:10px}
+  .result.top{box-shadow:inset 0 0 0 1.5px var(--primary)}
+  .result-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .result h2{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:6px 0 0}
+  .result-top .tag{margin-bottom:2px}
+  .price{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .score{text-align:center;flex:none;min-width:60px}
+  .score strong{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--primary);line-height:1.1}
+  .score span{font-size:11px;color:var(--ink-3);font-weight:600}
+  .bars{display:grid;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .bar-row{display:grid;grid-template-columns:76px 1fr 28px;gap:10px;align-items:center;font-size:13px;color:var(--ink-2)}
+  .bar-row b{text-align:right;color:var(--ink);font-weight:600}
+  .track{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+  .fill{height:100%;background:var(--primary);border-radius:3px}
+  .bar-row.eco .fill{background:var(--eco)}
+  .result-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+  .eco-chip{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;background:var(--eco-weak);color:var(--eco);font-size:13px;font-weight:700;white-space:nowrap}
+  .eco-chip svg{width:14px;height:14px}
+  @media (prefers-reduced-motion:no-preference){.fill{transition:width .5s ease}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="appbar-in">
+  <span class="brand">
+    <svg class="brand-logo" viewBox="0 0 120 120" fill="none" aria-hidden="true"><path d="M91.1 28.9 A44 44 0 1 0 104 60 H72" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="67" cy="60" r="11" fill="#b8732e"/></svg>
+    Green Circuit
+  </span>
+  <span class="appbar-meta">구매자용</span>
+</div></header>
+
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">보증서 있는 중고폰</p>
+    <h1 class="title">내게 맞는 중고 스마트폰 찾기</h1>
+    <p class="lead">기종과 중요한 성능 3가지를 고르면, 가격이 합리적이고 환경온도가 높은 순으로 보여 드려요.</p>
+  </div>
+
+  <section class="section">
+    <div class="field">
+      <label class="field-label" for="model">기종</label>
+      <input class="input" id="model" type="text" list="models" placeholder="예: 갤럭시 S23" autocomplete="off">
+      <datalist id="models"></datalist>
+    </div>
+
+    <div class="field" style="margin-top:20px">
+      <span class="field-label" id="prio-title">중요한 성능 3가지</span>
+      <p class="muted" style="margin:0 0 10px">중요한 순서대로 눌러 주세요. 다시 누르면 선택이 취소돼요.</p>
+      <div class="chips" id="chips" role="group" aria-labelledby="prio-title"></div>
+    </div>
+
+    <button class="btn btn-primary btn-block go" id="go" disabled style="margin-top:20px">추천 받기</button>
+  </section>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+  <div id="results"></div>
+</main>
+
+<script>
+const TESTS = [
+  ["camera", "카메라"], ["mic", "마이크"], ["speaker", "스피커"],
+  ["gyro", "자이로"], ["touch", "터치"]
+];
+const LABEL = Object.fromEntries(TESTS);
+let picked = [];
+
+const chips = document.getElementById("chips");
+const go = document.getElementById("go");
+const msg = document.getElementById("msg");
+const results = document.getElementById("results");
+const modelInput = document.getElementById("model");
+
+function renderChips() {
+  chips.innerHTML = "";
+  TESTS.forEach(([key, name]) => {
+    const idx = picked.indexOf(key);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.setAttribute("aria-pressed", idx >= 0);
+    b.disabled = idx < 0 && picked.length >= 3;
+    b.innerHTML = `<span class="rank">${idx + 1}</span>${name}`;
+    b.addEventListener("click", () => {
+      picked = idx >= 0 ? picked.filter(k => k !== key) : [...picked, key];
+      renderChips(); updateGo();
+    });
+    chips.appendChild(b);
+  });
+}
+function updateGo() {
+  go.disabled = !(modelInput.value.trim() && picked.length === 3);
+}
+modelInput.addEventListener("input", updateGo);
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const won = n => n.toLocaleString("ko-KR") + "원";
+const TRUST = { high: "높음", medium: "보통", low: "낮음" };
+
+function bar(label, v, eco) {
+  return `<div class="bar-row${eco ? ' eco' : ''}"><span>${label}</span><div class="track"><div class="fill" style="width:${v}%"></div></div><b>${Math.round(v)}</b></div>`;
+}
+
+function card(item, i) {
+  const b = item.breakdown;
+  const tests = picked.map(k => `<span class="tag">${LABEL[k]} ${item.scores[k] ?? "미확인"}</span>`).join("");
+  const ref = item.reference ? `업체 매입 참고 ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""}` : "시세 정보 없음";
+  const facts = [item.storage, item.condition, item.battery && item.battery.healthPct != null ? `배터리 ${item.battery.healthPct}% (판매자 캡처)` : "배터리 미점검", `신뢰도 ${TRUST[item.trust] || item.trust}`];
+  return `
+  <article class="result ${i === 0 ? "top" : ""}">
+    <div class="result-top">
+      <div>
+        ${i === 0 ? '<span class="tag good">가장 추천</span>' : ""}
+        <h2>${esc(item.model)}</h2>
+        <div class="price">${item.price ? won(item.price) : "가격 미정"}</div>
+        <p class="muted" style="margin:4px 0 0">${esc(ref)}</p>
+        <p class="muted" style="margin:2px 0 0">${facts.map(esc).join(" · ")}</p>
+      </div>
+      <div class="score"><strong>${item.final_score}</strong><span>종합 점수</span></div>
+    </div>
+    <div class="bars">
+      ${bar("성능", b.performance)}
+      ${b.price === null ? "" : bar("가격 합리성", b.price)}
+      ${bar("환경온도", b.eco, true)}
+    </div>
+    <div class="result-bottom">
+      <div class="tags">${tests}</div>
+      <span class="eco-chip" aria-label="환경온도 ${item.eco_temp}도">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        ${item.eco_temp}°C
+      </span>
+    </div>
+    <a class="btn btn-secondary btn-block" style="margin-top:12px" href="${esc(item.cert_url)}" target="_blank" rel="noopener">보증서 보기 · 판매자 ${esc(item.seller)}</a>
+  </article>`;
+}
+
+go.addEventListener("click", async () => {
+  msg.className = ""; msg.textContent = "찾는 중이에요…"; results.innerHTML = "";
+  go.disabled = true;
+  try {
+    const res = await fetch("/api/public/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ device_model: modelInput.value.trim(), priorities: picked })
+    });
+    if (res.status === 404) {
+      msg.textContent = "조건에 맞는 매물이 없어요. 기종 이름을 바꾸거나 성능 선택을 바꿔 보세요.";
+      return;
+    }
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "");
+    const data = await res.json();
+    msg.textContent = `${data.count}개를 찾았어요.`;
+    results.innerHTML = data.items.map(card).join("");
+  } catch (e) {
+    msg.className = "error";
+    msg.textContent = e.message || "서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.";
+  } finally {
+    updateGo();
+  }
+});
+
+renderChips();
+// 지금 판매 중인 기종으로 자동완성 채우기
+fetch("/api/public/models").then(r => r.json()).then(ms => {
+  document.getElementById("models").innerHTML = ms.map(m => `<option value="${esc(m)}">`).join("");
+}).catch(() => {});
+</script>
+<script src="/assets/nav.js"></script>
+</body>
+</html>

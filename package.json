@@ -1,0 +1,22 @@
+{
+  "name": "green-circuit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Green Circuit: ① 하드웨어 테스트 → ② 시세·처분 판단 → ③ 성능 보증서 → ④ 구매자 추천 (서버 하나)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "share": "node common/scripts/share.js",
+    "models": "node common/scripts/models.js",
+    "validate": "node common/scripts/validate.js",
+    "summary": "node part1_hardware_test/summary.js",
+    "seed": "node part3_certificate/scripts/seed-demo.js",
+    "test": "node part2_price_disposal/lib/assessment.js && node part4_buyer/lib/buyer.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

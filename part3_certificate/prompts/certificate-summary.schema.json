@@ -1,0 +1,11 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "summary_ko": { "type": "STRING" },
+    "strengths_ko": { "type": "ARRAY", "items": { "type": "STRING" } },
+    "cautions_ko": { "type": "ARRAY", "items": { "type": "STRING" } },
+    "eco_line_ko": { "type": "STRING" }
+  },
+  "required": ["summary_ko", "strengths_ko", "cautions_ko", "eco_line_ko"],
+  "propertyOrdering": ["summary_ko", "strengths_ko", "cautions_ko", "eco_line_ko"]
+}

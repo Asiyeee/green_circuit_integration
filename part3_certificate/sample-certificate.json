@@ -1,0 +1,214 @@
+{
+  "schema": "seller-certificate/v1",
+  "id": "Hspzu8xkgK",
+  "issuedAt": "2026-11-02T05:13:18.930Z",
+  "expiresAt": "2026-12-02T05:13:18.930Z",
+  "seller": {
+    "nickname": "영찬",
+    "temperatureAtIssue": 36.6
+  },
+  "device": {
+    "brand": "Apple",
+    "model": "iPhone 12",
+    "modelKey": "iphone12",
+    "storage": "256GB",
+    "declaredSource": "dropdown",
+    "matchesUserAgent": true,
+    "platform": "iPhone",
+    "screen": {
+      "width": 390,
+      "height": 844,
+      "dpr": 3
+    }
+  },
+  "condition": {
+    "code": "clean",
+    "label_ko": "흠집·파손·잔상 없음",
+    "knownFault": "none",
+    "knownFaultLabel_ko": "없음",
+    "source": "seller_declared"
+  },
+  "test": {
+    "schema": "device-hw-test/v1",
+    "sessionId": "3f2b8c1e-5a7d-4e90-9b1a-0c6d2e8f7a41",
+    "testedAt": "2026-11-01T13:20:00.000Z",
+    "completed": true,
+    "allPassed": true,
+    "passedCount": 5,
+    "totalCount": 5,
+    "batteryTested": false,
+    "items": {
+      "camera": {
+        "status": "pass",
+        "photoGrade": "B",
+        "photoGradeNote_ko": "촬영 사진 1장 기준 화질 등급. 외관·시세 등급과 무관",
+        "scores": {
+          "sharpness": 7,
+          "noise_cleanliness": 7,
+          "dynamic_range": 6,
+          "exposure_accuracy": 8,
+          "color_accuracy": 8,
+          "low_light_potential": null
+        },
+        "styleTags": [
+          "clean_modern",
+          "crisp_digital"
+        ],
+        "aiSummary_ko": "밝은 곳에서 선명하고 색이 자연스러운 일상용 카메라입니다. 어두운 환경과 필름 같은 느낌을 기대하는 용도에는 아쉽습니다.",
+        "confidence": "medium",
+        "megapixels": 12.2,
+        "lensLabel": "Back Camera",
+        "verdictBasis": "gemini"
+      },
+      "microphone": {
+        "status": "pass",
+        "peakDb": -12.3,
+        "noiseFloorDb": -58.7
+      },
+      "speaker": {
+        "status": "pass",
+        "userConfirmed": true
+      },
+      "touch": {
+        "status": "pass",
+        "cellsHit": 12,
+        "cellsTotal": 12,
+        "maxSimultaneousTouches": 3
+      },
+      "gyro": {
+        "status": "pass",
+        "maxOrientationRangeDeg": 289.3
+      }
+    }
+  },
+  "price": {
+    "brand": "Apple",
+    "model": "iPhone 12",
+    "modelKey": "iphone12",
+    "storage": "256GB",
+    "conditionCode": "clean",
+    "knownFault": "none",
+    "status": "ok",
+    "referenceId": "15bcfa041a9c2587d402",
+    "displayModel": "iPhone 12",
+    "conditionLabel": "흠집·파손·잔상 없음",
+    "conditionDescription": "외관이 깨끗하고 파손·잔상이 없으며 알려진 기능 이상이 없는 상태",
+    "minKrw": 210000,
+    "maxKrw": 300000,
+    "label_ko": "업체 매입 참고 범위",
+    "singleAmount": false,
+    "vendorCount": 3,
+    "quoteCount": 3,
+    "checkedOn": "2026-11-02",
+    "notice_ko": "업체별 등급을 서비스 상태 분류에 대응한 매입 참고 범위입니다. 배터리·잔상 정도·수리이력·검수 조건에 따라 실제 금액이 달라질 수 있습니다.",
+    "quotes": [
+      {
+        "vendor": "폰삼",
+        "grade": "S급",
+        "minKrw": 210000,
+        "maxKrw": 210000,
+        "conditions_ko": "기능·외관·성능 등에 이상이 없는 매우 깨끗한 상태",
+        "priceDate": "원자료 기준일 미표시",
+        "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-12"
+      },
+      {
+        "vendor": "Rediva",
+        "grade": "A급",
+        "minKrw": 270000,
+        "maxKrw": 270000,
+        "conditions_ko": "외관·화면·기능 정상; 아이폰 배터리 효율 90% 이상",
+        "priceDate": "2026-10-28",
+        "url": "https://rediva.ai/price"
+      },
+      {
+        "vendor": "리템즈",
+        "grade": "A그룹 새제품급",
+        "minKrw": 280000,
+        "maxKrw": 300000,
+        "conditions_ko": "흠집이 거의 없는 깨끗한 새제품급 상태; 제시 범위에 배터리·구성품 반영",
+        "priceDate": "10월 29일 (연도 미표시)",
+        "url": "https://www.retemz.com/custom/seo/sell/iphone-12.html"
+      }
+    ]
+  },
+  "carbon": {
+    "schema": "device-carbon/v1",
+    "avoidedKg": 70.6,
+    "basis": "official",
+    "matchedModel": "iPhone 12",
+    "storageUsed": "256GB",
+    "storageNote_ko": null,
+    "lifecycleKg": 85,
+    "productionShare": 0.83,
+    "region": "US",
+    "source": {
+      "name": "Apple Product Environmental Report",
+      "url": "https://www.apple.com/environment/",
+      "report": "iPhone_12_PER_Oct2020.pdf"
+    },
+    "method_ko": "재사용 1대가 신규 생산 1대를 대체한다고 가정한 최대 추정치",
+    "equivalence": {
+      "oakTreesYear": 4.9,
+      "label_ko": "30년생 상수리나무 한 그루가 1년 동안 흡수하는 이산화탄소",
+      "perTreeKg": 14.4,
+      "source": "국립산림과학원 '주요 산림수종의 표준 탄소흡수량' (노컷뉴스 인용 https://www.nocutnews.co.kr/news/6185670)"
+    },
+    "checkedOn": "2026-11-02"
+  },
+  "ecoPreview": {
+    "note_ko": "거래 완료 시 판매자 환경 온도 상승분",
+    "sold": {
+      "delta": 0.71,
+      "creditedKg": 70.6,
+      "label_ko": "판매로 재사용",
+      "before": 36.6,
+      "after": 37.31
+    },
+    "donated": {
+      "delta": 0.91,
+      "creditedKg": 70.6,
+      "label_ko": "나눔폰 기부로 재사용",
+      "before": 36.6,
+      "after": 37.51
+    },
+    "recycled": {
+      "delta": 0.3,
+      "creditedKg": 0,
+      "label_ko": "지정 수거함·방문수거로 올바른 배출",
+      "before": 36.6,
+      "after": 36.9
+    }
+  },
+  "photos": [],
+  "assessment": null,
+  "status": "listed",
+  "outcome": null,
+  "trust": {
+    "level": "high",
+    "reasons": [
+      "외관 상태·고장 여부는 판매자 입력값",
+      "배터리 상태 미점검"
+    ]
+  },
+  "summary": {
+    "by": "rule",
+    "model": null,
+    "summary_ko": "iPhone 12 256GB. 외관 '흠집·파손·잔상 없음'(판매자 입력), 하드웨어 점검 5개 중 5개 정상. 업체 매입 참고 범위 21만원~30만원.",
+    "strengths_ko": [
+      "하드웨어 점검 5/5 정상",
+      "카메라 사진 화질 B등급",
+      "멀티터치 정상 인식",
+      "흠집·파손·잔상 없음 (판매자 입력)"
+    ],
+    "cautions_ko": [
+      "배터리 상태 미점검",
+      "외관 상태는 판매자 입력값"
+    ],
+    "eco_line_ko": "재사용 시 신규 생산 대비 약 70.6kg CO2e 감축."
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "sha256": "56caf6138493b9371a210750080ffd953e1c13dd5ed524c1e2cfef3e0d1b61d5",
+    "note_ko": "발급 시점 내용으로 계산한 값. 내용이 바뀌면 불일치"
+  }
+}

@@ -1,0 +1,796 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "device-hw-test/v1",
+  "title": "Device hardware test report",
+  "description": "기기 하드웨어 테스트 결과. 필드는 추가만 하고, 이름 변경/삭제는 schema 버전(v2)을 올립니다.",
+  "type": "object",
+  "required": [
+    "schema",
+    "testedAt",
+    "results",
+    "summary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "device-hw-test/v1"
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "테스트 1회(페이지 로드 1회)당 고유 ID"
+    },
+    "testedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tester": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "page": {
+      "type": "string"
+    },
+    "device": {
+      "type": "object",
+      "properties": {
+        "declared": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "사용자가 드롭다운에서 고른 기종(검증되지 않은 값). 선택 안 했으면 null",
+          "properties": {
+            "brand": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "enum": [
+                "dropdown",
+                "typed",
+                "user-unknown"
+              ]
+            },
+            "matchesUserAgent": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "접속한 기기(UA)와 모순되지 않는지. 알 수 없으면 null"
+            }
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "required": [
+        "camera",
+        "microphone",
+        "speaker",
+        "touch",
+        "gyro"
+      ],
+      "properties": {
+        "camera": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/item"
+            }
+          ],
+          "properties": {
+            "stream": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "photo": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "resolution": {
+                  "type": "string"
+                },
+                "megapixels": {
+                  "type": "number"
+                },
+                "localMetrics": {
+                  "type": "object",
+                  "properties": {
+                    "meanBrightness": {
+                      "type": "number"
+                    },
+                    "contrastStd": {
+                      "type": "number"
+                    },
+                    "laplacianVariance": {
+                      "type": "number",
+                      "description": "클수록 선명"
+                    },
+                    "darkClipPct": {
+                      "type": "number"
+                    },
+                    "brightClipPct": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "localPass": {
+                  "type": "boolean"
+                },
+                "gemini": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "sharpness": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "exposure": {
+                      "enum": [
+                        "underexposed",
+                        "ok",
+                        "overexposed"
+                      ]
+                    },
+                    "noise": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "color_accuracy": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "motion_blur": {
+                      "type": "boolean"
+                    },
+                    "lens_obstruction": {
+                      "type": "boolean"
+                    },
+                    "overall_pass": {
+                      "type": "boolean"
+                    },
+                    "issues": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "summary_ko": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "imageFile": {
+                  "type": "string",
+                  "description": "서버가 저장한 사진 파일명 (results/ 안, JSON 과 같은 이름의 .jpg)"
+                },
+                "exif": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "사진 파일의 EXIF. 브라우저/앱이 제거하면 null",
+                  "properties": {
+                    "make": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "model": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "lens_model": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "f_number": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "exposure_time_s": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "초 단위 (1/60s = 0.0166667)"
+                    },
+                    "iso": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "focal_length_mm": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "focal_length_35mm_equiv": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    }
+                  }
+                },
+                "exifStatus": {
+                  "enum": [
+                    "ok",
+                    "no_exif_segment",
+                    "exif_without_camera_tags",
+                    "exif_unreadable",
+                    "not_jpeg",
+                    "unreadable"
+                  ],
+                  "description": "ok=읽음 / no_exif_segment=EXIF 자체가 없음 / exif_without_camera_tags=EXIF 틀만 있고 카메라 정보 태그가 없음 / exif_unreadable=있는데 못 읽음"
+                },
+                "jpegSegments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "JPEG 헤더 세그먼트 목록(진단용)"
+                },
+                "exifTagIds": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "EXIF 안에 들어 있는 태그 번호 목록(진단용, 값은 없음)",
+                  "properties": {
+                    "ifd0": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "exif": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "declaredAtCapture": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "사진을 올릴 당시 선택돼 있던 기종(Gemini 에 전달된 값)",
+                  "properties": {
+                    "brand": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "model": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "verdictBasis": {
+              "enum": [
+                "gemini",
+                "local-heuristic"
+              ]
+            },
+            "profile": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "Gemini 가 만든 카메라 성향 프로필 (중고폰을 카메라로 고르는 사람용). 서버 모드에서만 채워지고 실패하면 null. 항목 정의는 prompts/camera-profile.system.md",
+              "properties": {
+                "grade": {
+                  "enum": [
+                    "S",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    null
+                  ]
+                },
+                "summary_ko": {
+                  "type": "string"
+                },
+                "scores": {
+                  "type": "object",
+                  "properties": {
+                    "sharpness": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "noise_cleanliness": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "dynamic_range": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "exposure_accuracy": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "color_accuracy": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "low_light_potential": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    }
+                  }
+                },
+                "look": {
+                  "type": "object",
+                  "properties": {
+                    "style_tags": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "clean_modern",
+                          "vintage",
+                          "film_like",
+                          "digicam_ccd",
+                          "soft_dreamy",
+                          "high_contrast",
+                          "muted",
+                          "vivid",
+                          "warm_tone",
+                          "cool_tone",
+                          "grainy",
+                          "crisp_digital",
+                          "hdr_processed"
+                        ]
+                      }
+                    },
+                    "vintage_score": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "warmth": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": -5,
+                      "maximum": 5
+                    },
+                    "saturation": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "contrast": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "grain": {
+                      "enum": [
+                        "none",
+                        "subtle",
+                        "moderate",
+                        "heavy",
+                        null
+                      ]
+                    },
+                    "softness": {
+                      "enum": [
+                        "crisp",
+                        "neutral",
+                        "soft",
+                        null
+                      ]
+                    },
+                    "vignetting": {
+                      "enum": [
+                        "none",
+                        "slight",
+                        "strong",
+                        null
+                      ]
+                    },
+                    "feel_ko": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "optics": {
+                  "type": "object",
+                  "properties": {
+                    "focal_length_35mm_equiv": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "aperture_f": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "iso": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "shutter_s": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "lens_label": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "depth_of_field": {
+                      "enum": [
+                        "shallow",
+                        "moderate",
+                        "deep",
+                        "unknown"
+                      ]
+                    }
+                  }
+                },
+                "defects": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "none",
+                      "lens_smudge",
+                      "motion_blur",
+                      "out_of_focus",
+                      "overexposed",
+                      "underexposed",
+                      "heavy_noise",
+                      "color_cast",
+                      "soft_corners",
+                      "purple_fringing",
+                      "banding",
+                      "over_smoothing",
+                      "oversharpening"
+                    ]
+                  }
+                },
+                "best_for": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "use"
+                    ],
+                    "properties": {
+                      "use": {
+                        "enum": [
+                          "street_snap",
+                          "portrait",
+                          "landscape",
+                          "night_lowlight",
+                          "closeup_macro",
+                          "document_text",
+                          "vlog_video",
+                          "travel",
+                          "pet_kids",
+                          "food",
+                          "social_feed",
+                          "film_look_project"
+                        ]
+                      },
+                      "reason_ko": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "not_ideal_for": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "street_snap",
+                      "portrait",
+                      "landscape",
+                      "night_lowlight",
+                      "closeup_macro",
+                      "document_text",
+                      "vlog_video",
+                      "travel",
+                      "pet_kids",
+                      "food",
+                      "social_feed",
+                      "film_look_project"
+                    ]
+                  }
+                },
+                "confidence": {
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high"
+                  ]
+                },
+                "caveats_ko": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "checks": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "서버가 Gemini 결과를 EXIF·측정값·선택 기종과 대조한 결과. warnings 가 있으면 profile.confidence 는 low",
+              "properties": {
+                "exif_present": {
+                  "type": "boolean"
+                },
+                "optics_source": {
+                  "enum": [
+                    "exif",
+                    "none"
+                  ]
+                },
+                "declared_device_given": {
+                  "type": "boolean"
+                },
+                "declared_matches_user_agent": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "exposure_consistent_with_local": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "sharpness_consistent_with_local": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "microphone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/item"
+            }
+          ],
+          "properties": {
+            "peakDb": {
+              "type": "number"
+            },
+            "avgDb": {
+              "type": "number"
+            },
+            "noiseFloorDb": {
+              "type": "number"
+            },
+            "sampleRate": {
+              "type": "number"
+            }
+          }
+        },
+        "speaker": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/item"
+            }
+          ],
+          "properties": {
+            "userConfirmed": {
+              "type": "boolean"
+            },
+            "baseLatencyMs": {
+              "type": "number"
+            },
+            "outputLatencyMs": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        },
+        "touch": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/item"
+            }
+          ],
+          "properties": {
+            "cellsHit": {
+              "type": "integer"
+            },
+            "cellsTotal": {
+              "type": "integer"
+            },
+            "maxSimultaneousTouches": {
+              "type": "integer"
+            },
+            "multiTouchDetected": {
+              "type": "boolean"
+            },
+            "pointerTypes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "gyro": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/item"
+            }
+          ],
+          "properties": {
+            "orientationEvents": {
+              "type": "integer"
+            },
+            "motionEvents": {
+              "type": "integer"
+            },
+            "maxOrientationRangeDeg": {
+              "type": "number"
+            },
+            "maxAccelRange": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "completed",
+        "allPassed"
+      ],
+      "properties": {
+        "camera": {
+          "$ref": "#/$defs/status"
+        },
+        "microphone": {
+          "$ref": "#/$defs/status"
+        },
+        "speaker": {
+          "$ref": "#/$defs/status"
+        },
+        "touch": {
+          "$ref": "#/$defs/status"
+        },
+        "gyro": {
+          "$ref": "#/$defs/status"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "5개 항목 모두 pending 이 아님"
+        },
+        "allPassed": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": [
+        "pass",
+        "fail",
+        "unsupported",
+        "pending"
+      ]
+    },
+    "item": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "error": {
+          "type": "string",
+          "description": "fail/unsupported 일 때 원인"
+        },
+        "errorName": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "qa": {
+      "type": "OBJECT",
+      "properties": {
+        "sharpness": { "type": "INTEGER" },
+        "exposure": { "type": "STRING", "enum": ["underexposed", "ok", "overexposed"] },
+        "noise": { "type": "INTEGER" },
+        "color_accuracy": { "type": "INTEGER" },
+        "motion_blur": { "type": "BOOLEAN" },
+        "lens_obstruction": { "type": "BOOLEAN" },
+        "overall_pass": { "type": "BOOLEAN" },
+        "issues": { "type": "ARRAY", "items": { "type": "STRING" } },
+        "summary_ko": { "type": "STRING" }
+      },
+      "required": ["sharpness", "exposure", "noise", "color_accuracy", "motion_blur", "lens_obstruction", "overall_pass", "issues", "summary_ko"]
+    },
+    "profile": {
+      "type": "OBJECT",
+      "properties": {
+        "grade": { "type": "STRING", "enum": ["S", "A", "B", "C", "D"] },
+        "summary_ko": { "type": "STRING" },
+        "scores": {
+          "type": "OBJECT",
+          "properties": {
+            "sharpness": { "type": "INTEGER" },
+            "noise_cleanliness": { "type": "INTEGER" },
+            "dynamic_range": { "type": "INTEGER" },
+            "exposure_accuracy": { "type": "INTEGER" },
+            "color_accuracy": { "type": "INTEGER" },
+            "low_light_potential": { "type": "INTEGER", "nullable": true }
+          },
+          "required": ["sharpness", "noise_cleanliness", "dynamic_range", "exposure_accuracy", "color_accuracy", "low_light_potential"]
+        },
+        "look": {
+          "type": "OBJECT",
+          "properties": {
+            "style_tags": {
+              "type": "ARRAY",
+              "items": {
+                "type": "STRING",
+                "enum": ["clean_modern", "vintage", "film_like", "digicam_ccd", "soft_dreamy", "high_contrast", "muted", "vivid", "warm_tone", "cool_tone", "grainy", "crisp_digital", "hdr_processed"]
+              }
+            },
+            "vintage_score": { "type": "INTEGER" },
+            "warmth": { "type": "INTEGER" },
+            "saturation": { "type": "INTEGER" },
+            "contrast": { "type": "INTEGER" },
+            "grain": { "type": "STRING", "enum": ["none", "subtle", "moderate", "heavy"] },
+            "softness": { "type": "STRING", "enum": ["crisp", "neutral", "soft"] },
+            "vignetting": { "type": "STRING", "enum": ["none", "slight", "strong"] },
+            "feel_ko": { "type": "STRING" }
+          },
+          "required": ["style_tags", "vintage_score", "warmth", "saturation", "contrast", "grain", "softness", "vignetting", "feel_ko"]
+        },
+        "optics": {
+          "type": "OBJECT",
+          "properties": {
+            "focal_length_35mm_equiv": { "type": "NUMBER", "nullable": true },
+            "aperture_f": { "type": "NUMBER", "nullable": true },
+            "iso": { "type": "NUMBER", "nullable": true },
+            "shutter_s": { "type": "NUMBER", "nullable": true },
+            "lens_label": { "type": "STRING", "nullable": true },
+            "depth_of_field": { "type": "STRING", "enum": ["shallow", "moderate", "deep", "unknown"] }
+          },
+          "required": ["focal_length_35mm_equiv", "aperture_f", "iso", "shutter_s", "lens_label", "depth_of_field"]
+        },
+        "defects": {
+          "type": "ARRAY",
+          "items": {
+            "type": "STRING",
+            "enum": ["none", "lens_smudge", "motion_blur", "out_of_focus", "overexposed", "underexposed", "heavy_noise", "color_cast", "soft_corners", "purple_fringing", "banding", "over_smoothing", "oversharpening"]
+          }
+        },
+        "best_for": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "use": {
+                "type": "STRING",
+                "enum": ["street_snap", "portrait", "landscape", "night_lowlight", "closeup_macro", "document_text", "vlog_video", "travel", "pet_kids", "food", "social_feed", "film_look_project"]
+              },
+              "reason_ko": { "type": "STRING" }
+            },
+            "required": ["use", "reason_ko"]
+          }
+        },
+        "not_ideal_for": {
+          "type": "ARRAY",
+          "items": {
+            "type": "STRING",
+            "enum": ["street_snap", "portrait", "landscape", "night_lowlight", "closeup_macro", "document_text", "vlog_video", "travel", "pet_kids", "food", "social_feed", "film_look_project"]
+          }
+        },
+        "confidence": { "type": "STRING", "enum": ["low", "medium", "high"] },
+        "caveats_ko": { "type": "ARRAY", "items": { "type": "STRING" } }
+      },
+      "required": ["grade", "summary_ko", "scores", "look", "optics", "defects", "best_for", "not_ideal_for", "confidence", "caveats_ko"]
+    }
+  },
+  "required": ["qa", "profile"]
+}

@@ -1,0 +1,32 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "condition": {
+      "type": "OBJECT",
+      "properties": {
+        "code": { "type": "STRING", "enum": ["clean", "minor_wear", "visible_wear", "burn_in", "rear_damage", "display_fault", "damage_or_fault", "unknown"] },
+        "confidence": { "type": "STRING", "enum": ["high", "medium", "low"] },
+        "damages": { "type": "ARRAY", "items": { "type": "STRING" } },
+        "evidence_ko": { "type": "STRING" },
+        "caveats_ko": { "type": "ARRAY", "items": { "type": "STRING" } }
+      },
+      "required": ["code", "confidence", "damages", "evidence_ko", "caveats_ko"],
+      "propertyOrdering": ["code", "confidence", "damages", "evidence_ko", "caveats_ko"]
+    },
+    "battery": {
+      "type": "OBJECT",
+      "properties": {
+        "screenType": { "type": "STRING", "enum": ["health", "usage", "other", "none"] },
+        "isBatteryScreen": { "type": "BOOLEAN" },
+        "healthPct": { "type": "INTEGER", "nullable": true },
+        "statusLabel": { "type": "STRING", "nullable": true },
+        "cycleCount": { "type": "INTEGER", "nullable": true },
+        "osHint": { "type": "STRING", "enum": ["ios", "android", "unknown"] }
+      },
+      "required": ["screenType", "isBatteryScreen", "healthPct", "statusLabel", "cycleCount", "osHint"],
+      "propertyOrdering": ["screenType", "isBatteryScreen", "healthPct", "statusLabel", "cycleCount", "osHint"]
+    }
+  },
+  "required": ["condition", "battery"],
+  "propertyOrdering": ["condition", "battery"]
+}

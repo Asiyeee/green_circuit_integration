@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>중고폰 성능 점검</title>
+<link rel="stylesheet" href="assets/ui.css">
+<style>
+  /* 점검 화면 전용 (공통 토큰은 assets/ui.css) */
+  .test .section-head{margin-bottom:6px}
+  .test .section-sub{margin-bottom:4px}
+  .detail{font-size:13px;color:var(--ink-2);margin-top:10px;white-space:pre-wrap;word-break:break-word}
+  .detail:empty{display:none}
+  video,img.thumb{width:100%;border-radius:12px;margin-top:12px;display:none;background:#000;aspect-ratio:4/3;object-fit:cover}
+  .bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-top:14px}
+  .bar>i{display:block;height:100%;width:0;background:var(--primary);transition:width .08s}
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;touch-action:none;user-select:none;-webkit-user-select:none}
+  .cell{height:64px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;font-weight:600;transition:background .1s}
+  .cell.hit{background:var(--primary);color:var(--on-primary)}
+  #spk-confirm{display:none;gap:8px;margin-top:8px}
+  #spk-confirm .btn{flex:1}
+  .progress{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);font-weight:600}
+  .progress-track{width:64px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+  .progress-track i{display:block;height:100%;width:0;background:var(--primary);transition:width .2s}
+  pre{background:var(--surface-2);border-radius:10px;padding:12px;font:12px/1.5 var(--mono);max-height:320px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin:12px 0 0}
+  #insecure,#dev-warn{display:none;margin-bottom:12px}
+  #dev-warn{margin:10px 0 0}
+  .out-link{margin-top:12px;width:100%}
+  /* 카메라 프로필 */
+  #profile{margin-top:16px;display:none;border-top:1px solid var(--line);padding-top:16px}
+  .pf-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+  .grade{flex:none;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;background:var(--surface-2);color:var(--ink)}
+  .grade.S,.grade.A{background:var(--primary-weak);color:var(--primary)}
+  .grade.B{background:var(--surface-2);color:var(--ink)}
+  .grade.C{background:var(--warn-weak);color:var(--warn)}
+  .grade.D{background:var(--danger-weak);color:var(--danger)}
+  .pf-sum{font-size:14px;flex:1;color:var(--ink)}
+  .pf-h{font-size:13px;font-weight:600;color:var(--ink-3);margin:16px 0 6px}
+  .sc{display:grid;grid-template-columns:88px 1fr 24px;gap:10px;align-items:center;font-size:13px;margin:5px 0;color:var(--ink-2)}
+  .sc .m{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}.sc .m i{display:block;height:100%;background:var(--primary)}
+  .sc .v{text-align:right;color:var(--ink);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);font-size:12.5px;font-weight:600}
+  .chip.bad{background:var(--danger-weak);color:var(--danger)}.chip.good{background:var(--primary-weak);color:var(--primary)}.chip.vint{background:var(--surface-2);color:var(--ink)}
+  .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px}.kv span{color:var(--ink-3)}
+  .pf-note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+  .pf-use{font-size:13.5px;margin:4px 0;color:var(--ink-2)}.pf-use b{font-weight:600;color:var(--ink)}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="appbar-in">
+  <span class="brand"><span class="brand-mark"></span>중고폰 성능 점검</span>
+  <span class="progress"><span class="progress-track"><i id="progress-bar"></i></span><span id="progress-text">0/5</span></span>
+</div></header>
+
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">앱 설치 없이 3분</p>
+    <h1 class="title">5가지 항목을<br>순서대로 점검해 주세요</h1>
+    <p class="lead">결과는 판매 보증서에 그대로 들어가요. 권한을 물으면 모두 허용해 주세요.</p>
+  </div>
+
+  <div class="notice danger" id="insecure">보안 연결(HTTPS)이 아니라서 카메라·마이크·센서를 쓸 수 없어요. 안내받은 주소로 다시 접속해 주세요.</div>
+
+  <section class="section">
+    <h2 class="section-title">점검할 기기</h2>
+    <p class="section-sub">지금 들고 있는 폰을 골라 주세요. 보증서에 기종으로 표시돼요.</p>
+    <div class="field" style="margin-top:16px">
+      <label class="field-label" for="dev-brand">제조사</label>
+      <select class="select" id="dev-brand"></select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="dev-model">모델</label>
+      <select class="select" id="dev-model"></select>
+      <input class="input" type="text" id="dev-custom" placeholder="모델명 직접 입력 (예: Galaxy S26)" style="display:none;margin-top:8px">
+    </div>
+    <div class="notice" id="dev-warn"></div>
+    <div class="field">
+      <label class="field-label" for="tester">이름 <span class="muted">(선택)</span></label>
+      <input class="input" type="text" id="tester" placeholder="결과 파일 이름에 들어가요">
+    </div>
+  </section>
+
+  <section class="section test">
+    <div class="section-head">
+      <div><div class="step-no">01</div><h2 class="section-title">카메라</h2></div>
+      <span class="status" id="b-camera">대기</span>
+    </div>
+    <p class="section-sub">밝은 곳에서 글씨가 있는 종이나 물건을 가까이 찍어 주세요. 사진으로 화질을 평가해요.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="cam-photo">사진 찍기</button>
+    </div>
+    <input type="file" id="cam-file" accept="image/*" capture="environment" hidden>
+    <video id="cam-video" playsinline muted></video>
+    <img id="cam-thumb" class="thumb" alt="">
+    <div class="detail" id="d-camera"></div>
+    <div id="profile"></div>
+  </section>
+
+  <section class="section test">
+    <div class="section-head">
+      <div><div class="step-no">02</div><h2 class="section-title">마이크</h2></div>
+      <span class="status" id="b-microphone">대기</span>
+    </div>
+    <p class="section-sub">시작을 누르고 5초 동안 말하거나 박수를 쳐 주세요.</p>
+    <div class="btn-row"><button class="btn btn-primary" id="mic-start">마이크 점검 시작</button></div>
+    <div class="bar"><i id="mic-bar"></i></div>
+    <div class="detail" id="d-microphone"></div>
+  </section>
+
+  <section class="section test">
+    <div class="section-head">
+      <div><div class="step-no">03</div><h2 class="section-title">스피커</h2></div>
+      <span class="status" id="b-speaker">대기</span>
+    </div>
+    <p class="section-sub">점점 높아지는 소리가 나와요. 무음 모드를 끄고 볼륨을 올려 주세요.</p>
+    <div class="btn-row"><button class="btn btn-primary" id="spk-play">소리 재생</button></div>
+    <div id="spk-confirm">
+      <button class="btn btn-good" id="spk-yes">들렸어요</button><button class="btn btn-danger" id="spk-no">안 들렸어요</button>
+    </div>
+    <div class="detail" id="d-speaker"></div>
+  </section>
+
+  <section class="section test">
+    <div class="section-head">
+      <div><div class="step-no">04</div><h2 class="section-title">터치</h2></div>
+      <span class="status" id="b-touch">대기</span>
+    </div>
+    <p class="section-sub">12칸을 모두 눌러 주세요. 두 손가락으로 함께 누르면 멀티터치도 확인돼요.</p>
+    <div class="pad" id="pad"></div>
+    <div class="btn-row"><button class="btn btn-text" id="touch-reset">다시 하기</button></div>
+    <div class="detail" id="d-touch"></div>
+  </section>
+
+  <section class="section test">
+    <div class="section-head">
+      <div><div class="step-no">05</div><h2 class="section-title">자이로·가속도 센서</h2></div>
+      <span class="status" id="b-gyro">대기</span>
+    </div>
+    <p class="section-sub">시작을 누르고 6초 동안 폰을 이리저리 기울이고 돌려 주세요.</p>
+    <div class="btn-row"><button class="btn btn-primary" id="gyro-start">센서 점검 시작</button></div>
+    <div class="detail" id="d-gyro"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">점검 결과</h2>
+    <p class="section-sub">5가지를 모두 마치면 자동으로 저장돼요.</p>
+    <div class="detail" id="d-out"></div>
+  </section>
+
+  <section class="section">
+    <details>
+      <summary>개발자 정보</summary>
+      <div id="server-card" style="margin-top:14px">
+        <div class="section-head" style="margin-bottom:4px"><span class="small">서버 연결</span><span class="status" id="b-server">확인 중</span></div>
+        <div class="detail" id="d-server"></div>
+      </div>
+      <div id="legacy-settings" style="display:none;margin-top:14px">
+        <div class="field"><label class="field-label" for="gkey">Gemini API 키 (사진 분석용, 결과에는 저장 안 됨)</label><input class="input" type="password" id="gkey" placeholder="AIza..."></div>
+        <div class="field"><label class="field-label" for="gmodel">Gemini 모델</label><input class="input" type="text" id="gmodel" value="gemini-flash-lite-latest"></div>
+        <div class="field"><label class="field-label" for="endpoint">결과 전송 주소 (POST, 선택)</label><input class="input" type="url" id="endpoint" placeholder="https://example.com/api/device-test"></div>
+      </div>
+      <pre id="json">{}</pre>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="dl">JSON 받기</button>
+        <button class="btn btn-secondary" id="copy">복사</button>
+        <button class="btn btn-secondary" id="send">서버로 보내기</button>
+      </div>
+    </details>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const results = {};
+const sessionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(16)+Math.random().toString(16).slice(2,10));
+
+/* ---------- 서버 API (npm run share 로 띄운 서버가 있을 때) ---------- */
+const API = {server:false, geminiEnabled:false, model:null, token:null};
+(function(){
+  let t = new URLSearchParams(location.search).get('t');
+  try{ if(t) sessionStorage.setItem('t',t); else t = sessionStorage.getItem('t'); }catch{}
+  API.token = t;
+})();
+function api(path, opts={}){
+  return fetch(path, {...opts, headers:{'Content-Type':'application/json','x-access-token':API.token||'', ...(opts.headers||{})}});
+}
+const LABELS = {pending:'대기',pass:'통과',fail:'실패',unsupported:'미지원',skipped:'건너뜀'};
+const AC = window.AudioContext || window.webkitAudioContext;
+
+/* ---------- 공통 ---------- */
+function setBadge(id, status){ const b=$('#b-'+id); b.textContent=LABELS[status]; b.className='status '+status; updateProgress(); }
+function updateProgress(){
+  const done=['camera','microphone','speaker','touch','gyro'].filter(k=>results[k]&&results[k].status&&results[k].status!=='pending').length;
+  $('#progress-text').textContent=`${done}/5`; $('#progress-bar').style.width=`${done*20}%`;
+}
+function setDetail(id, text){ $('#d-'+id).textContent = text; }
+function record(id, status, data){ results[id] = {status, ...data}; setBadge(id, status); refreshJson(); maybeAutoSend(); }
+const round = (n,d=2)=>Math.round(n*10**d)/10**d;
+const errInfo = e => ({errorName:e?.name||'Error', error:e?.message||String(e)});
+
+const PHONES = {"Apple": ["iPhone 8", "iPhone 8 Plus", "iPhone X", "iPhone XR", "iPhone XS", "iPhone XS Max", "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max", "iPhone SE (2세대)", "iPhone SE (3세대)", "iPhone 12 mini", "iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max", "iPhone 13 mini", "iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max", "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max", "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max", "iPhone 16e", "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max", "iPhone 17", "iPhone Air", "iPhone 17 Pro", "iPhone 17 Pro Max"], "Samsung": ["Galaxy S8", "Galaxy S8+", "Galaxy S9", "Galaxy S9+", "Galaxy S10e", "Galaxy S10", "Galaxy S10+", "Galaxy S20", "Galaxy S20+", "Galaxy S20 Ultra", "Galaxy S20 FE", "Galaxy S21", "Galaxy S21+", "Galaxy S21 Ultra", "Galaxy S21 FE", "Galaxy S22", "Galaxy S22+", "Galaxy S22 Ultra", "Galaxy S23", "Galaxy S23+", "Galaxy S23 Ultra", "Galaxy S23 FE", "Galaxy S24", "Galaxy S24+", "Galaxy S24 Ultra", "Galaxy S24 FE", "Galaxy S25", "Galaxy S25+", "Galaxy S25 Ultra", "Galaxy S25 Edge", "Galaxy Note 8", "Galaxy Note 9", "Galaxy Note 10", "Galaxy Note 10+", "Galaxy Note 20", "Galaxy Note 20 Ultra", "Galaxy Z Flip", "Galaxy Z Flip 3", "Galaxy Z Flip 4", "Galaxy Z Flip 5", "Galaxy Z Flip 6", "Galaxy Z Flip 7", "Galaxy Z Fold 2", "Galaxy Z Fold 3", "Galaxy Z Fold 4", "Galaxy Z Fold 5", "Galaxy Z Fold 6", "Galaxy Z Fold 7", "Galaxy A15", "Galaxy A25", "Galaxy A35", "Galaxy A55", "Galaxy A34", "Galaxy A54", "Galaxy A33", "Galaxy A53", "Galaxy A52", "Galaxy A32", "Galaxy A71", "Galaxy A72", "Galaxy A73"], "Google Pixel": ["Pixel 3", "Pixel 3 XL", "Pixel 3a", "Pixel 3a XL", "Pixel 4", "Pixel 4 XL", "Pixel 4a", "Pixel 4a (5G)", "Pixel 5", "Pixel 5a", "Pixel 6", "Pixel 6 Pro", "Pixel 6a", "Pixel 7", "Pixel 7 Pro", "Pixel 7a", "Pixel 8", "Pixel 8 Pro", "Pixel 8a", "Pixel 9", "Pixel 9 Pro", "Pixel 9 Pro XL", "Pixel 9 Pro Fold", "Pixel 9a", "Pixel 10", "Pixel 10 Pro", "Pixel 10 Pro XL", "Pixel 10 Pro Fold"], "Xiaomi / Redmi / POCO": ["Mi 9", "Mi 10", "Mi 10T Pro", "Mi 11", "Mi 11 Ultra", "Xiaomi 12", "Xiaomi 12 Pro", "Xiaomi 13", "Xiaomi 13 Pro", "Xiaomi 13 Ultra", "Xiaomi 14", "Xiaomi 14 Pro", "Xiaomi 14 Ultra", "Xiaomi 15", "Xiaomi 15 Ultra", "Redmi Note 10", "Redmi Note 11", "Redmi Note 12", "Redmi Note 12 Pro", "Redmi Note 13", "Redmi Note 13 Pro", "Redmi Note 14", "Redmi Note 14 Pro", "POCO F3", "POCO F5", "POCO F6", "POCO X6 Pro"], "OnePlus": ["OnePlus 6", "OnePlus 6T", "OnePlus 7", "OnePlus 7 Pro", "OnePlus 7T", "OnePlus 8", "OnePlus 8 Pro", "OnePlus 9", "OnePlus 9 Pro", "OnePlus 10 Pro", "OnePlus 11", "OnePlus 12", "OnePlus 13", "OnePlus Nord", "OnePlus Nord 2", "OnePlus Nord 3"], "Sony": ["Xperia XZ2", "Xperia XZ3", "Xperia 1", "Xperia 5", "Xperia 1 II", "Xperia 5 II", "Xperia 1 III", "Xperia 5 III", "Xperia 1 IV", "Xperia 5 IV", "Xperia 1 V", "Xperia 5 V", "Xperia 1 VI", "Xperia 10 IV", "Xperia 10 V"], "LG": ["G6", "G7 ThinQ", "G8 ThinQ", "V20", "V30", "V35 ThinQ", "V40 ThinQ", "V50 ThinQ", "V60 ThinQ", "Velvet", "Wing"], "Motorola": ["Moto G Power", "Moto G Stylus", "Moto G84", "Moto G54", "Moto Edge 30", "Moto Edge 40", "Moto Edge 50", "Razr 40", "Razr 50"], "Huawei / Honor": ["Huawei P20 Pro", "Huawei P30 Pro", "Huawei P40 Pro", "Huawei P60 Pro", "Huawei Mate 20 Pro", "Huawei Mate 30 Pro", "Huawei Mate 40 Pro", "Huawei Mate 50 Pro", "Huawei Pura 70 Pro", "Honor Magic 5 Pro", "Honor Magic 6 Pro"], "Oppo / Vivo": ["Oppo Find X2 Pro", "Oppo Find X3 Pro", "Oppo Find X5 Pro", "Oppo Find X6 Pro", "Oppo Find X7 Ultra", "Oppo Find X8", "Oppo Reno 8", "Oppo Reno 10", "Oppo Reno 11", "Vivo X60 Pro", "Vivo X70 Pro", "Vivo X80 Pro", "Vivo X90 Pro", "Vivo X100 Pro", "Vivo X200 Pro"], "기타 제조사": ["Nothing Phone (1)", "Nothing Phone (2)", "Nothing Phone (2a)", "Nothing Phone (3)", "Asus Zenfone 9", "Asus Zenfone 10", "Asus Zenfone 11 Ultra", "Asus ROG Phone 8", "Fairphone 4", "Fairphone 5"]};
+const OTHER = '__other__', UNKNOWN = '__unknown__';
+function uaBrand(){ const ua=navigator.userAgent; if(/iPhone|iPad/.test(ua)) return 'Apple'; if(/Android/.test(ua)) return 'Android'; return null; }
+function declaredDevice(){
+  const b=$('#dev-brand')?.value, m=$('#dev-model')?.value;
+  if(!b) return null;
+  if(b===UNKNOWN) return {brand:null, model:null, source:'user-unknown', matchesUserAgent:null};
+  let brand=b, model=m, source='dropdown';
+  if(b===OTHER || m===OTHER){ model=($('#dev-custom').value||'').trim()||null; source='typed'; if(b===OTHER) brand=null; }
+  if(!model && b!==OTHER) return null;
+  const u=uaBrand();
+  const matches = u==='Apple' ? (brand===null? null : brand==='Apple') : u==='Android' ? (brand===null? null : brand!=='Apple') : null;
+  return {brand, model, source, matchesUserAgent:matches};
+}
+function initDevicePicker(){
+  const bs=$('#dev-brand'), ms=$('#dev-model'), cu=$('#dev-custom'), warn=$('#dev-warn');
+  const opt=(v,t)=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; return o; };
+  bs.append(opt('','제조사 선택...'));
+  Object.keys(PHONES).forEach(b=>bs.append(opt(b,b)));
+  bs.append(opt(OTHER,'목록에 없음 (직접 입력)'), opt(UNKNOWN,'모르겠음'));
+  const fillModels=()=>{
+    ms.textContent=''; const b=bs.value;
+    if(PHONES[b]){ ms.disabled=false; ms.append(opt('','모델 선택...')); PHONES[b].forEach(m=>ms.append(opt(m,m))); ms.append(opt(OTHER,'목록에 없음 (직접 입력)')); }
+    else { ms.disabled=true; ms.append(opt('', b? '-' : '먼저 제조사를 고르세요')); }
+    cu.style.display = (b===OTHER) ? 'block' : 'none';
+  };
+  const refresh=()=>{
+    cu.style.display = (bs.value===OTHER || ms.value===OTHER) ? 'block' : 'none';
+    const d=declaredDevice();
+    warn.style.display='none';
+    if(d && d.matchesUserAgent===false){ warn.textContent='선택한 제조사가 지금 접속한 폰과 달라 보여요. 맞는지 확인해 주세요.'; warn.style.display='block'; }
+    try{ localStorage.setItem('devPick', JSON.stringify({b:bs.value, m:ms.value, c:cu.value})); }catch{}
+    refreshJson();
+  };
+  bs.onchange=()=>{ fillModels(); refresh(); }; ms.onchange=refresh; cu.oninput=refresh;
+  // 이전 선택 복원 → 없으면 iPhone 이면 Apple 미리 선택
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem('devPick')||'null'); }catch{}
+  if(saved && (saved.b===OTHER||saved.b===UNKNOWN||PHONES[saved.b])){ bs.value=saved.b; fillModels(); if(saved.m && (saved.m===OTHER||(PHONES[saved.b]||[]).includes(saved.m))) ms.value=saved.m; cu.value=saved.c||''; }
+  else { if(uaBrand()==='Apple') bs.value='Apple'; fillModels(); }
+  refresh();
+}
+function deviceInfo(){
+  return {
+    userAgent:navigator.userAgent, platform:navigator.platform, language:navigator.language,
+    declared:declaredDevice(),   // 사용자가 드롭다운으로 고른 기종(검증되지 않은 값)
+    secureContext:window.isSecureContext,
+    screen:{width:screen.width,height:screen.height,innerWidth:innerWidth,innerHeight:innerHeight,devicePixelRatio:devicePixelRatio,orientation:screen.orientation?.type??null},
+    maxTouchPoints:navigator.maxTouchPoints, hardwareConcurrency:navigator.hardwareConcurrency??null,
+    deviceMemoryGB:navigator.deviceMemory??null, connection:navigator.connection?.effectiveType??null
+  };
+}
+const KEYS = ['camera','microphone','speaker','touch','gyro'];
+function buildReport(){
+  const summary = {};
+  KEYS.forEach(k => summary[k] = results[k]?.status || 'pending');
+  return {
+    schema:'device-hw-test/v1',
+    sessionId,
+    testedAt:new Date().toISOString(),
+    tester:$('#tester').value.trim()||null,
+    page:location.origin+location.pathname,
+    device:deviceInfo(),
+    results:Object.fromEntries(KEYS.map(k=>[k, results[k]||{status:'pending'}])),
+    summary:{...summary, completed:KEYS.every(k=>summary[k]!=='pending'), allPassed:KEYS.every(k=>summary[k]==='pass')}
+  };
+}
+function refreshJson(){ $('#json').textContent = JSON.stringify(buildReport(), null, 2); }
+
+if(!window.isSecureContext) $('#insecure').style.display='block';
+initDevicePicker();
+
+/* URL 파라미터 / 저장값 복원: ?gkey=&model=&endpoint=&tester= */
+(function(){
+  const p = new URLSearchParams(location.search);
+  $('#gkey').value = p.get('gkey') || sessionStorage.getItem('gkey') || '';
+  if(p.get('model')) $('#gmodel').value = p.get('model');
+  if(p.get('endpoint')) $('#endpoint').value = p.get('endpoint');
+  if(p.get('tester')) $('#tester').value = p.get('tester');
+  $('#gkey').addEventListener('change', e=>{ try{sessionStorage.setItem('gkey', e.target.value)}catch{} });
+  $('#tester').addEventListener('input', refreshJson);
+})();
+
+/* ---------- 카메라 ---------- */
+const dropIds = o => { if(!o || typeof o!=='object') return o; const c={...o}; delete c.deviceId; delete c.groupId; return c; };   // 기기 식별자는 결과 JSON 에 넣지 않음
+let camStreamInfo = null;
+let photoDataUrl = null;
+// 카메라 정보(해상도·렌즈 수 등)를 잠깐 읽고 바로 끕니다. 화면에는 띄우지 않습니다.
+// 사진을 고른 뒤 한 번만 부르며, 실패하거나 권한을 거부해도 사진으로 판정합니다 (stream: null).
+async function probeStream(){
+  if(!navigator.mediaDevices?.getUserMedia) return null;
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    const v = $('#cam-video'); v.srcObject = stream; await v.play().catch(()=>{});
+    await new Promise(r=>setTimeout(r,800));
+    const t = stream.getVideoTracks()[0];
+    let caps = null; try{ caps = JSON.parse(JSON.stringify(t.getCapabilities?.() ?? null)); }catch{}
+    let cams = null; try{ cams = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput').length; }catch{}
+    return {label:t.label, settings:dropIds(t.getSettings()), capabilities:dropIds(caps), videoInputCount:cams, videoElement:{width:v.videoWidth,height:v.videoHeight}};
+  }catch{ return null; }
+  finally{
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    $('#cam-video').srcObject=null;
+  }
+}
+// 사용자 탭 안에서 바로 열어야 iOS 가 카메라를 띄웁니다 (await 뒤에 열면 막힘)
+$('#cam-photo').onclick = () => { analysisSeq++; stopAiTimer(); $('#cam-file').click(); };
+
+async function loadBitmap(file){
+  try{ return await createImageBitmap(file,{imageOrientation:'from-image'}); }
+  catch{ return await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); }); }
+}
+function drawScaled(bmp,max){
+  const w0=bmp.width||bmp.naturalWidth, h0=bmp.height||bmp.naturalHeight;
+  const s=Math.min(1,max/Math.max(w0,h0));
+  const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(w0*s)); c.height=Math.max(1,Math.round(h0*s));
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height); return c;
+}
+function imageMetrics(c){
+  const {width:w,height:h}=c; const d=c.getContext('2d').getImageData(0,0,w,h).data; const n=w*h;
+  const g=new Float32Array(n); let sum=0, dark=0, bright=0;
+  for(let i=0;i<n;i++){ const y=0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2]; g[i]=y; sum+=y; if(y<15)dark++; if(y>240)bright++; }
+  const mean=sum/n; let sq=0; for(let i=0;i<n;i++){ const t=g[i]-mean; sq+=t*t; }
+  let ls=0, lq=0, cnt=0;
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){ const i=y*w+x; const l=g[i-1]+g[i+1]+g[i-w]+g[i+w]-4*g[i]; ls+=l; lq+=l*l; cnt++; }
+  const lm=ls/cnt;
+  return {analysisSize:`${w}x${h}`, meanBrightness:round(mean,1), contrastStd:round(Math.sqrt(sq/n),1), laplacianVariance:round(lq/cnt-lm*lm,1), darkClipPct:round(dark/n*100,1), brightClipPct:round(bright/n*100,1)};
+}
+
+/* EXIF-START */
+function parseExif(buf){
+  try{
+    const v=new DataView(buf);
+    if(v.byteLength<12 || v.getUint16(0)!==0xFFD8) return null;
+    let off=2;
+    while(off+4<v.byteLength){
+      const marker=v.getUint16(off); off+=2;
+      if(marker===0xFFDA) break;
+      if((marker&0xFF00)!==0xFF00) break;
+      const len=v.getUint16(off);
+      if(marker===0xFFE1 && v.getUint32(off+2)===0x45786966) return readTiffExif(v, off+8);
+      off+=len;
+    }
+  }catch(e){}
+  return null;
+}
+function readTiffExif(v, tiff){
+  const le=v.getUint16(tiff)===0x4949;
+  const u16=o=>v.getUint16(o,le), u32=o=>v.getUint32(o,le);
+  if(u16(tiff+2)!==42) return null;
+  const SZ={1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8,12:8};
+  function val(e){
+    const type=u16(e+2), count=u32(e+4), size=(SZ[type]||1)*count;
+    const vo = size<=4 ? e+8 : tiff+u32(e+8);
+    if(vo+size>v.byteLength || count>256) return null;
+    const many=f=>{ const a=[]; for(let i=0;i<count;i++) a.push(f(i)); return count===1?a[0]:a; };
+    if(type===2){ let s=''; for(let i=0;i<count;i++){ const c=v.getUint8(vo+i); if(!c) break; s+=String.fromCharCode(c);} return s.trim(); }
+    if(type===3) return many(i=>u16(vo+2*i));
+    if(type===4) return many(i=>u32(vo+4*i));
+    if(type===5) return many(i=>{ const d=u32(vo+8*i+4); return d? u32(vo+8*i)/d : null; });
+    if(type===10) return many(i=>{ const d=v.getInt32(vo+8*i+4,le); return d? v.getInt32(vo+8*i,le)/d : null; });
+    if(type===12) return many(i=>v.getFloat64(vo+8*i,le));
+    return null;
+  }
+  function ifd(off, want){
+    const out={}; if(off<=0 || tiff+off+2>v.byteLength) return out;
+    const n=u16(tiff+off);
+    for(let i=0;i<n;i++){
+      const e=tiff+off+2+12*i; if(e+12>v.byteLength) break;
+      const tag=u16(e);
+      if(want.includes(tag)){ try{ out[tag]=val(e); }catch(_){} }
+    }
+    return out;
+  }
+  const r=n=>(typeof n==='number'&&isFinite(n))?Math.round(n*1000)/1000:null;
+  const rn=n=>(typeof n==='number'&&isFinite(n))?Number(n.toPrecision(6)):null;   // 셔터 속도처럼 아주 작은 값용(유효숫자 기준)
+  const first=a=>Array.isArray(a)?a[0]:a;
+  const i0=ifd(u32(tiff+4),[0x010F,0x0110,0x0112,0x0131,0x8769]);
+  const ex=i0[0x8769]!=null ? ifd(first(i0[0x8769]),[0x829A,0x829D,0x8827,0x9204,0x9209,0x920A,0xA403,0xA405,0xA432,0xA433,0xA434,0x9201,0x9202,0x8833]) : {};
+  const out={
+    make:i0[0x010F]||null, model:i0[0x0110]||null, software:i0[0x0131]||null,
+    lens_make:ex[0xA433]||null, lens_model:ex[0xA434]||null,
+    f_number:r(first(ex[0x829D]) ?? (first(ex[0x9202])!=null ? Math.pow(2,first(ex[0x9202])/2) : null)),
+    exposure_time_s:rn(first(ex[0x829A]) ?? (first(ex[0x9201])!=null ? Math.pow(2,-first(ex[0x9201])) : null)),
+    iso:first(ex[0x8827]) ?? first(ex[0x8833]) ?? null,
+    focal_length_mm:r(first(ex[0x920A])), focal_length_35mm_equiv:first(ex[0xA405])??null,
+    exposure_bias_ev:r(first(ex[0x9204])), flash_fired: ex[0x9209]!=null ? (first(ex[0x9209])&1)===1 : null,
+    white_balance: ex[0xA403]!=null ? (first(ex[0xA403])===0?'auto':'manual') : null,
+    lens_spec: Array.isArray(ex[0xA432]) ? ex[0xA432].map(r) : null
+  };
+  return Object.values(out).some(x=>x!=null) ? out : null;
+}
+/* EXIF-END */
+// EXIF 안에 어떤 태그 번호가 들어 있는지(값은 읽지 않음) — 카메라 정보가 지워졌는지 구분하는 진단용
+function exifTagIds(v, tiff){
+  try{
+    const le=v.getUint16(tiff)===0x4949, u16=o=>v.getUint16(o,le), u32=o=>v.getUint32(o,le);
+    const list=off=>{ const out=[]; if(off<=0||tiff+off+2>v.byteLength) return out; const n=Math.min(u16(tiff+off),200);
+      for(let i=0;i<n;i++){ const e=tiff+off+2+12*i; if(e+12>v.byteLength) break; out.push({tag:u16(e), val:u32(e+8)}); } return out; };
+    const hex=a=>a.map(t=>'0x'+t.tag.toString(16).toUpperCase().padStart(4,'0'));
+    const i0=list(u32(tiff+4)); const ptr=i0.find(t=>t.tag===0x8769);
+    return {ifd0:hex(i0), exif: ptr?hex(list(ptr.val)):[]};
+  }catch(e){ return {ifd0:[],exif:[]}; }
+}
+// EXIF 가 왜 비었는지 알려주는 진단: 사진 파일의 JPEG 세그먼트를 훑어 Exif(APP1) 유무를 확인
+function exifDiagnose(buf){
+  try{
+    const v=new DataView(buf);
+    if(v.byteLength<4 || v.getUint16(0)!==0xFFD8) return {status:'not_jpeg', segments:[]};
+    const segs=[]; let off=2, hasExif=false, tags=null, app1Bytes=null;
+    while(off+4<v.byteLength && segs.length<24){
+      const marker=v.getUint16(off); off+=2;
+      if(marker===0xFFDA || (marker&0xFF00)!==0xFF00) break;
+      const len=v.getUint16(off);
+      let name='0x'+marker.toString(16).toUpperCase();
+      if(marker===0xFFE0) name='APP0(JFIF)';
+      else if(marker===0xFFE1){ const ex=v.getUint32(off+2)===0x45786966; name=ex?'APP1(Exif)':'APP1(other)'; if(ex){ hasExif=true; tags=exifTagIds(v,off+8); app1Bytes=len; } }
+      else if(marker===0xFFDB) name='DQT'; else if(marker===0xFFC0||marker===0xFFC2) name='SOF';
+      segs.push(name); off+=len;
+    }
+    return {status: hasExif?'has_exif_segment':'no_exif_segment', segments:segs, app1Bytes, tags};
+  }catch(e){ return {status:'unreadable', segments:[]}; }
+}
+
+const pickKeys=(o,ks)=>Object.fromEntries(ks.filter(k=>o&&o[k]!==undefined).map(k=>[k,o[k]]));
+function buildMetadata(file, local, fullW, fullH, exif){
+  const caps=camStreamInfo?.capabilities||{};
+  const dd=declaredDevice();
+  return {
+    user_declared_device: dd && dd.model ? {brand:dd.brand, model:dd.model, note:'사용자가 드롭다운에서 고른 값, 검증되지 않음'} : null,
+    device:{platform:navigator.platform, userAgent:navigator.userAgent, language:navigator.language, devicePixelRatio:devicePixelRatio, maxTouchPoints:navigator.maxTouchPoints},
+    camera_stream:{
+      label:camStreamInfo?.label||null, videoInputCount:camStreamInfo?.videoInputCount??null,
+      settings:pickKeys(camStreamInfo?.settings,['width','height','frameRate','facingMode','zoom','whiteBalanceMode']),
+      capabilities:pickKeys(caps,['width','height','frameRate','zoom','focusDistance','torch','whiteBalanceMode','exposureMode','exposureCompensation','iso'])
+    },
+    photo:{resolution:`${fullW}x${fullH}`, megapixels:round(fullW*fullH/1e6,1), fileSizeKB:round(file.size/1024,0), mime:file.type},
+    exif: exif||null,
+    local_metrics: local
+  };
+}
+
+const L={
+  style:{clean_modern:'깔끔한 모던',vintage:'빈티지',film_like:'필름 느낌',digicam_ccd:'옛날 디카(CCD)',soft_dreamy:'몽글몽글',high_contrast:'하이 콘트라스트',muted:'차분한 톤',vivid:'선명한 색감',warm_tone:'따뜻한 톤',cool_tone:'차가운 톤',grainy:'그레인',crisp_digital:'또렷한 디지털',hdr_processed:'HDR 보정감'},
+  use:{street_snap:'스트리트 스냅',portrait:'인물',landscape:'풍경',night_lowlight:'야간·저조도',closeup_macro:'접사',document_text:'문서·글씨',vlog_video:'브이로그',travel:'여행',pet_kids:'반려동물·아이',food:'음식',social_feed:'SNS 피드',film_look_project:'필름룩 작업'},
+  defect:{none:'결함 없음',lens_smudge:'렌즈 오염',motion_blur:'흔들림',out_of_focus:'초점 불량',overexposed:'노출 과다',underexposed:'노출 부족',heavy_noise:'노이즈 심함',color_cast:'색 번짐/틴트',soft_corners:'모서리 흐림',purple_fringing:'보라 프린지',banding:'밴딩',over_smoothing:'뭉개짐(과한 노이즈제거)',oversharpening:'과한 샤프닝'},
+  grain:{none:'없음',subtle:'약함',moderate:'보통',heavy:'강함'}, soft:{crisp:'또렷함',neutral:'보통',soft:'부드러움'}, vig:{none:'없음',slight:'약간',strong:'강함'},
+  dof:{shallow:'얕음(배경 흐림)',moderate:'보통',deep:'깊음(전체 선명)',unknown:'알 수 없음'}, conf:{low:'낮음',medium:'보통',high:'높음'},
+  score:{sharpness:'선명도',noise_cleanliness:'노이즈 억제',dynamic_range:'다이내믹 레인지',exposure_accuracy:'노출 정확도',color_accuracy:'색 정확도',low_light_potential:'저조도 잠재력'}
+};
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+function renderProfile(p){
+  const box=$('#profile'); box.textContent='';
+  if(!p){ box.style.display='none'; return; }
+  box.style.display='block';
+  const top=el('div','pf-top'); top.append(el('div','grade '+(p.grade||''), p.grade||'?'), el('div','pf-sum', p.summary_ko||'')); box.append(top);
+
+  box.append(el('div','pf-h','성능 점수 (10점 만점)'));
+  for(const [k,label] of Object.entries(L.score)){
+    const v=p.scores?.[k]; const row=el('div','sc'); const m=el('div','m'); const i=el('i'); i.style.width=(v==null?0:v*10)+'%'; m.append(i);
+    row.append(el('div',null,label), m, el('div','v', v==null?'-':String(v))); box.append(row);
+  }
+
+  const lk=p.look||{};
+  box.append(el('div','pf-h','느낌 · 룩'));
+  const chips=el('div','chips'); (lk.style_tags||[]).forEach(t=>chips.append(el('span','chip vint',L.style[t]||t))); box.append(chips);
+  const kv=el('div','kv');
+  const add=(k,v)=>{ kv.append(el('span',null,k), el('div',null,v)); };
+  add('빈티지 정도', lk.vintage_score==null?'-':`${lk.vintage_score}/10`);
+  add('색온도', lk.warmth==null?'-':(lk.warmth>0?`따뜻함 +${lk.warmth}`:lk.warmth<0?`차가움 ${lk.warmth}`:'중립'));
+  add('채도 / 대비', `${lk.saturation??'-'} / ${lk.contrast??'-'}`);
+  add('그레인', L.grain[lk.grain]||'-'); add('선예도 성향', L.soft[lk.softness]||'-'); add('비네팅', L.vig[lk.vignetting]||'-');
+  box.append(kv);
+  if(lk.feel_ko) box.append(el('div','pf-note',lk.feel_ko));
+
+  const o=p.optics||{};
+  box.append(el('div','pf-h','광학 정보 (메타데이터 기준)'));
+  const kv2=el('div','kv'); const add2=(k,v)=>{ kv2.append(el('span',null,k), el('div',null,v)); };
+  add2('환산 초점거리', o.focal_length_35mm_equiv!=null?`${o.focal_length_35mm_equiv}mm`:'-');
+  add2('조리개', o.aperture_f!=null?`f/${o.aperture_f}`:'-');
+  add2('ISO', o.iso!=null?String(o.iso):'-');
+  add2('셔터', o.shutter_s!=null?(o.shutter_s<1?`1/${Math.round(1/o.shutter_s)}s`:`${o.shutter_s}s`):'-');
+  add2('심도', L.dof[o.depth_of_field]||'-'); add2('렌즈', o.lens_label||'-');
+  box.append(kv2);
+
+  if((p.best_for||[]).length){
+    box.append(el('div','pf-h','잘 맞는 용도'));
+    p.best_for.forEach(b=>{ const d=el('div','pf-use'); d.append(el('b',null,(L.use[b.use]||b.use)+' — '), document.createTextNode(b.reason_ko||'')); box.append(d); });
+  }
+  if((p.not_ideal_for||[]).length){
+    box.append(el('div','pf-h','아쉬운 용도'));
+    const c=el('div','chips'); p.not_ideal_for.forEach(u=>c.append(el('span','chip bad',L.use[u]||u))); box.append(c);
+  }
+  box.append(el('div','pf-h','발견된 결함'));
+  const dc=el('div','chips'); (p.defects||[]).forEach(d=>dc.append(el('span','chip '+(d==='none'?'good':'bad'),L.defect[d]||d))); box.append(dc);
+
+  box.append(el('div','pf-note',`분석 신뢰도: ${L.conf[p.confidence]||'-'}` + ((p.caveats_ko||[]).length?` · ${p.caveats_ko.join(' / ')}`:'')));
+}
+
+async function askServerAnalysis(b64, meta){
+  const body=JSON.stringify({imageBase64:b64, metadata:meta});
+  let res, lastErr;
+  for(let attempt=1; attempt<=2; attempt++){
+    try{
+      res = await api('/api/analyze-camera',{method:'POST',body,signal:AbortSignal.timeout(95000)});
+      if(res.ok || ![502,503,504].includes(res.status)) break;
+      lastErr=`HTTP ${res.status}`;
+    }catch(e){ res=null; lastErr=e.message; }
+    if(attempt<2) await new Promise(r=>setTimeout(r,1000*attempt));
+  }
+  if(!res) throw new Error(`분석 요청 실패 (재시도 2회): ${lastErr}`);
+  if(!res.ok){
+    const t=(await res.text()).trim();
+    let msg=t; try{ msg=JSON.parse(t).error||t; }catch{}
+    throw new Error(`HTTP ${res.status}: ${msg.startsWith('<')?'(서버/터널 오류 페이지)':msg.slice(0,300)}`);
+  }
+  return await res.json();
+}
+
+async function askGemini(b64, meta){
+  const key=$('#gkey').value.trim(); const model=$('#gmodel').value.trim()||'gemini-flash-lite-latest';
+  if(API.server){
+    if(!API.geminiEnabled) return {skipped:true, reason:'서버에 GEMINI_API_KEY 없음(.env 확인)'};
+    return await askServerAnalysis(b64, meta);   // 서버 모드: 프롬프트/스키마는 서버의 prompts/ 사용
+  }
+  if(!key) return {skipped:true, reason:'Gemini API 키 없음'};   // 단독 모드: 간단 화질 평가만
+  const prompt = `You are a QA inspector for a phone camera. Judge the CAMERA IMAGE QUALITY of this photo (not the subject matter).
+Return ONLY a JSON object with these keys:
+{"sharpness":1-10 (10=very sharp),"exposure":"underexposed"|"ok"|"overexposed","noise":1-10 (10=very noisy),"color_accuracy":1-10,"motion_blur":true|false,"lens_obstruction":true|false (smudge/finger/cover over lens),"overall_pass":true|false,"issues":[string],"summary_ko":"한 문장 한국어 요약"}`;
+  const reqBody = JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:b64}}]}],generationConfig:{responseMimeType:'application/json',temperature:0.2}});
+  const call = () => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{
+        method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':key}, body:reqBody
+      });
+  // 터널/네트워크의 일시적 오류(502/503/504, 네트워크 끊김)는 최대 3번까지 재시도
+  let res, lastErr;
+  for(let attempt=1; attempt<=3; attempt++){
+    try{
+      res = await call();
+      if(res.ok || ![502,503,504].includes(res.status)) break;
+      lastErr = `HTTP ${res.status}`;
+    }catch(e){ res=null; lastErr = e.message; }
+    if(attempt<3) await new Promise(r=>setTimeout(r,1000*attempt));
+  }
+  if(!res) throw new Error(`Gemini 요청 실패 (재시도 3회): ${lastErr}`);
+  if(!res.ok){
+    const t = (await res.text()).trim();
+    const brief = t.startsWith('<') ? '(서버/터널 오류 페이지)' : t.slice(0,200);
+    throw new Error(`Gemini HTTP ${res.status}: ${brief}`);
+  }
+  const j = await res.json();
+  const txt = (j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+  return {model, ...JSON.parse(txt)};
+}
+let analysisSeq = 0, aiIv = null;
+function stopAiTimer(){ if(aiIv){ clearInterval(aiIv); aiIv = null; } }
+const onPhoto = async e => {
+  const file = e.target.files[0]; e.target.value=''; if(!file) return;
+  const seq = ++analysisSeq; stopAiTimer();
+  setDetail('camera','사진 처리 중...'); renderProfile(null);
+  if(!camStreamInfo) camStreamInfo = await probeStream();
+  if(seq !== analysisSeq) return;
+  try{
+    const bmp = await loadBitmap(file);
+    const fullW = bmp.width||bmp.naturalWidth, fullH = bmp.height||bmp.naturalHeight;
+    const local = imageMetrics(drawScaled(bmp,512));
+    const sendCanvas = drawScaled(bmp,1280);
+    const dataUrl = sendCanvas.toDataURL('image/jpeg',0.85);          // 서버에 저장하는 사진
+    const aiB64 = drawScaled(bmp,1024).toDataURL('image/jpeg',0.8).split(',')[1];   // Gemini 로 보내는 작은 사진(속도)
+    photoDataUrl = dataUrl;
+    let exif=null, exifDiag={status:'unreadable',segments:[]};
+    try{ const ab=await file.arrayBuffer(); exif = parseExif(ab); exifDiag = exifDiagnose(ab); }catch(_){}
+    const exifStatus = exif ? 'ok' : (exifDiag.status==='has_exif_segment' ? ((exifDiag.tags&&(exifDiag.tags.ifd0.length+exifDiag.tags.exif.length)>0) ? 'exif_without_camera_tags' : 'exif_unreadable') : exifDiag.status);   // ok | no_exif_segment | exif_without_camera_tags | exif_unreadable | not_jpeg | unreadable
+    const iosOtherBrowser = /FxiOS|CriOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+    const th=$('#cam-thumb'); th.src=dataUrl; th.style.display='block';
+    const localPass = local.laplacianVariance>=60 && local.meanBrightness>=35 && local.meanBrightness<=225;
+    const base = {fileName:file.name, fileSizeKB:round(file.size/1024,0), mime:file.type, resolution:`${fullW}x${fullH}`, megapixels:round(fullW*fullH/1e6,1), localMetrics:local, exif, exifStatus, jpegSegments:exifDiag.segments, exifTagIds:exifDiag.tags||null, declaredAtCapture:(declaredDevice()&&declaredDevice().model)?{brand:declaredDevice().brand,model:declaredDevice().model}:null, localPass};
+    let line1 = `${fullW}x${fullH} (${base.megapixels}MP) · 선명도 ${local.laplacianVariance} · 밝기 ${local.meanBrightness}`;
+    if(!exif){
+      const ios=/iPhone|iPad/.test(navigator.userAgent);
+      line1 += exifStatus==='no_exif_segment' ? '\n사진에 촬영 정보(EXIF)가 없어요. 브라우저가 지운 경우예요.'
+             : ios ? '\niOS 는 웹으로 사진을 넘길 때 ISO·셔터·초점거리 같은 카메라 정보를 제거합니다. 정상 동작이며, 이 경우 Gemini 가 사진 내용만으로 평가합니다.'
+             : '\n사진에 ISO·셔터·초점거리 정보가 없어요.';
+    }
+
+    // AI 분석 결과(또는 실패/건너뜀)를 반영해 카메라 항목을 확정
+    const finalize = (gemini, geminiError) => {
+      let profile=null, checks=null;
+      if(gemini && gemini.qa){ profile = gemini.profile; checks = gemini.checks||null; gemini = {model:gemini.model, ...gemini.qa}; }
+      const geminiUsed = gemini && !gemini.skipped;
+      const photoOk = geminiUsed ? !!gemini.overall_pass : localPass;
+      const photo = {...base, gemini:geminiUsed?gemini:null, geminiSkipped:gemini?.skipped?gemini.reason:null, geminiError};
+      const status = photoOk ? 'pass' : 'fail'; // 카메라 정보(stream)는 참고용, 판정은 사진으로
+      record('camera', status, {stream:camStreamInfo, photo, profile, checks, verdictBasis: geminiUsed?'gemini':'local-heuristic'});
+      renderProfile(profile);
+      setDetail('camera', `${line1}\n` + (geminiUsed ? `Gemini: ${gemini.summary_ko||''}` : `Gemini 미사용(${geminiError||gemini?.reason}) → 로컬 기준으로 판정`));
+    };
+
+    const aiAvailable = API.server ? API.geminiEnabled : !!$('#gkey').value.trim();
+    if(!aiAvailable){
+      finalize({skipped:true, reason: API.server ? '서버에 GEMINI_API_KEY 없음(.env 확인)' : 'Gemini API 키 없음'}, null);
+      return;
+    }
+
+    // 로컬 결과를 먼저 보여주고, AI 분석은 백그라운드로 돌립니다. 그동안 다른 항목을 진행할 수 있어요.
+    record('camera','pending',{stream:camStreamInfo, photo:{...base, gemini:null, geminiSkipped:null, geminiError:null}, profile:null, verdictBasis:null});
+    $('#b-camera').textContent = 'AI 분석 중';
+    const tA = Date.now();
+    const tick = () => setDetail('camera', `${line1}\nAI가 사진을 분석하는 중... ${Math.round((Date.now()-tA)/1000)}초\n기다리지 말고 다른 항목을 먼저 진행해도 됩니다.`);
+    tick(); aiIv = setInterval(tick, 1000);
+    const meta = buildMetadata(file, local, fullW, fullH, exif);
+    askGemini(aiB64, meta).then(r=>({r}), err=>({err})).then(out=>{
+      if(seq !== analysisSeq) return;     // 그 사이 재촬영/재확인했다면 이 결과는 버림
+      stopAiTimer();
+      if(out.err) finalize(null, out.err.message); else finalize(out.r, null);
+    });
+  }catch(err){
+    stopAiTimer();
+    record('camera','fail',{stage:'photo',stream:camStreamInfo, ...errInfo(err)}); setDetail('camera','사진 분석 실패: '+err.message);
+  }
+};
+$('#cam-file').onchange = onPhoto;
+
+/* ---------- 마이크 ---------- */
+// 소리가 담기면 통과. 고장 난 마이크는 거의 무음(-70dB 이하)이라 이 값을 넘지 못합니다. 실기기에서 오판이 나면 여기만 조정.
+const MIC_MIN_PEAK_DB = -50;
+$('#mic-start').onclick = async () => {
+  if(!navigator.mediaDevices?.getUserMedia){ record('microphone','unsupported',{error:'getUserMedia 미지원'}); return; }
+  let stream, ac;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    ac = new AC(); await ac.resume();
+    const an = ac.createAnalyser(); an.fftSize=2048; ac.createMediaStreamSource(stream).connect(an);
+    const buf = new Float32Array(an.fftSize); const t0=performance.now();
+    let peak=0, sum=0, n=0; const rmsList=[];
+    setDetail('microphone','측정 중... 말하거나 박수를 치세요');
+    await new Promise(res=>{
+      const tick=()=>{
+        an.getFloatTimeDomainData(buf); let s=0; for(const v of buf) s+=v*v; const rms=Math.sqrt(s/buf.length);
+        peak=Math.max(peak,rms); rmsList.push(rms); sum+=rms; n++;
+        $('#mic-bar').style.width=Math.max(0,Math.min(100,(60+20*Math.log10(Math.max(rms,1e-6)))/60*100))+'%';
+        (performance.now()-t0<5000)?requestAnimationFrame(tick):res();
+      }; tick();
+    });
+    const db = v=>round(20*Math.log10(Math.max(v,1e-6)),1);
+    rmsList.sort((a,b)=>a-b); const floor = rmsList[Math.floor(rmsList.length*0.1)]||0;   // 하위 10% 지점 = 배경 소음
+    const track=stream.getAudioTracks()[0];
+    const data = {peakDb:db(peak), avgDb:db(sum/n), noiseFloorDb:db(floor), peakRms:round(peak,4), sampleRate:ac.sampleRate, label:track.label, settings:dropIds(track.getSettings()), unit:'dBFS'};
+    const ok = data.peakDb > MIC_MIN_PEAK_DB;
+    record('microphone', ok?'pass':'fail', data);
+    setDetail('microphone', ok
+      ? `소리가 잘 담겼어요 (최대 ${data.peakDb}dB · 0에 가까울수록 큰 소리)`
+      : `소리가 거의 담기지 않았어요 (최대 ${data.peakDb}dB). 폰에 가까이 대고 말하거나 박수를 쳐 주세요.`);
+  }catch(e){
+    record('microphone','fail',{...errInfo(e)}); setDetail('microphone', e.name==='NotAllowedError'?'마이크 권한이 거부되었습니다.':`오류: ${e.name} ${e.message}`);
+  }finally{
+    stream?.getTracks().forEach(t=>t.stop()); ac?.close(); $('#mic-bar').style.width='0';
+  }
+};
+
+/* ---------- 스피커 ---------- */
+let spkInfo=null;
+$('#spk-play').onclick = async () => {
+  if(!AC){ record('speaker','unsupported',{error:'WebAudio 미지원'}); return; }
+  try{
+    const ac=new AC(); await ac.resume();
+    const o=ac.createOscillator(), g=ac.createGain(); g.gain.value=0.25;
+    o.frequency.setValueAtTime(440,ac.currentTime); o.frequency.linearRampToValueAtTime(1760,ac.currentTime+1.5);
+    o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime+1.6);
+    spkInfo={sampleRate:ac.sampleRate, baseLatencyMs:round((ac.baseLatency||0)*1000,1), outputLatencyMs:(ac.outputLatency>0 && ac.outputLatency<2)?round(ac.outputLatency*1000,1):null, tone:'440→1760Hz sweep 1.5s'};
+    setDetail('speaker','재생 중... 소리가 들렸는지 알려 주세요.'); $('#spk-confirm').style.display='flex';
+    o.onended=()=>ac.close();
+  }catch(e){ record('speaker','fail',errInfo(e)); }
+};
+$('#spk-yes').onclick = () => { record('speaker','pass',{userConfirmed:true,...spkInfo}); setDetail('speaker','사용자가 소리를 확인했습니다.'); $('#spk-confirm').style.display='none'; };
+$('#spk-no').onclick  = () => { record('speaker','fail',{userConfirmed:false,...spkInfo}); setDetail('speaker','볼륨/무음 모드/블루투스 출력 여부를 확인하고 다시 시도하세요.'); $('#spk-confirm').style.display='none'; };
+
+/* ---------- 터치 ---------- */
+(function(){
+  const pad=$('#pad'); const N=12;
+  const state={hit:new Set(),active:new Set(),maxSimultaneous:0,pointerTypes:new Set(),events:0};
+  function build(){
+    pad.innerHTML=''; for(let i=0;i<N;i++){ const c=document.createElement('div'); c.className='cell'; c.dataset.i=i; c.textContent=i+1; pad.appendChild(c); }
+    state.hit.clear(); state.active.clear(); state.maxSimultaneous=0; state.pointerTypes.clear(); state.events=0;
+    setDetail('touch',`0/${N} · 멀티터치 최대 0점`);
+  }
+  function mark(el){ const c=el?.closest?.('.cell'); if(c){ c.classList.add('hit'); state.hit.add(c.dataset.i); } }
+  function update(){
+    const data={cellsHit:state.hit.size,cellsTotal:N,maxSimultaneousTouches:state.maxSimultaneous,multiTouchDetected:state.maxSimultaneous>=2,pointerTypes:[...state.pointerTypes],maxTouchPoints:navigator.maxTouchPoints,touchEventSupported:'ontouchstart' in window};
+    setDetail('touch',`${state.hit.size}/${N} · 멀티터치 최대 ${state.maxSimultaneous}점`);
+    if(state.hit.size===N) record('touch','pass',data);
+  }
+  pad.addEventListener('pointerdown',e=>{ state.active.add(e.pointerId); state.pointerTypes.add(e.pointerType); state.maxSimultaneous=Math.max(state.maxSimultaneous,state.active.size); state.events++; mark(document.elementFromPoint(e.clientX,e.clientY)); update(); });
+  pad.addEventListener('pointermove',e=>{ if(state.active.has(e.pointerId)){ mark(document.elementFromPoint(e.clientX,e.clientY)); update(); } });
+  ['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,e=>state.active.delete(e.pointerId)));
+  $('#touch-reset').onclick=()=>{ build(); delete results.touch; setBadge('touch','pending'); refreshJson(); };
+  build();
+})();
+
+/* ---------- 자이로 ---------- */
+$('#gyro-start').onclick = async () => {
+  const DO=window.DeviceOrientationEvent, DM=window.DeviceMotionEvent;
+  if(!DO && !DM){ record('gyro','unsupported',{error:'DeviceOrientation/DeviceMotion 미지원'}); setDetail('gyro','이 브라우저는 모션 센서 API가 없습니다.'); return; }
+  const perm={};
+  try{
+    const reqs=[];
+    if(DO && typeof DO.requestPermission==='function') reqs.push(DO.requestPermission().then(r=>perm.orientation=r));
+    if(DM && typeof DM.requestPermission==='function') reqs.push(DM.requestPermission().then(r=>perm.motion=r));
+    await Promise.all(reqs);
+  }catch(e){ record('gyro','fail',{permission:perm,...errInfo(e)}); setDetail('gyro','권한 요청 실패: '+e.message); return; }
+  if(perm.orientation==='denied'||perm.motion==='denied'){ record('gyro','fail',{permission:perm,error:'권한 거부'}); setDetail('gyro','센서 권한이 거부되었습니다. Safari를 완전히 종료 후 다시 시도하세요.'); return; }
+
+  const rng=()=>({min:Infinity,max:-Infinity}); const up=(r,v)=>{ if(v==null||isNaN(v))return; r.min=Math.min(r.min,v); r.max=Math.max(r.max,v); };
+  const O={alpha:rng(),beta:rng(),gamma:rng()}, A={x:rng(),y:rng(),z:rng()}, G={alpha:rng(),beta:rng(),gamma:rng()};
+  let oN=0,mN=0,last='';
+  const onO=e=>{ oN++; up(O.alpha,e.alpha);up(O.beta,e.beta);up(O.gamma,e.gamma); last=`α ${round(e.alpha??0,0)}  β ${round(e.beta??0,0)}  γ ${round(e.gamma??0,0)}`; };
+  const onM=e=>{ mN++; const a=e.accelerationIncludingGravity||{}; up(A.x,a.x);up(A.y,a.y);up(A.z,a.z); const r=e.rotationRate||{}; up(G.alpha,r.alpha);up(G.beta,r.beta);up(G.gamma,r.gamma); };
+  window.addEventListener('deviceorientation',onO); window.addEventListener('devicemotion',onM);
+  const t0=performance.now();
+  await new Promise(res=>{ const iv=setInterval(()=>{ const left=Math.max(0,6-(performance.now()-t0)/1000); setDetail('gyro',`측정 중 (${left.toFixed(1)}s) 기기를 기울이세요\n${last||'이벤트 대기...'}`); if(left<=0){clearInterval(iv);res();} },100); });
+  window.removeEventListener('deviceorientation',onO); window.removeEventListener('devicemotion',onM);
+
+  const fin=o=>Object.fromEntries(Object.entries(o).map(([k,r])=>[k,isFinite(r.min)?{min:round(r.min,1),max:round(r.max,1),range:round(r.max-r.min,1)}:null]));
+  const oF=fin(O), aF=fin(A), gF=fin(G);
+  const oRange=Math.max(...Object.values(oF).map(v=>v?.range??0));
+  const aRange=Math.max(...Object.values(aF).map(v=>v?.range??0));
+  const data={permission:perm,orientationEvents:oN,motionEvents:mN,orientation:oF,accelerationIncludingGravity:aF,rotationRate:gF,maxOrientationRangeDeg:oRange,maxAccelRange:aRange};
+  if(oN===0 && mN===0){ record('gyro','fail',{...data,error:'센서 이벤트 없음 (센서 없음 또는 HTTPS 아님)'}); setDetail('gyro','센서 데이터가 들어오지 않았습니다.'); return; }
+  const ok=(oN>=10 && oRange>=20) || (mN>=10 && aRange>=3);
+  record('gyro',ok?'pass':'fail',data);
+  setDetail('gyro',`방향 이벤트 ${oN}회 / 모션 이벤트 ${mN}회 · 각도 변화 최대 ${oRange}° · 가속도 변화 최대 ${aRange}`+(ok?'':'\n변화량이 작습니다. 더 크게 기울여서 다시 시도해 주세요.'));
+};
+
+/* ---------- 출력 ---------- */
+function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`; }
+$('#dl').onclick=()=>{
+  const blob=new Blob([JSON.stringify(buildReport(),null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`device-test-${stamp()}.json`; document.body.appendChild(a); a.click(); a.remove();
+  setDetail('out','JSON 파일을 내려받았습니다.');
+};
+$('#copy').onclick=async()=>{ try{ await navigator.clipboard.writeText(JSON.stringify(buildReport(),null,2)); setDetail('out','클립보드에 복사했습니다.'); }catch(e){ setDetail('out','복사 실패: '+e.message); } };
+/* 5개 항목이 모두 끝나면 서버에 자동 저장 (같은 세션은 같은 파일을 덮어씀) */
+let lastSig=null, sendTimer=null;
+function maybeAutoSend(){
+  if(!API.server) return;
+  if(!buildReport().summary.completed) return;
+  clearTimeout(sendTimer); sendTimer=setTimeout(()=>sendReport(true),800);
+}
+async function sendReport(auto){
+  if(!API.server){
+    const url=$('#endpoint').value.trim(); if(!url){ setDetail('out','엔드포인트 URL을 입력해 주세요.'); return; }
+    try{
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildReport())});
+      setDetail('out',`전송 완료: HTTP ${res.status}`);
+    }catch(e){ setDetail('out','전송 실패 (CORS/네트워크 확인): '+e.message); }
+    return;
+  }
+  const rep = JSON.parse(JSON.stringify(buildReport()));
+  if(photoDataUrl && rep.results.camera && rep.results.camera.photo) rep.results.camera.photo.imageBase64 = photoDataUrl.split(',')[1];
+  const {testedAt, ...rest} = rep; const sig = JSON.stringify(rest);
+  if(auto && sig===lastSig) return;
+  try{
+    const res = await api('/api/report',{method:'POST',body:JSON.stringify(rep)});
+    const j = await res.json().catch(()=>({}));
+    if(res.ok){ lastSig=sig; setDetail('out',`저장 완료 · results/${j.jsonFile}${j.imageFile?' (사진 포함)':''}`); showSellerLink(); }
+    else setDetail('out',`저장하지 못했어요 (HTTP ${res.status}): ${j.error||''} ${(j.details||[]).join(', ')}`);
+  }catch(e){ setDetail('out','서버에 연결하지 못했어요: '+e.message); }
+}
+$('#send').onclick=()=>sendReport(false);
+
+/* 저장이 끝나면 판매 보증서 만들기 버튼을 보여 줍니다 */
+function showSellerLink(){
+  const out=$('#d-out'); if(document.querySelector('.out-link')) return;
+  const a=document.createElement('a'); a.className='btn btn-primary btn-block out-link'; a.textContent='이 폰으로 판매 보증서 만들기';
+  a.href='/seller'+(API.token?('?t='+encodeURIComponent(API.token)):'');
+  out.after(a);
+}
+
+
+async function initServer(){
+  const badge=$('#b-server'), det=$('#d-server');
+  const legacy=msg=>{ badge.textContent='서버 없음'; badge.className='status unsupported'; det.textContent=msg; $('#legacy-settings').style.display='block'; };
+  if(location.protocol==='file:') return legacy('파일로 직접 열었습니다. 아래에 Gemini 키를 입력하면 단독으로 동작합니다. (서버 모드: npm run share)');
+  try{
+    const r=await api('/api/config');
+    if(r.status===401){ badge.textContent='토큰 필요'; badge.className='status fail'; det.textContent='접속 토큰이 없습니다. 터미널에 출력된 QR/URL(?t=...)로 다시 접속하세요.'; return; }
+    if(!r.ok) return legacy('서버 API가 없습니다(정적 호스팅). 아래에 Gemini 키를 입력하면 단독으로 동작합니다.');
+    const c=await r.json();
+    API.server=true; API.geminiEnabled=!!c.geminiEnabled; API.model=c.model;
+    badge.textContent='연결됨'; badge.className='status pass';
+    det.textContent = c.geminiEnabled
+      ? `Gemini 사용 가능 (모델: ${c.model})\n5개 항목을 모두 마치면 결과가 서버(노트북)에 자동 저장됩니다.`
+      : '서버 .env 에 GEMINI_API_KEY 가 없어 카메라 사진은 로컬 기준으로만 판정합니다.\n5개 항목을 모두 마치면 결과가 서버(노트북)에 자동 저장됩니다.';
+    maybeAutoSend();
+  }catch(e){ legacy('서버에 연결하지 못했습니다: '+e.message); }
+}
+refreshJson();
+initServer();
+</script>
+<script src="/assets/nav.js"></script>
+</body>
+</html>
