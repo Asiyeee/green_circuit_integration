@@ -14,10 +14,17 @@
     "summary": "node part1_hardware_test/summary.js",
     "seed": "node part3_certificate/scripts/seed-demo.js",
     "test": "node part2_price_disposal/lib/assessment.js && node part4_buyer/lib/buyer.js && node --test tests/*.test.js",
-    "price:validate": "node part2_price_disposal/scripts/price-refresh.js validate"
+    "price:validate": "node part2_price_disposal/scripts/price-refresh.js validate",
+    "price:collect": "node part2_price_disposal/scripts/price-daily.js run",
+    "price:daily": "node part2_price_disposal/scripts/price-daily.js run --apply",
+    "price:status": "node part2_price_disposal/scripts/price-daily.js status",
+    "price:search": "node part2_price_disposal/scripts/price-search.js"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",
     "qrcode-terminal": "^0.12.0"
+  },
+  "optionalDependencies": {
+    "@google-cloud/storage": "^8.4.0"
   }
 }

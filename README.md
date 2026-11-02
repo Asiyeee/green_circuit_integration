@@ -66,6 +66,6 @@ npm test                    # ②·④ 자체 점검
 ## 다음 할 일 (2026-11-03 기준)
 
 - ① 마이크·스피커 정밀 측정(녹음 품질 등급), 카메라 촬영 가이드, 전체 화면 터치 테스트
-- ② [갱신 정책과 검증·승격 도구](part2_price_disposal/PRICE_REFRESH.md) 마련. 실시간/자동 수집 미구현. 실제 화면 파손 사진·실제 Gemini 검증 필요. 임시 3만원 자동 처분 분기 제거.
+- ② [실제 공개 출처 수집·일별 실행·검색 인계](part2_price_disposal/PRICE_REFRESH.md). `npm run price:daily`로 수집/검증/기존 견적 갱신, `npm run price:status`로 성공/실패 확인. 일별 예약/Cloud Run 설정은 준비했으나 가동·배포하지 않았습니다. Gemini 검색은 별도 연결했으며 키가 없어 실제 호출 미검증입니다. 실제 파손 사진 검증도 남아 있습니다.
 - ③ Firebase Authentication(구글 로그인) → 판매자 계정별 보증서·환경 온도 (지금은 공용 토큰 + 닉네임)
 - 배포: Cloud Run + Firestore (`common/docs/DEPLOY.md`)

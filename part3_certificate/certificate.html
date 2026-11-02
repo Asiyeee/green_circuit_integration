@@ -126,6 +126,9 @@ function render({ certificate: c, verified, expired, seller }) {
     <div class="price-sub">${esc(p.label_ko)} · 업체 ${p.vendorCount}곳 · 견적 ${p.quoteCount}건 · ${esc(c.device.storage)} · ${esc(c.condition.label_ko)}</div>
     <p class="price-sub">업체 검수·조건에 따라 실제 매입가가 달라집니다. 개인 간 실거래가·보장 판매가가 아닙니다. ${esc(p.notice_ko)}</p>
     <p class="price-sub">업체 등급을 자체 상태로 연결했으며 평가 조건은 서로 다릅니다. 배터리별 정밀 보정 가격이 아닙니다.</p>
+    ${p.latestCollectedAt ? `<p class="price-sub">공개 출처 수집: ${esc(new Date(p.latestCollectedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }))} KST. ${p.partiallyRefreshed ? '일부 출처는 이전 자료 유지.' : ''} 원문 가격 기준일과 다릅니다.</p>` : ''}
+    ${p.dataWarning ? `<p class="notice">${esc(p.dataWarning)}</p>` : ''}
+    ${p.latestCollectedAt ? `<details><summary>수집 원문의 모델·등급·조건·시각</summary>${p.quotes.map(q => `<p class="price-sub">${esc(q.vendor)} · ${esc(q.sourceModel || c.device.model)} · ${esc(q.sourceGrade || q.grade)}<br>수집: ${esc(q.collectedAt || '이전 자료 유지')}<br>${esc(q.sourceConditions_ko || q.conditions_ko)}</p>`).join('')}</details>` : ''}
     <details style="margin-top:14px"><summary>업체별 견적</summary>
       <table><tr><th>업체</th><th>업체 등급</th><th class="r">금액</th></tr>
       ${p.quotes.map((q) => `<tr><td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a><small>원문 기준일: ${esc(q.priceDate || q.priceDateSource || '미표시')}</small></td><td>${esc(q.grade)}<small>${esc(q.conditions_ko)}</small></td><td class="r">${q.minKrw === q.maxKrw ? won(q.minKrw) : won(q.minKrw) + '~' + won(q.maxKrw)}</td></tr>`).join('')}

@@ -249,6 +249,9 @@ async function quote() {
   $('#quote').className = '';
   $('#quote').innerHTML = `<div class="quote-grid">${priceHtml}
     <div><div class="k">재사용 시 탄소 감축${c.basis === 'estimate' ? ' (추정)' : ''}</div><div class="v">${c.avoidedKg}kg</div><div class="s">나무 ${c.equivalence.oakTreesYear}그루가 1년간 흡수하는 양</div></div></div>
+    ${p.latestCollectedAt ? `<p class="muted">공개 출처 수집 시각: ${esc(new Date(p.latestCollectedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }))} KST. ${p.partiallyRefreshed ? '일부 출처는 이전 자료를 유지합니다.' : '각 원문 가격 기준일은 업체별 상세를 확인하세요.'} 조회할 때마다 실시간 수집하는 가격이 아닙니다.</p>` : ''}
+    ${p.dataWarning ? `<p class="notice">${esc(p.dataWarning)}</p>` : ''}
+    ${p.status === 'ok' && p.latestCollectedAt ? `<details><summary>수집 원문의 모델·등급·조건·시각</summary>${p.quotes.map(q => `<p class="muted">${esc(q.vendor)} · ${esc(q.sourceModel)} · ${esc(q.sourceGrade)}<br>수집: ${esc(q.collectedAt || '이전 조사 자료 유지')}<br>${esc(q.sourceConditions_ko || q.conditions_ko)}</p>`).join('')}</details>` : ''}
     ${dp ? `<div class="notice info manual" style="margin-top:12px"><b>추천 처리: ${esc(dp.label_ko)}</b>
       <ul style="margin:6px 0 0;padding-left:18px">${dp.reasons_ko.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
       <p class="muted" style="margin:6px 0 0">판매하려면 아래 희망가 입력 후 매물 등록을 누르세요. 기부·배출은 별도의 선택이에요. 안내 열람만으로 완료되지 않으며 매물 상세에서 실제 처리 후 완료를 기록해요.</p>

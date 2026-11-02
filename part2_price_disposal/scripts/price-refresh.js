@@ -41,6 +41,11 @@ function validate(text) {
       if (!urlOk(q.source_url) || !urlOk(q.condition_source_url)) bad('허용된 업체의 HTTPS 출처·조건 링크 필요');
       if (q.price_date && !date(q.price_date)) bad('원문 가격 기준일 오류');
       if (!q.price_date && !q.price_date_source) bad('원문 가격 기준일 미표시 사유 누락');
+      if (q.collected_at) {
+        if (!Number.isFinite(Date.parse(q.collected_at)) || Date.parse(q.collected_at) > Date.now()) bad('수집 시각 오류/미래 시각');
+        for (const field of ['source_evidence_sha256', 'condition_evidence_sha256', 'condition_contract_sha256']) if (!/^[a-f0-9]{64}$/.test(q[field] || '')) bad('수집 증빙 해시 누락/오류');
+        if (!q.source_model || !q.source_grade || !q.source_conditions_ko) bad('수집 원문 모델/등급/조건 누락');
+      }
     }
     const vendors = new Set(quotes.map(q => q.vendor));
     if (+row.vendor_count !== vendors.size || +row.quote_count !== quotes.length) bad('업체 수·견적 수 불일치');
@@ -50,11 +55,28 @@ function validate(text) {
   if (!rows.length) errors.push('빈 시세 파일');
   return { errors, rows };
 }
+function assertPreservesExisting(before, after) {
+  const key = r => [r.brand, r.model_key, r.storage, r.condition_code].join('|');
+  const next = new Map(after.map(r => [key(r), r]));
+  const quoteKey = q => [q.vendor, q.grade, q.source_url].join('|');
+  for (const row of before) {
+    const found = next.get(key(row));
+    if (!found) throw new Error('부분 수집으로 기존 조회 행을 삭제할 수 없습니다: ' + key(row));
+    for (const field of ['reference_id', 'requires_no_known_function_fault', 'condition_label_ko', 'condition_description_ko', 'mapping_version']) if (found[field] !== row[field]) throw new Error('기존 v1 분류/기능 조건을 임의 변경할 수 없습니다: ' + field);
+    const quotes = new Map(JSON.parse(found.source_quotes_json).map(q => [quoteKey(q), q]));
+    for (const q of JSON.parse(row.source_quotes_json)) {
+      const replacement = quotes.get(quoteKey(q));
+      if (!replacement) throw new Error('수집 실패/누락으로 기존 업체 견적을 삭제할 수 없습니다');
+      if (replacement.conditions_ko !== q.conditions_ko) throw new Error('기존 등급 연결 조건 변경 금지. 수집 원문은 별도 필드로 보존하세요');
+    }
+  }
+}
 function promote(candidate, reviewPath, live = LIVE) {
   const bytes = fs.readFileSync(candidate), text = bytes.toString('utf8');
   const { errors, rows } = validate(text);
   if (errors.length) throw new Error(errors.join('\n'));
   const current = fs.readFileSync(live), review = JSON.parse(fs.readFileSync(reviewPath, 'utf8'));
+  assertPreservesExisting(validate(current.toString('utf8')).rows, rows);
   if (review.candidateSha256 !== sha(bytes) || review.baseSha256 !== sha(current)) throw new Error('검토 대상 또는 기존 파일 해시 불일치 (충돌 재검토 필요)');
   if (!review.reviewer || !review.reviewedAt || !Number.isFinite(Date.parse(review.reviewedAt)) || Date.parse(review.reviewedAt) > Date.now()) throw new Error('검토자·검토일 필요');
   if (review.fullSnapshotConfirmed !== true || review.modelStorageGradeAmountsConfirmed !== true) throw new Error('전체 스냅샷·기종/용량/등급/금액 확인 필요');
@@ -90,4 +112,4 @@ if (require.main === module) {
     else throw new Error('사용: node price-refresh.js validate [후보.csv] | promote 후보.csv 검토.json');
   } catch (e) { console.error(e.message); process.exitCode = 1; }
 }
-module.exports = { validate, promote, sha };
+module.exports = { validate, assertPreservesExisting, promote, sha };

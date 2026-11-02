@@ -191,6 +191,29 @@ test('미확인 시세·다른 모델의 희망가가 가격 점수를 생성하
   assert.ok(result.every(x => x.breakdown.price === null));
 });
 
+test('후면 파손·화면 불량·복합 손상·시세 없음·기능 모름의 조회/추천/등록 분기', async () => {
+  const cases = [
+    { conditionCode: 'rear_damage', knownFault: 'none', expected: 'ok' },
+    { conditionCode: 'display_fault', knownFault: 'yes', expected: 'ok' },
+    { conditionCode: 'damage_or_fault', knownFault: 'yes', expected: 'ok' },
+    { conditionCode: 'damage_or_fault', storage: '2TB', knownFault: 'unknown', expected: 'no_data' },
+    { conditionCode: 'clean', knownFault: 'unknown', expected: 'needs_check' },
+  ];
+  for (const scenario of cases) {
+    const quote = await api('/api/price/quote', { method: 'POST', body: makeBody(scenario) });
+    assert.equal(quote.data.price.status, scenario.expected);
+    assert.equal(quote.data.disposal.action, 'sell');
+    assert.ok(quote.data.disposal.alternatives.includes('donate'));
+    const created = await issue(scenario); assert.equal(created.status, 200);
+    const cert = created.data.certificate;
+    assert.equal(cert.condition.knownFault, scenario.knownFault);
+    assert.equal(cert.condition.code, scenario.conditionCode);
+    assert.ok((await api('/api/public/certificates', { auth: false })).data.items.some(c => c.id === cert.id));
+    if (scenario.expected !== 'ok') { assert.equal(cert.price.minKrw, undefined); assert.equal(cert.price.maxKrw, undefined); }
+  }
+  assert.equal((await api('/api/price/search', { method: 'POST', body: { brand: 'Apple', model: 'iPhone 12', storage: '128GB', grade: 'S급' } })).status, 503);
+});
+
 test('로컬 트랜잭션 journal 재시작 복구', () => {
   const dir = path.join(temp, 'recovery'); fs.mkdirSync(dir);
   fs.writeFileSync(path.join(dir, 'market-transaction.json'), JSON.stringify([['market/recover.json', { ownerHash: hash(secret()), requests: [] }], ['certificates/recover.json', { id: 'recover' }]]));

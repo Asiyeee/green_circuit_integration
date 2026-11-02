@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CSV_PATH = path.join(__dirname, '..', 'data', '중고폰_시세_통합.csv');
+const csvPath = () => path.resolve(process.env.PRICE_CSV_PATH || path.join(__dirname, '..', 'data', '중고폰_시세_통합.csv'));
 
 const CONDITIONS = [
   { code: 'clean', label_ko: '흠집·파손·잔상 없음', hint_ko: '외관이 깨끗하고 파손·잔상이 없음' },
@@ -55,9 +55,19 @@ function parseCsv(text) {
 }
 
 let cache = null;
+let externalWarning = null;
 function load() {
-  if (cache) return cache;
+  const CSV_PATH = csvPath();
+  const stat = fs.statSync(CSV_PATH);
+  const signature = `${CSV_PATH}|${stat.mtimeMs}|${stat.size}|${stat.ctimeMs}`;
+  if (cache?.signature === signature) return cache;
   const text = fs.readFileSync(CSV_PATH, 'utf8').replace(/^﻿/, '');
+  // atomic rename 후 변경을 감지해 검증된 새 스냅샷만 사용. 잘못된 파일은 마지막 정상 캐시 보존.
+  const errors = require('../scripts/price-refresh').validate(text).errors;
+  if (errors.length) {
+    if (cache) { cache.warning = '갱신 파일 검증 실패. 마지막 정상 시세 자료를 사용합니다.'; return cache; }
+    throw new Error('시세 자료 검증 실패: ' + errors.slice(0, 3).join('; '));
+  }
   const [header, ...lines] = parseCsv(text);
   const index = new Map();
   const models = new Map(); // brand|model_key → { brand, model, storages:Set }
@@ -88,7 +98,7 @@ function load() {
     models.get(mk).storages.add(row.storage);
     models.get(mk).conditions.add(row.conditionCode);
   }
-  cache = { index, models };
+  cache = { index, models, signature, warning: null, loadedAt: new Date().toISOString() };
   return cache;
 }
 
@@ -108,11 +118,12 @@ function options(brand, model) {
 
 // knownFault: 'none' | 'yes' | 'unknown'
 function lookup({ brand, model, storage, conditionCode, knownFault }) {
-  const base = { brand, model, modelKey: modelKey(model), storage, conditionCode, knownFault };
+  const data = load();
+  const base = { brand, model, modelKey: modelKey(model), storage, conditionCode, knownFault, dataWarning: externalWarning || data.warning };
   if (!storage || storage === 'unknown') {
     return { ...base, status: 'needs_input', message_ko: '저장 용량 미확인. 시세 추정 안 함' };
   }
-  const row = load().index.get([brand, base.modelKey, storage, conditionCode].join('|'));
+  const row = data.index.get([brand, base.modelKey, storage, conditionCode].join('|'));
   if (!row) return { ...base, status: 'no_data', message_ko: '해당 조건의 시세 정보 없음' };
   if (row.requiresNoKnownFault && knownFault !== 'none') {
     return {
@@ -124,6 +135,9 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
     };
   }
   const single = row.vendorCount === 1;
+  const collected = row.quotes.map(q => q.collected_at).filter(Boolean).sort();
+  const latestCollectedAt = collected.at(-1) || null;
+  const kstDay = stamp => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(stamp));
   return {
     ...base,
     status: 'ok',
@@ -139,6 +153,8 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
     quoteCount: row.quoteCount,
     checkedOn: row.checkedOn,
     notice_ko: row.notice,
+    latestCollectedAt,
+    partiallyRefreshed: row.quotes.some(q => !q.collected_at || kstDay(q.collected_at) !== kstDay(latestCollectedAt)),
     quotes: row.quotes.map((q) => ({
       vendor: q.vendor_name,
       grade: q.grade,
@@ -149,9 +165,16 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
       priceDateSource: q.price_date_source || null,
       conditionSourceUrl: q.condition_source_url || null,
       verificationMethod: q.verification_method || null,
+      collectedAt: q.collected_at || null,
+      sourceConditions_ko: q.source_conditions_ko || null,
+      sourceModel: q.source_model || row.model,
+      sourceGrade: q.source_grade || q.grade,
+      evidenceSha256: q.source_evidence_sha256 || null,
       url: q.source_url,
     })),
   };
 }
 
-module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup };
+function datasetInfo() { const data = load(); return { rows: data.index.size, loadedAt: data.loadedAt, dataWarning: externalWarning || data.warning, mode: 'collected_csv_snapshot', automaticFetchOnQuote: false }; }
+const setExternalWarning = warning => { externalWarning = warning || null; };
+module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup, datasetInfo, setExternalWarning };

@@ -1,6 +1,6 @@
 # ② 업체 매입 참고가 · 상태 제안 · 처리 안내
 
-담당 영역: `lib/price.js`, `lib/assessment.js`, `prompts/assessment.*`, `data/`, `scripts/price-refresh.js`.
+담당 영역: `lib/price.js`, `lib/assessment.js`, `prompts/assessment.*`, `data/`, `scripts/price-refresh.js`. 공개 수집/증분 병합은 `lib/price-sources.js`/`price-collection.js`, 일별 실행은 `scripts/price-daily.js`, 별도 Gemini 검색은 `lib/price-search.js`, Cloud Run 연결은 `lib/price-cloud.js`입니다.
 통합 API/화면은 ③의 `lib/seller-routes.js`, `seller.html`과 연결됩니다.
 
 1. 점검 JSON에서 제조사·기종을 읽고 판매자가 저장 용량·외관 상태·알려진 기능 이상(없음/있음/모름)을 추가합니다. RAM과 카메라 사진 화질은 시세 조회 조건이 아닙니다.
@@ -14,4 +14,6 @@
 
 `assessment`의 기존 필드를 유지합니다. `disposal.action` 기본값은 `sell`, `alternatives`는 `donate/recycle`, `registrationUrl`을 추가했습니다. 과거 `sell_parts`/`donate` 보증서는 그대로 읽습니다. `DONATE_BELOW_KRW` export는 과거 코드 호환용이며 추천 분기에는 쓰지 않습니다.
 
-검증: 루트 `npm test`, `npm run price:validate`. [갱신 정책](PRICE_REFRESH.md), [통합 인계](../common/docs/PRICE_PLATFORM_HANDOFF.md).
+실제 공개 출처에서 수집해 기존 1,784행의 참고가를 갱신했습니다. 수집 원자료와 서비스 집계를 분리하고 실패/미확인 견적은 유지합니다. 파일 갱신 시 서버가 검증 후 캐시를 자동 교체하며 기존 보증서의 발급 당시 가격은 보존합니다. `checkedOn`/원문 기준일/수집 시각을 구분합니다.
+
+실행: `npm run price:collect`(후보만), `npm run price:daily`(검증 후 반영), `npm run price:status`(마지막 성공/실패). 예약/클라우드는 준비만 했으며 가동하지 않았습니다. 검증은 루트 `npm test`, `npm run price:validate`. [실제 결과·제한·예약/검색 실행법](PRICE_REFRESH.md), [플랫폼 인계](../common/docs/PRICE_PLATFORM_HANDOFF.md).

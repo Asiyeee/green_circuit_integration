@@ -1,5 +1,7 @@
 # 플랫폼 판매 흐름 인계 (2026-11-03 KST)
 
+추가 구현: 실제 7업체 공개 출처 수집·검증·증분 갱신과 서버 자동 반영을 실행했습니다. 일별 실행·로컬 예약 XML·Cloud Run 연결·별도 Gemini 검색도 준비했습니다. [시세 수집 운영 인계](../../part2_price_disposal/PRICE_REFRESH.md)와 [실행 감사 기록](../../part2_price_disposal/data/collection-audit.json)을 함께 확인하세요. 예약/클라우드 배포는 가동하지 않았으며 실제 Gemini·파손 사진은 미검증입니다.
+
 ## 구현된 흐름
 
 웹 점검 결과 선택/업로드 → 제조사·기종·저장 용량·외관 상태·알려진 기능 이상 확인 → 업체 매입 참고가 → 판매자 희망가 → **기존 listed 보증서를 매물로 등록** → 구매자 전체 목록/성능 추천 → 상세·보증서 → 문의/거래 요청 영속 저장 → 판매자 확인 → 판매자가 실제 완료 확인 후 판매 완료 기록.
@@ -46,8 +48,8 @@ node part3_certificate/scripts/assign-owner.js 보증서ID --ownership-verified
 - 업체 매입 최고가/후보 희망가 중앙값으로 개인 거래 적정가를 점수화하던 방식을 제거했습니다. 모든 매물의 가격 점수는 null, 기존 성능/환경온도 0.4/0.25를 61.5/38.5%로 재정규화합니다. 시세 없는 매물에 점수 페널티를 주지 않습니다. 환경온도 40°C 목표는 기존 임시 데모 기준입니다.
 - 다섯 하드웨어 점검이 통과해도 기능 이상 `unknown`을 `none`으로 바꾸지 않습니다. RAM을 저장 용량으로 쓰지 않고, 카메라 화질을 외관/시세 등급으로 쓰지 않습니다. A52/A52 5G/A52s를 합치는 별칭을 추가하지 않았습니다.
 - 외관 AI는 자동 선택 대신 판매자가 적용 버튼/수동 선택으로 확인합니다. 배터리 캡처는 선택이며 직접 측정이나 기기 일치 검증이 아닙니다. 미확인을 정상으로 간주하거나 감가율을 만들지 않습니다. Gemini 실패 시 수동 등록과 규칙 요약을 유지합니다.
-- CSV 2종은 조사 원본과 **바이트 동일**, 매뉴얼은 **줄바꿈 정규화 후 동일**임을 확인했습니다. 통합 자료를 로컬 파일로 덮어쓰지 않았습니다. 시세 1,784행의 신규 수집/갱신은 하지 않았습니다.
-- [갱신 정책과 실행법](../../part2_price_disposal/PRICE_REFRESH.md): 후보 CSV 검증·사람이 원문 확인한 증빙/검토 해시 검증·기존 파일 백업·승격·실패 시 보존을 구현했습니다. **자동 수집/실시간 조회/Gemini 검색/일별 스케줄은 미구현**입니다. 수집기·검토 담당·실행 환경/자격증명·알림 설정이 남았습니다. 승격 후 서버 재시작이 필요합니다.
+- 초기 자료 비교 후 기존 조사 원자료 CSV·매뉴얼은 보존했습니다. 통합 CSV는 실제 수집 결과로 기존 1,784행과 분류를 유지하며 갱신했습니다. 이전 로컬 파일로 덮어쓰지 않았습니다.
+- [갱신 정책과 실행법](../../part2_price_disposal/PRICE_REFRESH.md): 실제 공개 표 수집·원자료 보관·조건 계약/정확한 키/금액 검증·기존 견적만 치환·백업·실패 보존을 실행했습니다. 갱신 파일은 서버가 검증 후 재시작 없이 반영합니다. 일별 실행과 예약/Cloud Run 설정, 별도 Gemini 검색 연결은 구현했지만 실제 예약 가동·원격 배포는 하지 않았으며 Gemini 키가 없어 실제 검색 호출은 미검증입니다.
 
 ## 변경 파일과 다른 파트 영향
 
@@ -55,17 +57,19 @@ node part3_certificate/scripts/assign-owner.js 보증서ID --ownership-verified
 |---|---|
 | `part2_price_disposal/lib/price.js` | 원문 날짜/검증/조건 출처 추가. 정확한 키 조회 유지 |
 | `part2_price_disposal/lib/assessment.js`, `prompts/assessment.system.md` | 파손·3만원·시세 없음 처분 자동 분기 제거. 플랫폼 판매/선택적 대안, 내부 기능 단정 금지 |
-| `part2_price_disposal/scripts/price-refresh.js`, `PRICE_REFRESH.md`, README | 검증/승격 도구와 갱신 정책 |
+| `part2_price_disposal/lib/price-sources.js`, `price-collection.js`, `price-search.js`, `price-cloud.js`, `scripts/price-daily.js` 등 | 실제 공개 수집/증분 병합/검색 근거 검증/클라우드 보관·임대 잠금 연결. 원자료와 서비스 집계를 분리 |
+| `part2_price_disposal/scripts/price-refresh.js`, `PRICE_REFRESH.md`, `data/collection-*.json`, `data/raw/*.gz` | 부분 수집의 전체 덮어쓰기/기존 견적 삭제 차단, 실행 증빙·실제 원자료 보존 |
 | `part3_certificate/seller.html`, `certificate.html` | 우리 플랫폼 등록·희망가·업체 원문·수동 상태 확인·문의/관리 진입 |
 | `part3_certificate/lib/seller-routes.js`, 새 `market.js` | 모름 보존, 매물별 관리키 발급, 요청 저장/확인, 소유권·완료 상태 검증. ②·③ 접점이므로 수정 |
 | `part3_certificate/lib/certificate.js`, 요약 프롬프트 | 미확인 기능·캡처 판독·참고가 표현. 원래 v1 해시 구조 유지 |
 | `part3_certificate/scripts/seed-demo.js`, 새 `assign-owner.js` | 데모 완료 처리에도 관리키 적용, 기존 매물 운영자 이관 경로 |
 | `part4_buyer/buyer.html`, `lib/buyer.js`, README | 전체 매물/문의 연결과 보수적 추천, 종료 제외 |
 | `common/lib/certificate-store.js`, 새 `common/assets/market.js` | 기존 보증서 구조를 유지한 비공개 요청·소유권 저장과 완료 트랜잭션, 상세 UI |
-| `server.js` | 기본 실행은 유지하고 테스트에서 임시 저장소/임의 포트를 주입하도록 `start(options)` 확장 |
+| `server.js` | 기존 테스트 주입을 유지하고 Cloud Run 시세 스냅샷 동기화를 선택적으로 연결. 기본 로컬 동작은 동일 |
+| `common/scripts/*price*.ps1`, `common/deploy/price-*`, `.dockerignore`, `.gcloudignore`, `.env.example`, npm 의존성/lock | 일별 실행/예약 템플릿, Cloud Storage SDK 명시, 로컬 증빙·비밀 파일 업로드 제외. 배포/예약 등록은 미실행 |
 | `tests/`, `package.json`, `.gitignore`, README/공통 인계 | 회귀·통합·브라우저 테스트, 갱신 증빙/백업 git 제외, 실행 설명 |
 
-① 하드웨어 테스트 코드, 공통 `ui.css`, 결과 스키마, 원래 CSV/매뉴얼은 수정하지 않았습니다. ③·④와 공통 파일은 사용자 요청의 판매 흐름·소유권·가격 의미를 연결하기 위해 수정했습니다.
+① 하드웨어 테스트 코드, 공통 `ui.css`, 결과 스키마, 기존 조사 원자료 CSV/매뉴얼은 수정하지 않았습니다. 통합 시세 CSV만 검증된 수집 자료로 갱신했습니다. ③ 화면/API는 수집 시각·원문 조건·시세 검색을 연결하기 위해 추가 수정했으며 기존 보증서 가격은 다시 쓰지 않습니다.
 
 ## 실행·확인
 
@@ -82,9 +86,9 @@ npm start
 
 ## 실제 수행한 검증
 
-기존 `assessment.js`, `buyer.js` 자체 점검 통과. Node 통합/갱신 테스트 **11개** 통과. Chrome headless에서 PC 1280px/모바일 390px 흐름 테스트 통과. 화면 캡처도 확인했습니다. 테스트 데이터는 임시 폴더에만 생성 후 정리했습니다.
+기존 `assessment.js`, `buyer.js` 자체 점검과 정상 npm 환경의 통합/수집/갱신/검색 회귀 테스트 **20개**가 통과했습니다. 갱신 후 Chrome PC 1280px/모바일 390px 판매 흐름도 통과했습니다. 실제 수집 원자료 재집계와 실행 중 서버 반영·과거 보증서 보존·오염 파일 거부도 수행했습니다. 테스트 데이터는 임시 폴더에만 생성 후 정리했습니다.
 
-실행 환경의 PATH에 `npm`이 없어 `package.json`의 test와 같은 세 Node 명령을 직접 실행했습니다. 번들 pnpm 실행 시도는 사전 의존성 설치의 build-script 정책에서 중단됐으며 이를 테스트 통과로 계산하지 않았습니다. 설치가 생성한 별도 pnpm 설정/lock은 이번 변경에 포함하지 않았고 기존 `package-lock.json`은 유지합니다.
+초기 PATH에 npm이 없었으나 공식 npm 배포물의 무결성을 확인해 별도 로컬 도구 폴더에 준비했습니다. Node 24.22.1/npm 12.2.1에서 `npm ci`, `npm test`, `npm run price:validate`, `npm run price:status`, `npm start`와 실제 화면/API 응답을 확인했습니다. Cloud Storage를 직접 사용하므로 의존성과 npm lock을 함께 갱신했습니다. npm 기본 정책이 차단한 두 의존성 install script는 승인하지 않았으며 실제 Firestore/Cloud 실행이 검증됐다고 보고하지 않습니다.
 
 | 사용자 완료 기준 | 실제 검증 |
 |---|---|
@@ -98,16 +102,16 @@ npm start
 | 8. 중복 완료·권한 차단 | 동시 두 완료 요청 200/409와 온도 1회 반영, 타 매물 키/공용 토큰 단독 차단, 요청·확인 중복 차단 |
 | 9. 기존 보증서/저장 호환 | 기존 sample 보증서 상세/무결성 판정 유지, 관리키 없는 기존 매물 변경 차단, 로컬 journal 복구 |
 
-**미실행:** 실제 휴대폰 하드웨어 측정, 실제 파손 사진→Gemini 상태 제안→가격 전체 흐름, 실제 Gemini 호출/검색, 실제 Firestore 연결·동시 트랜잭션, 운영 배포, 실제 원문 신규 가격 수집. 합성 실패 주입·샘플 JSON·합성 갱신 증빙 테스트를 실제 파손폰/가격 수집 검증으로 보고하지 않습니다.
+**미실행:** 실제 휴대폰 하드웨어 측정, 실제 파손 사진→Gemini 상태 제안→가격 전체 흐름, 실제 Gemini 호출/검색, 실제 Firestore/Cloud Storage·Cloud Run 연결·동시 트랜잭션, 예약 가동/운영 배포, 실제 매입 결과와 표시 가격의 오차 검증. 실제 원문 수집은 수행했습니다. 샘플 JSON/실패 주입/검색·Cloud 클라이언트 대역 테스트를 실제 파손폰/Gemini/클라우드 실행으로 계산하지 않습니다.
 
 ## main 통합 전 석훈님 확인 사항
 
 1. 기존 UI/파트 변경과 위 API 헤더를 함께 통합하세요. 예전 공용 토큰만 보내는 완료 호출은 의도적으로 403이 됩니다. 구매자가 완료 API를 호출하면 안 됩니다.
 2. 기존 매물은 소유권 확인 후 관리키를 이관하거나 데모를 다시 생성하세요. 공개 서버가 발급한 관리키를 git/로그/URL/공개 보증서에 저장하지 마세요.
 3. 로컬 서버는 단일 프로세스로 운영하세요. Firestore 프로젝트의 Admin 자격증명/비공개 컬렉션 접근 설정과 실제 연결 테스트가 필요합니다.
-4. 실제 파손 사진·실제 Gemini·Firestore QA와 가격 갱신 운영 설정은 남아 있습니다. 자동/실시간 시세나 실제 계정 인증/결제를 제공한다고 안내하면 안 됩니다.
+4. 수집 코드는 실제 실행했지만 일별 예약/Cloud 운영 설정은 가동하지 않았습니다. 실제 파손 사진·실제 Gemini·Firestore/Cloud QA가 남았습니다. 실시간 견적·실제 계정 인증/결제를 제공한다고 안내하면 안 됩니다. 민팃의 깨진 조건, 폰삼의 미확정 모델/문의-표 충돌은 기존 자료를 유지합니다.
 5. 작업 브랜치는 `codex/price-platform-flow`, 기준 main은 `108de0a`입니다. main 병합/배포는 진행하지 않았습니다. 원격 업로드 결과와 커밋 ID는 작업 완료 보고의 Git 결과를 확인하세요.
 
 ## 석훈님께 보낼 카톡 초안
 
-석훈님, 시세·처리 안내와 플랫폼 판매 흐름을 `codex/price-platform-flow`에서 수정했습니다. 희망가 등록→구매자 노출→문의 저장/판매자 확인→명시적 판매 완료를 연결했고 파손·시세 없음도 등록됩니다. 모름 보존, 업체 참고가/희망가 구분, 가격 점수 제외와 갱신 후보 검증 도구도 반영했습니다. 기존 자체 점검·통합 테스트 11개·Chrome 화면 흐름은 통과했고 실제 파손 사진/Gemini/Firestore는 미검증입니다. 기존 매물 관리키 이관 등 주의사항은 `common/docs/PRICE_PLATFORM_HANDOFF.md`에 정리했습니다. 현재 저장소 쓰기 권한이 없으면 제 계정 `younghwi-ko`에 브랜치 push 권한이 필요합니다. 권한 확인 후 브랜치 올리면 main 통합 검토 부탁드립니다.
+석훈님, 플랫폼 판매 흐름에 이어 실제 공개 업체 시세 수집→검증→기존 참고가 갱신까지 실행했습니다. 기존 1,784행/상태 분류는 유지했고 업체 원자료·실패/충돌 기록도 남겼습니다. 일별 실행/예약·Cloud Run 설정과 Gemini 검색 근거 검증도 구현했으며 예약/배포는 하지 않았습니다. 정상 npm 테스트 20개와 Chrome 판매 흐름·서버 가격 자동 반영이 통과했습니다. 실제 Gemini/Cloud/파손 사진은 자격증명·자료 부족으로 미검증입니다. 작업 브랜치는 codex/price-platform-flow이며 최신 커밋은 작업 완료 보고를 확인해 주세요. younghwi-ko 계정의 쓰기 권한이 없어 업로드 대기 중이고, 최신 bundle과 인계 문서를 준비했습니다.

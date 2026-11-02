@@ -1,0 +1,32 @@
+# 준비용 템플릿. 실제 프로젝트/이미지/서비스 계정을 채운 뒤 운영자가 별도로 적용.
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: green-circuit-price-daily
+spec:
+  template:
+    spec:
+      taskCount: 1
+      parallelism: 1
+      template:
+        spec:
+          serviceAccountName: PRICE_JOB_SERVICE_ACCOUNT
+          timeoutSeconds: '1800'
+          maxRetries: 1
+          containers:
+            - image: PRICE_JOB_IMAGE
+              command: ['node']
+              args: ['part2_price_disposal/scripts/price-daily.js', 'run', '--apply', '--cloud']
+              env:
+                - name: PRICE_BUCKET
+                  value: PRICE_BUCKET_NAME
+                - name: PRICE_OBJECT
+                  value: prices/current.csv
+                - name: PRICE_CSV_PATH
+                  value: /tmp/green-circuit-prices/current.csv
+                - name: PRICE_JOB_DIR
+                  value: /tmp/green-circuit-price-job
+                - name: PRICE_BOOTSTRAP_FROM_REPO
+                  value: 'false'
+                - name: FIREBASE_PROJECT_ID
+                  value: PROJECT_ID

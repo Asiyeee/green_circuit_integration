@@ -1,0 +1,46 @@
+{
+  "verifiedAt": "2026-11-02T18:46:39.783Z",
+  "sourceRunId": "2026-11-02T18-26-22-746Z-7548",
+  "model": "iPhone 17e",
+  "storage": "256GB",
+  "condition": "clean",
+  "before": {
+    "min": 520000,
+    "max": 607000
+  },
+  "after": {
+    "min": 470000,
+    "max": 607000
+  },
+  "serverRestarted": false,
+  "oldCertificatePreserved": true,
+  "newCertificateUsesRefreshedSnapshot": true,
+  "invalidSnapshotRejected": true,
+  "rawEvidenceReproducedSha256": "fefb516e6eef6a02c70de78347f65ec767ff6e12a5a5fedbe1b968fd824148b3",
+  "rowsPreserved": 1784,
+  "note_ko": "실제 수집 원자료로 재생성한 CSV의 서버 반영 검증. 실제 기기 검수/매입 정확도 검증 아님",
+  "previousChecks": [
+    {
+      "verifiedAt": "2026-11-02T18:17:20.709Z",
+      "sourceRunId": "2026-11-02T18-13-35-821Z-25448",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "clean",
+      "before": {
+        "min": 950000,
+        "max": 1000000
+      },
+      "after": {
+        "min": 950000,
+        "max": 998000
+      },
+      "serverRestarted": false,
+      "oldCertificatePreserved": true,
+      "newCertificateUsesRefreshedSnapshot": true,
+      "invalidSnapshotRejected": true,
+      "rawEvidenceReproducedSha256": "d089cb00d78c90378ee6ae261a7a84b7494feee4e0472b6555a5c5940e185720",
+      "rowsPreserved": 1784,
+      "note_ko": "실제 수집 원자료로 재생성한 CSV의 서버 반영 검증. 실제 기기 검수/매입 정확도 검증 아님"
+    }
+  ]
+}

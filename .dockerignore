@@ -1,0 +1,8 @@
+.git
+node_modules
+.env*
+store
+results
+firebase-service-account*.json
+part2_price_disposal/data/refresh-staging
+part2_price_disposal/data/refresh-backups

@@ -325,6 +325,7 @@ async function handle(req, res, cfg, state) {
 
   if (state.buyerRoutes && await state.buyerRoutes(req, res, url)) return; // ④ 구매자: 토큰 없이 열림
   const given = req.headers['x-access-token'] || url.searchParams.get('t');
+  if (state.priceSync && tokenOk(given, cfg.token) && ['/api/price/quote', '/api/certificates'].includes(p)) await state.priceSync.ensure();
   if (state.sellerRoutes && await state.sellerRoutes(req, res, url, tokenOk(given, cfg.token))) return;
 
   if (p.startsWith('/api/')) {
@@ -407,6 +408,10 @@ function start(options = {}) {
   const state = { calls: [], planIdx: 0, textPlanIdx: 0 };
   const store = options.store || createStore();
   state.store = store;
+  if (process.env.PRICE_BUCKET) {
+    const price = require('./part2_price_disposal/lib/price');
+    state.priceSync = require('./part2_price_disposal/lib/price-cloud').createCloudSync({ onWarning: price.setExternalWarning });
+  }
   state.buyerRoutes = createBuyerRoutes({ store, listItem, readJson, sendJson });
   state.sellerRoutes = createSellerRoutes({
     cfg, state, store, readJson, sendJson, httpError,

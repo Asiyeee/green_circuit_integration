@@ -24,12 +24,12 @@ test('승격 실패 시 기존 자료 보존, 증빙·검토 해시 일치 시�
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gc-refresh-'));
   try {
     const live = path.join(dir, 'live.csv'), candidate = path.join(dir, 'candidate.csv'), review = path.join(dir, 'review.json');
-    const candidateCsv = csv([rows[0]]);
+    const candidateCsv = csv(rows);
     fs.writeFileSync(live, source); fs.writeFileSync(candidate, candidateCsv);
     fs.writeFileSync(review, '{}');
     assert.throws(() => promote(candidate, review, live), /해시 불일치/);
     assert.equal(fs.readFileSync(live, 'utf8'), source);
-    const urls = [...new Set(JSON.parse(rows[0][headers.indexOf('source_quotes_json')]).flatMap(q => [q.source_url, q.condition_source_url]))];
+    const urls = [...new Set(rows.flatMap(row => JSON.parse(row[headers.indexOf('source_quotes_json')]).flatMap(q => [q.source_url, q.condition_source_url])))];
     // 합성 테스트 증빙. 실제 원문 수집/검증을 수행했다는 의미가 아님.
     fs.writeFileSync(path.join(dir, 'synthetic-evidence.txt'), 'synthetic test fixture only');
     const record = { reviewer: 'test fixture', reviewedAt: new Date().toISOString(), candidateSha256: sha(candidateCsv), baseSha256: sha(source), fullSnapshotConfirmed: true, modelStorageGradeAmountsConfirmed: true, sources: urls.map(url => ({ url, verified: true, evidenceFile: 'synthetic-evidence.txt', evidenceSha256: sha('synthetic test fixture only') })) };

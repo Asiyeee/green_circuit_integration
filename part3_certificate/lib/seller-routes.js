@@ -242,6 +242,7 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
 function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJson }) {
   const { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor } = createSellerService({ cfg, store, httpError, geminiJson });
   const market = createMarketService(store);
+  let searchCalls = [];
 
   // 처리했으면 true
   return async function handle(req, res, url, tokenValid) {
@@ -309,6 +310,9 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
       sendJson(res, 200, price.options(url.searchParams.get('brand'), url.searchParams.get('model')));
       return true;
     }
+    if (req.method === 'GET' && p === '/api/price/status') {
+      sendJson(res, 200, price.datasetInfo()); return true;
+    }
     if (req.method === 'POST' && p === '/api/price/quote') {
       const b = await readJson(req);
       const input = { brand: b.brand, model: b.model, storage: b.storage, conditionCode: b.conditionCode, knownFault: resolveFault(b.knownFault, b.testSummary).knownFault };
@@ -316,6 +320,13 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
       const disposal = disposalFor({ brand: b.brand, conditionCode: b.conditionCode, price: pr, report: { summary: b.testSummary }, analysis: analysisOf(b.assessId) });
       sendJson(res, 200, { price: pr, carbon: carbon.receipt(input), disposal: { ...disposal, manual: disposal.manualSections.map(assessment.manualSection).filter(Boolean) } });
       return true;
+    }
+    if (req.method === 'POST' && p === '/api/price/search') {
+      searchCalls = searchCalls.filter(at => Date.now() - at < 60000);
+      if (searchCalls.length >= 3) throw httpError(429, '시세 검색은 분당 3회까지 가능합니다');
+      searchCalls.push(Date.now());
+      const result = await require('../../part2_price_disposal/lib/price-search').searchPrices({ cfg, query: await readJson(req) });
+      sendJson(res, 200, result); return true;
     }
     if (req.method === 'POST' && p === '/api/assess') {
       sendJson(res, 200, await analyzePhotos(await readJson(req)));
