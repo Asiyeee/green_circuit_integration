@@ -2,7 +2,7 @@
 .gcloudignore
 .git
 .gitignore
-.env
+.env*
 node_modules/
 store/
 results/

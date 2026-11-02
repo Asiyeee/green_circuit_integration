@@ -26,8 +26,9 @@ const GEMINI_PER_MINUTE = 20;
 const GEMINI_TIMEOUT_MS = 60000; // 요청 1건당 제한. 헤징(20초)까지 합쳐도 80초 < Cloudflare 터널 한도(약 100초)
 
 function loadEnv() {
-  const p = path.join(ROOT, '.env');
-  if (!fs.existsSync(p)) return;
+  // 윈도우 메모장으로 만들면 숨은 확장자 때문에 .env.txt 가 되기 쉬워서 그것도 읽습니다.
+  const p = ['.env', '.env.txt'].map((n) => path.join(ROOT, n)).find((f) => fs.existsSync(f));
+  if (!p) return;
   for (const line of fs.readFileSync(p, 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
     if (!m) continue;

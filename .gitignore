@@ -1,4 +1,6 @@
-.env
+# .env, .env.txt 등 키가 든 파일은 전부 제외 (예시 파일만 올림)
+.env*
+!.env.example
 results/
 node_modules/
 *.log
