@@ -15,11 +15,15 @@
     .gc-tabs{position:sticky;top:0;z-index:20;display:flex;justify-content:center;gap:4px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
     .gc-tabs a{flex:0 1 160px;text-align:center;padding:8px 0;border-radius:999px;font-weight:700;font-size:14px;color:var(--ink-2);text-decoration:none}
     .gc-tabs a[aria-current=page]{background:var(--primary);color:var(--on-primary)}
-    .gc-tabs a:not([aria-current=page]):hover{background:var(--surface-2)}`;
+    .gc-tabs a:not([aria-current=page]):not(.gc-home):hover{background:var(--surface-2)}
+    .gc-tabs .gc-home{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:10px}
+    .gc-tabs .gc-home img{width:22px;height:22px}
+    .gc-tabs{padding-left:56px;padding-right:56px}`;
   const nav = document.createElement('nav');
   nav.className = 'gc-tabs';
   nav.setAttribute('aria-label', '화면 전환');
-  nav.innerHTML = tabs.map(([k, label, href]) => `<a href="${href}"${k === active ? ' aria-current="page"' : ''}>${label}</a>`).join('');
+  const logo = matchMedia('(prefers-color-scheme: dark)').matches ? '/assets/logo-dark.svg' : '/assets/logo.svg';
+  nav.innerHTML = `<a class="gc-home" href="/start" aria-label="Green Circuit 홈"><img src="${logo}" alt=""></a>` + tabs.map(([k, label, href]) => `<a href="${href}"${k === active ? ' aria-current="page"' : ''}>${label}</a>`).join('');
   document.head.append(css);
   document.body.prepend(nav);
 })();

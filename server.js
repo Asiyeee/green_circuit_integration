@@ -307,6 +307,12 @@ async function handle(req, res, cfg, state) {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
 
+  // 시작 화면 (common/home.html). 팀 합의 후 루트(/)로 바꿀 수 있음
+  if (req.method === 'GET' && (p === '/start' || p === '/home')) {
+    const html = fs.readFileSync(path.join(ROOT, 'common', 'home.html'));
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    return res.end(html);
+  }
   if (req.method === 'GET' && (p === '/' || p === '/index.html')) {
     const html = fs.readFileSync(path.join(ROOT, 'part1_hardware_test', 'index.html'));
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });

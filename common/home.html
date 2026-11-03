@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Green Circuit · 중고폰 성능 보증서</title>
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+  /* 시작 화면 전용 (공통 토큰은 /assets/ui.css) */
+  .hero-brand{display:flex;align-items:center;gap:10px;margin:20px 0 4px}
+  .hero-brand img{width:32px;height:32px}
+  .hero-brand b{font-size:18px;letter-spacing:-.02em}
+
+  .path{display:flex;align-items:center;gap:14px;padding:20px;border-radius:var(--radius);text-decoration:none;margin-bottom:12px;transition:transform .1s}
+  .path:active{transform:scale(.99)}
+  .path-body{flex:1;min-width:0}
+  .path-label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+  .path-title{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+  .path-desc{display:block;font-size:13px}
+  .path-arrow{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+  .path-arrow svg{width:16px;height:16px}
+
+  .path.seller{background:var(--primary);color:var(--on-primary)}
+  .path.seller .path-label,.path.seller .path-desc{opacity:.85}
+  .path.seller .path-arrow{background:color-mix(in srgb,var(--on-primary) 18%,transparent)}
+  .path.buyer{background:var(--surface);color:var(--ink)}
+  .path.buyer .path-label{color:var(--primary)}
+  .path.buyer .path-desc{color:var(--ink-2)}
+  .path.buyer .path-arrow{background:var(--primary-weak);color:var(--primary)}
+
+  .steps{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:16px}
+  .steps li{display:flex;gap:14px;align-items:center}
+  .steps .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--primary-weak);color:var(--primary);font-weight:700;font-size:14px;display:grid;place-items:center}
+  .steps b{display:block;font-size:15px;font-weight:600}
+  .steps span{display:block;font-size:13px;color:var(--ink-3)}
+
+  .eco-card{display:flex;gap:14px;align-items:center;background:var(--eco-weak);color:var(--eco);border-radius:var(--radius);padding:18px 20px}
+  .eco-card svg{flex:none;width:26px;height:26px}
+  .eco-card span{display:block;font-size:13px}
+  .eco-card b{display:block;font-size:15px;letter-spacing:-.02em}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="hero-brand">
+    <picture>
+      <source srcset="/assets/logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="/assets/logo.svg" alt="">
+    </picture>
+    <b>Green Circuit</b>
+  </div>
+
+  <div class="page-head">
+    <p class="eyebrow">앱 설치 없이 3분 점검</p>
+    <h1 class="title">중고폰, 상태를 증명하고<br>믿고 거래하세요</h1>
+    <p class="lead">브라우저에서 기기를 점검하면 성능 보증서와 시세·탄소 감축량을 함께 받아요.</p>
+  </div>
+
+  <a class="path seller" id="go-seller" href="/">
+    <span class="path-body">
+      <span class="path-label">판매자</span>
+      <span class="path-title">내 기기 점검하고 보증서 받기</span>
+      <span class="path-desc">카메라 · 마이크 · 스피커 · 터치 · 센서</span>
+    </span>
+    <span class="path-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+
+  <a class="path buyer" href="/buyer">
+    <span class="path-body">
+      <span class="path-label">구매자</span>
+      <span class="path-title">보증서 있는 기기 찾기</span>
+      <span class="path-desc">원하는 조건과 보증서를 바로 비교해요</span>
+    </span>
+    <span class="path-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+
+  <section class="section" style="margin-top:8px">
+    <h2 class="section-title">이렇게 진행돼요</h2>
+    <ol class="steps">
+      <li><span class="num">1</span><div><b>웹 성능 점검</b><span>링크만 열면 5가지를 자동으로 점검</span></div></li>
+      <li><span class="num">2</span><div><b>성능 보증서 발급</b><span>시세 · 탄소 영수증 포함, QR로 공유</span></div></li>
+      <li><span class="num">3</span><div><b>판매 또는 올바른 배출</b><span>거래할수록 환경 온도가 올라가요</span></div></li>
+    </ol>
+  </section>
+
+  <div class="eco-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21c0-9 6-15 15-16-1 9-7 15-15 16z"/><path d="M5 21l7-7"/></svg>
+    <div><span>다시 쓰는 기기 한 대가</span><b>새 기기 생산 탄소를 줄여요</b></div>
+  </div>
+</main>
+
+<script>
+  // 판매자 화면은 접속 토큰(?t=)이 필요: nav.js 와 같은 방식으로 기억된 토큰을 붙임
+  (() => {
+    let t = new URLSearchParams(location.search).get('t');
+    try { if (t) localStorage.setItem('gc-token', t); else t = localStorage.getItem('gc-token'); } catch {}
+    if (t) document.getElementById('go-seller').href = '/?t=' + encodeURIComponent(t);
+  })();
+</script>
+<script src="/assets/nav.js"></script>
+</body>
+</html>

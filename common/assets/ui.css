@@ -20,6 +20,8 @@
   --warn:#b86e00;
   --warn-weak:#fff4e0;
   --paper:#fffdf7;
+  --eco:#9a5b1e;          /* 환경 강조색(구리): 탄소·환경 온도에만 사용 */
+  --eco-weak:#f8eee4;
   --paper-ink:#2a2925;
   --radius:16px;
   --radius-sm:10px;
@@ -30,7 +32,7 @@
   :root{
     --bg:#101215;--surface:#1a1d21;--surface-2:#22262b;--ink:#eef0f2;--ink-2:#b0b8c1;--ink-3:#7e8792;
     --line:#2b3036;--line-strong:#3a4047;--primary:#2fb383;--primary-press:#27a074;--primary-weak:#163328;--on-primary:#06150f;
-    --danger:#ff6b6a;--danger-weak:#3a1f1f;--warn:#f0aa45;--warn-weak:#3a2c14;--paper:#23231f;--paper-ink:#ecebe3;
+    --danger:#ff6b6a;--danger-weak:#3a1f1f;--warn:#f0aa45;--warn-weak:#3a2c14;--paper:#23231f;--paper-ink:#ecebe3;--eco:#e2a66b;--eco-weak:#3a2a1c;
   }
 }
 
@@ -44,8 +46,8 @@ button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
 .appbar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid transparent}
 .appbar-in{max-width:640px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;text-decoration:none}
-.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--primary);display:grid;place-items:center}
-.brand-mark::before{content:"";width:9px;height:12px;border:2px solid var(--on-primary);border-radius:2.5px}
+.brand-mark{width:22px;height:22px;flex:none;background:url(/assets/logo.svg) center/contain no-repeat}
+@media (prefers-color-scheme:dark){.brand-mark{background-image:url(/assets/logo-dark.svg)}}
 .appbar-meta{font-size:13px;color:var(--ink-3)}
 .page{max-width:640px;margin:0 auto;padding:8px 20px 96px}
 .page-head{padding:16px 0 20px}
