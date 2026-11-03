@@ -14,11 +14,6 @@
   video,img.thumb{width:100%;border-radius:12px;margin-top:12px;display:none;background:#000;aspect-ratio:4/3;object-fit:cover}
   .bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;margin-top:14px}
   .bar>i{display:block;height:100%;width:0;background:var(--primary);transition:width .08s}
-  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;touch-action:none;user-select:none;-webkit-user-select:none}
-  .cell{height:64px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;font-weight:600;transition:background .1s}
-  .cell.hit{background:var(--primary);color:var(--on-primary)}
-  #spk-confirm{display:none;gap:8px;margin-top:8px}
-  #spk-confirm .btn{flex:1}
   .progress{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);font-weight:600}
   .progress-track{width:64px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
   .progress-track i{display:block;height:100%;width:0;background:var(--primary);transition:width .2s}
@@ -45,6 +40,62 @@
   .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px}.kv span{color:var(--ink-3)}
   .pf-note{font-size:12.5px;color:var(--ink-3);margin-top:8px}
   .pf-use{font-size:13.5px;margin:4px 0;color:var(--ink-2)}.pf-use b{font-weight:600;color:var(--ink)}
+
+  /* 촬영 가이드 · 코칭 */
+  .guide{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+  .guide li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:10px 12px}
+  .guide li b{color:var(--ink);font-weight:600;flex:none;min-width:84px}
+  .guide .no{flex:none;width:20px;height:20px;border-radius:50%;background:var(--primary-weak);color:var(--primary);font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+  .coach{margin-top:12px;display:grid;gap:8px}
+  .coach:empty{display:none}
+  .coach-h{font-size:13px;font-weight:700;color:var(--ink-2)}
+  .tip{border-radius:10px;padding:10px 12px;font-size:13.5px;background:var(--surface-2);color:var(--ink-2)}
+  .tip b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .tip.warn{background:var(--warn-weak)}.tip.warn b{color:var(--warn)}
+  .tip.good{background:var(--primary-weak)}.tip.good b{color:var(--primary)}
+  .subtest{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+  .subtest-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px;font-weight:700}
+  .subtest p{font-size:13.5px;color:var(--ink-2);margin:4px 0 0}
+
+  /* 마이크 · 스피커 */
+  .phase{margin-top:12px;border-radius:12px;background:var(--surface-2);padding:14px;display:none}
+  .phase.on{display:block}
+  .phase-k{font-size:12.5px;font-weight:700;color:var(--primary)}
+  .phase-t{font-size:16px;font-weight:700;margin-top:2px}
+  .phase-s{font-size:14px;color:var(--ink-2);margin-top:6px}
+  .phase-s q{display:block;quotes:none;font-size:16px;line-height:1.55;color:var(--ink);font-weight:600;margin-top:4px}
+  .bands{margin-top:12px;display:none}
+  .bands.on{display:block}
+  .bands .sc{grid-template-columns:72px 1fr 64px}
+  .bands .m i.weak{background:var(--warn)}
+  .bands .m i.bad{background:var(--danger)}
+  .ask{display:none;margin-top:12px}
+  .ask.on{display:block}
+  .ask-q{font-size:14px;font-weight:600;margin-bottom:8px}
+  .ask .btn-row{margin-top:0}
+  .count-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .count-btns .btn{min-width:0}
+  .count-btns .wide{grid-column:1/-1}
+  audio{width:100%;margin-top:4px;margin-bottom:8px}
+
+  /* 전체 화면 터치 */
+  .tmap{display:none;margin-top:12px;gap:2px;max-width:120px}
+  .tmap.on{display:grid}
+  .tmap i{aspect-ratio:1;border-radius:2px;background:var(--primary)}
+  .tmap i.miss{background:var(--danger)}
+  html.tf-lock,html.tf-lock body{overflow:hidden;overscroll-behavior:none}
+  #touch-full{position:fixed;inset:0;z-index:1000;background:var(--bg);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+  #touch-full[hidden]{display:none}
+  .tf-grid{position:absolute;inset:0;display:grid;gap:2px;padding:0}
+  .tf-grid i{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-strong);transition:background .08s}
+  .tf-grid i.hit{background:var(--primary);box-shadow:none}
+  .tf-grid i.miss{background:var(--danger-weak);box-shadow:inset 0 0 0 2px var(--danger)}
+  .tf-hud{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(300px,calc(100% - 48px));background:color-mix(in srgb,var(--surface) 94%,transparent);border-radius:16px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.18);text-align:center;pointer-events:none;transition:opacity .15s}
+  #touch-full.touching .tf-hud{opacity:.12}
+  .tf-count{font-size:28px;font-weight:800;letter-spacing:-.03em}
+  .tf-msg{font-size:14px;color:var(--ink-2);margin-top:4px}
+  .tf-btns{display:flex;gap:8px;margin-top:12px;pointer-events:auto}
+  .tf-btns .btn{flex:1;height:40px;font-size:14px}
 </style>
 </head>
 <body>
@@ -86,7 +137,12 @@
       <div><div class="step-no">01</div><h2 class="section-title">카메라</h2></div>
       <span class="status" id="b-camera">대기</span>
     </div>
-    <p class="section-sub">밝은 곳에서 글씨가 있는 종이나 물건을 가까이 찍어 주세요. 사진으로 화질을 평가해요.</p>
+    <p class="section-sub">사진 1장으로 화질을 평가해요. 찍기 전에 세 가지만 맞춰 주세요.</p>
+    <ul class="guide">
+      <li><span class="no">1</span><b>렌즈 닦기</b><span>옷이나 부드러운 천으로 뒷면 렌즈를 한 번 닦아 주세요.</span></li>
+      <li><span class="no">2</span><b>밝은 곳</b><span>창가나 밝은 조명 아래에서, 폰 그림자가 피사체를 가리지 않게.</span></li>
+      <li><span class="no">3</span><b>글씨 있는 종이</b><span>20~30cm 떨어져 글씨를 한 번 탭해 초점을 맞추고, 두 손으로 잡고 찍기.</span></li>
+    </ul>
     <div class="btn-row">
       <button class="btn btn-primary" id="cam-photo">사진 찍기</button>
     </div>
@@ -94,7 +150,17 @@
     <video id="cam-video" playsinline muted></video>
     <img id="cam-thumb" class="thumb" alt="">
     <div class="detail" id="d-camera"></div>
+    <div class="coach" id="cam-coach"></div>
     <div id="profile"></div>
+
+    <div class="subtest" id="ll-box" hidden>
+      <div class="subtest-h"><span>추가 · 어두운 곳 테스트</span><span class="status" id="b-lowlight">선택</span></div>
+      <p>밝은 사진 1장으로는 밤·실내 성능을 알 수 없어요. 불을 끄거나 커튼을 친 방에서, 물건이 겨우 보이는 정도의 어둠에서 한 장 더 찍어 주세요. 플래시는 꺼 주세요.</p>
+      <div class="btn-row"><button class="btn btn-secondary" id="ll-photo">어두운 곳에서 한 장 더</button></div>
+      <input type="file" id="ll-file" accept="image/*" capture="environment" hidden>
+      <img id="ll-thumb" class="thumb" alt="">
+      <div class="detail" id="d-lowlight"></div>
+    </div>
   </section>
 
   <section class="section test">
@@ -102,9 +168,16 @@
       <div><div class="step-no">02</div><h2 class="section-title">마이크</h2></div>
       <span class="status" id="b-microphone">대기</span>
     </div>
-    <p class="section-sub">시작을 누르고 5초 동안 말하거나 박수를 쳐 주세요.</p>
+    <p class="section-sub">두 단계로 재요. 먼저 2초 동안 조용히 해서 주변 잡음을 재고, 이어서 화면의 문장을 소리 내어 읽어 음질을 재요. 끝나면 녹음을 직접 들어 볼 수 있어요.</p>
     <div class="btn-row"><button class="btn btn-primary" id="mic-start">마이크 점검 시작</button></div>
+    <div class="phase" id="mic-phase"><div class="phase-k" id="mic-phase-k"></div><div class="phase-t" id="mic-phase-t"></div><div class="phase-s" id="mic-phase-s"></div></div>
     <div class="bar"><i id="mic-bar"></i></div>
+    <div class="bands" id="mic-bands"></div>
+    <div class="ask" id="mic-listen">
+      <div class="ask-q">녹음을 들어 보세요. 목소리가 또렷하게 들리나요?</div>
+      <audio id="mic-audio" controls playsinline></audio>
+      <div class="btn-row"><button class="btn btn-good" id="mic-clear">또렷해요</button><button class="btn btn-danger" id="mic-noisy">잡음·끊김이 있어요</button></div>
+    </div>
     <div class="detail" id="d-microphone"></div>
   </section>
 
@@ -113,10 +186,27 @@
       <div><div class="step-no">03</div><h2 class="section-title">스피커</h2></div>
       <span class="status" id="b-speaker">대기</span>
     </div>
-    <p class="section-sub">점점 높아지는 소리가 나와요. 무음 모드를 끄고 볼륨을 올려 주세요.</p>
-    <div class="btn-row"><button class="btn btn-primary" id="spk-play">소리 재생</button></div>
-    <div id="spk-confirm">
-      <button class="btn btn-good" id="spk-yes">들렸어요</button><button class="btn btn-danger" id="spk-no">안 들렸어요</button>
+    <p class="section-sub">무음 모드를 끄고 볼륨을 끝까지 올려 주세요. 이어폰·블루투스는 빼 주세요.</p>
+
+    <div class="subtest" style="border-top:0;padding-top:0;margin-top:12px">
+      <div class="subtest-h"><span>① 삐 소리 세기</span><span class="muted" style="font-weight:600">필수</span></div>
+      <p>삐 소리가 몇 번 나는지 세어 주세요. 매번 횟수가 달라져요.</p>
+      <div class="btn-row"><button class="btn btn-primary" id="spk-play">소리 듣기</button></div>
+      <div class="ask" id="spk-count">
+        <div class="ask-q">몇 번 들렸나요?</div>
+        <div class="count-btns">
+          <button class="btn btn-secondary" data-n="1">1번</button><button class="btn btn-secondary" data-n="2">2번</button><button class="btn btn-secondary" data-n="3">3번</button>
+          <button class="btn btn-secondary" data-n="4">4번</button><button class="btn btn-secondary" data-n="5">5번</button><button class="btn btn-secondary" data-n="6">6번</button>
+          <button class="btn btn-danger wide" data-n="0">안 들렸어요</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subtest">
+      <div class="subtest-h"><span>② 음역대 자동 측정</span><span class="muted" style="font-weight:600">권장</span></div>
+      <p>폰을 책상에 내려놓고 조용히 해 주세요. 낮은 음부터 높은 음까지 6가지 소리를 내고, 마이크로 다시 들어서 어느 음역이 잘 나오는지 재요.</p>
+      <div class="btn-row"><button class="btn btn-secondary" id="spk-auto">자동 측정 시작</button></div>
+      <div class="bands" id="spk-bands"></div>
     </div>
     <div class="detail" id="d-speaker"></div>
   </section>
@@ -126,9 +216,9 @@
       <div><div class="step-no">04</div><h2 class="section-title">터치</h2></div>
       <span class="status" id="b-touch">대기</span>
     </div>
-    <p class="section-sub">12칸을 모두 눌러 주세요. 두 손가락으로 함께 누르면 멀티터치도 확인돼요.</p>
-    <div class="pad" id="pad"></div>
-    <div class="btn-row"><button class="btn btn-text" id="touch-reset">다시 하기</button></div>
+    <p class="section-sub">화면 전체가 작은 칸으로 채워져요. 손가락으로 쓸어서 모든 칸을 칠해 주세요. 모서리와 가장자리 칸이 터치 불량이 가장 잘 생기는 곳이에요.</p>
+    <div class="btn-row"><button class="btn btn-primary" id="touch-start">전체 화면 터치 점검 시작</button></div>
+    <div class="tmap" id="touch-map"></div>
     <div class="detail" id="d-touch"></div>
   </section>
 
@@ -323,9 +413,13 @@ function imageMetrics(c){
   for(let i=0;i<n;i++){ const y=0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2]; g[i]=y; sum+=y; if(y<15)dark++; if(y>240)bright++; }
   const mean=sum/n; let sq=0; for(let i=0;i<n;i++){ const t=g[i]-mean; sq+=t*t; }
   let ls=0, lq=0, cnt=0;
-  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){ const i=y*w+x; const l=g[i-1]+g[i+1]+g[i-w]+g[i+w]-4*g[i]; ls+=l; lq+=l*l; cnt++; }
+  const hist=new Uint32Array(1024);   // |라플라시안| 히스토그램(0.25 단위) → 중앙값으로 노이즈 추정
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){ const i=y*w+x; const l=g[i-1]+g[i+1]+g[i-w]+g[i+w]-4*g[i]; ls+=l; lq+=l*l; cnt++; hist[Math.min(1023,(Math.abs(l)*4)|0)]++; }
   const lm=ls/cnt;
-  return {analysisSize:`${w}x${h}`, meanBrightness:round(mean,1), contrastStd:round(Math.sqrt(sq/n),1), laplacianVariance:round(lq/cnt-lm*lm,1), darkClipPct:round(dark/n*100,1), brightClipPct:round(bright/n*100,1)};
+  let acc=0, med=0; for(let k=0;k<1024;k++){ acc+=hist[k]; if(acc>=cnt/2){ med=k/4; break; } }
+  // 노이즈 표준편차 추정(밝기 0~255 기준). 가장자리(엣지)는 중앙값에 거의 영향을 주지 않아 평평한 부분의 노이즈를 잽니다.
+  const noiseSigma = 1.4826*med/Math.sqrt(20);
+  return {analysisSize:`${w}x${h}`, meanBrightness:round(mean,1), contrastStd:round(Math.sqrt(sq/n),1), laplacianVariance:round(lq/cnt-lm*lm,1), darkClipPct:round(dark/n*100,1), brightClipPct:round(bright/n*100,1), noiseSigma:round(noiseSigma,2)};
 }
 
 /* EXIF-START */
@@ -424,7 +518,7 @@ function exifDiagnose(buf){
 }
 
 const pickKeys=(o,ks)=>Object.fromEntries(ks.filter(k=>o&&o[k]!==undefined).map(k=>[k,o[k]]));
-function buildMetadata(file, local, fullW, fullH, exif){
+function buildMetadata(file, local, fullW, fullH, exif, purpose='main'){
   const caps=camStreamInfo?.capabilities||{};
   const dd=declaredDevice();
   return {
@@ -437,7 +531,11 @@ function buildMetadata(file, local, fullW, fullH, exif){
     },
     photo:{resolution:`${fullW}x${fullH}`, megapixels:round(fullW*fullH/1e6,1), fileSizeKB:round(file.size/1024,0), mime:file.type},
     exif: exif||null,
-    local_metrics: local
+    local_metrics: local,
+    // 어떤 지시로 찍은 사진인지 (prompts/camera-profile.system.md 의 Capture context 참고)
+    capture_context: purpose==='low_light'
+      ? {purpose:'low_light', instruction_given_ko:'불을 끄거나 커튼을 친 어두운 방에서, 플래시 없이 찍어 주세요'}
+      : {purpose:'main', instruction_given_ko:'밝은 곳에서 글씨가 있는 종이를 20~30cm 거리에서 찍어 주세요', low_light_photo_planned:true}
   };
 }
 
@@ -554,10 +652,87 @@ Return ONLY a JSON object with these keys:
 }
 let analysisSeq = 0, aiIv = null;
 function stopAiTimer(){ if(aiIv){ clearInterval(aiIv); aiIv = null; } }
+
+/* 촬영 코칭: 사진 측정값 + AI 판정을 보고 "이렇게 다시 찍어 보세요" 안내를 만듭니다 */
+const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const EXPOSURE_HOWTO = IS_IOS
+  ? '카메라 화면을 한 번 탭한 뒤, 옆에 뜨는 노란 해(☀) 아이콘을 위아래로 밀면 밝기가 바뀌어요.'
+  : '카메라 화면을 한 번 탭하면 나오는 밝기 막대(☀)를 밀면 밝기가 바뀌어요.';
+function cameraCoaching(local, qa, profile, ll){
+  const tips=[]; const add=(code,level,title_ko,text_ko)=>tips.push({code,level,title_ko,text_ko});
+  if(!local) return tips;
+  const def=new Set(profile?.defects||[]);
+  const b=local.meanBrightness;
+  if(qa?.lens_obstruction || def.has('lens_smudge'))
+    add('lens_dirty','warn','렌즈가 뿌옇거나 가려졌어요','부드러운 천으로 뒷면 렌즈를 닦고, 손가락이나 케이스가 렌즈를 가리지 않는지 확인한 뒤 다시 찍어 주세요.');
+  if(b<70 || qa?.exposure==='underexposed' || def.has('underexposed'))
+    add('too_dark','warn','사진이 어두워요',`창가나 밝은 조명 아래로 옮겨 주세요. ${EXPOSURE_HOWTO} 밝기를 조금 올려 주세요. 어두운 사진은 AI가 저조도 성능까지 낮게 볼 수 있어요.`);
+  else if(b>205 || local.brightClipPct>12 || qa?.exposure==='overexposed' || def.has('overexposed'))
+    add('too_bright','warn','밝은 부분이 하얗게 날아갔어요',`조명이 종이에 바로 반사되지 않게 각도를 조금 틀어 주세요. ${EXPOSURE_HOWTO} 밝기를 조금 내려 주세요.`);
+  if(local.darkClipPct>25 && b>=70)
+    add('shadow','info','그림자가 크게 졌어요','폰 그림자가 피사체를 가리지 않도록 조명을 옆이나 뒤쪽에 두고 찍어 주세요.');
+  if(qa?.motion_blur || def.has('motion_blur'))
+    add('shake','warn','사진이 흔들렸어요','두 손으로 잡고 팔꿈치를 몸에 붙여 주세요. 셔터를 누른 뒤 1초 동안 움직이지 마세요.');
+  else if(def.has('out_of_focus') || local.laplacianVariance<40)
+    add('focus','warn','초점이 맞지 않았어요','피사체에서 20cm 이상 떨어지고, 찍기 전에 글씨 부분을 한 번 탭해 초점을 맞춰 주세요.');
+  if(local.contrastStd<22)
+    add('flat_subject','info','찍은 대상이 밋밋해요','글씨가 빼곡한 종이나 무늬가 있는 물건을 찍으면 선명도를 더 정확하게 잴 수 있어요.');
+  if(def.has('heavy_noise') && b>=70)
+    add('noise','info','자글자글한 노이즈가 보여요','더 밝은 곳에서 찍으면 노이즈가 줄어 카메라 성능을 공정하게 잴 수 있어요.');
+  if(def.has('color_cast'))
+    add('color_cast','info','색이 한쪽으로 치우쳤어요','노란 조명과 형광등이 섞이지 않은 곳, 가능하면 낮의 자연광 아래에서 찍어 보세요.');
+  if(!ll && (profile?.not_ideal_for||[]).includes('night_lowlight'))
+    add('lowlight_untested','info','‘야간·저조도’는 아직 측정 전이에요','밝은 사진 1장으로는 어두운 곳 성능을 알 수 없어서 AI가 조심스럽게 적은 거예요. 아래 ‘어두운 곳 테스트’로 한 장 더 찍으면 실제로 확인해요.');
+  return tips;
+}
+function renderCoaching(tips, pending){
+  const box=$('#cam-coach'); box.textContent='';
+  if(!tips.length){
+    if(!pending){ const t=el('div','tip good'); t.append(el('b',null,'촬영 상태가 좋아요'), document.createTextNode('밝기·초점·흔들림 모두 평가하기 좋은 사진이에요.')); box.append(t); }
+    return;
+  }
+  const warn=tips.some(t=>t.level==='warn');
+  box.append(el('div','coach-h', warn ? '이렇게 다시 찍으면 더 정확해요' : '참고해 주세요'));
+  tips.forEach(tp=>{ const t=el('div','tip '+tp.level); t.append(el('b',null,tp.title_ko), document.createTextNode(tp.text_ko)); box.append(t); });
+  if(warn){ const b=el('button','btn btn-secondary','안내대로 다시 찍기'); b.style.width='100%'; b.onclick=()=>$('#cam-photo').click(); box.append(b); }
+}
+
+/* 저조도 결과를 메인 프로필에 반영 (원본 프로필은 cam.main.profile 에 그대로 둠) */
+function applyLowLight(profile, ll){
+  if(!profile || !ll || ll.score==null) return profile;
+  const NL='night_lowlight';
+  profile.scores = {...(profile.scores||{}), low_light_potential: ll.score};
+  let best=(profile.best_for||[]).filter(b=>b.use!==NL), notIdeal=(profile.not_ideal_for||[]).filter(u=>u!==NL);
+  if(ll.score>=7){ if(best.length<3) best.push({use:NL, reason_ko:`어두운 곳 추가 촬영에서 저조도 점수 ${ll.score}/10 (노이즈·디테일 양호)`}); }
+  else if(ll.score<=4){ if(notIdeal.length<3) notIdeal.push(NL); }
+  profile.best_for=best; profile.not_ideal_for=notIdeal;
+  profile.lowLightSource='extra_photo';
+  return profile;
+}
+function lowLightLocalScore(local){
+  const s=local.noiseSigma1024 ?? local.noiseSigma;
+  const steps=[[1.0,9],[1.6,8],[2.4,7],[3.4,6],[4.8,5],[6.5,4],[9,3]];
+  let score=2; for(const [lim,v] of steps){ if(s<lim){ score=v; break; } }
+  if(local.meanBrightness<25) score-=1;   // 어둠을 거의 못 끌어올림
+  return Math.max(1,Math.min(10,score));
+}
+
+// 카메라 항목 = 메인 사진(cam.main) + 선택: 어두운 곳 사진(cam.lowLight)
+const cam = {main:null, lowLight:null};
+function commitCamera(){
+  const m=cam.main; if(!m) return;
+  const profile = m.profile ? applyLowLight(JSON.parse(JSON.stringify(m.profile)), cam.lowLight) : null;
+  const coaching = cameraCoaching(m.photo?.localMetrics, m.qa, profile, cam.lowLight);
+  record('camera', m.status, {stream:m.stream, photo:m.photo, profile, checks:m.checks, verdictBasis:m.verdictBasis, coaching, lowLight:cam.lowLight});
+  if(m.status==='pending') $('#b-camera').textContent='AI 분석 중';
+  renderProfile(profile);
+  renderCoaching(m.status==='pending' ? coaching.filter(t=>t.code!=='lowlight_untested') : coaching, m.status==='pending');
+}
+
 const onPhoto = async e => {
   const file = e.target.files[0]; e.target.value=''; if(!file) return;
   const seq = ++analysisSeq; stopAiTimer();
-  setDetail('camera','사진 처리 중...'); renderProfile(null);
+  setDetail('camera','사진 처리 중...'); renderProfile(null); $('#cam-coach').textContent='';
   if(!camStreamInfo) camStreamInfo = await probeStream();
   if(seq !== analysisSeq) return;
   try{
@@ -571,15 +746,14 @@ const onPhoto = async e => {
     let exif=null, exifDiag={status:'unreadable',segments:[]};
     try{ const ab=await file.arrayBuffer(); exif = parseExif(ab); exifDiag = exifDiagnose(ab); }catch(_){}
     const exifStatus = exif ? 'ok' : (exifDiag.status==='has_exif_segment' ? ((exifDiag.tags&&(exifDiag.tags.ifd0.length+exifDiag.tags.exif.length)>0) ? 'exif_without_camera_tags' : 'exif_unreadable') : exifDiag.status);   // ok | no_exif_segment | exif_without_camera_tags | exif_unreadable | not_jpeg | unreadable
-    const iosOtherBrowser = /FxiOS|CriOS|EdgiOS|OPiOS/.test(navigator.userAgent);
     const th=$('#cam-thumb'); th.src=dataUrl; th.style.display='block';
+    $('#ll-box').hidden=false;
     const localPass = local.laplacianVariance>=60 && local.meanBrightness>=35 && local.meanBrightness<=225;
     const base = {fileName:file.name, fileSizeKB:round(file.size/1024,0), mime:file.type, resolution:`${fullW}x${fullH}`, megapixels:round(fullW*fullH/1e6,1), localMetrics:local, exif, exifStatus, jpegSegments:exifDiag.segments, exifTagIds:exifDiag.tags||null, declaredAtCapture:(declaredDevice()&&declaredDevice().model)?{brand:declaredDevice().brand,model:declaredDevice().model}:null, localPass};
     let line1 = `${fullW}x${fullH} (${base.megapixels}MP) · 선명도 ${local.laplacianVariance} · 밝기 ${local.meanBrightness}`;
     if(!exif){
-      const ios=/iPhone|iPad/.test(navigator.userAgent);
       line1 += exifStatus==='no_exif_segment' ? '\n사진에 촬영 정보(EXIF)가 없어요. 브라우저가 지운 경우예요.'
-             : ios ? '\niOS 는 웹으로 사진을 넘길 때 ISO·셔터·초점거리 같은 카메라 정보를 제거합니다. 정상 동작이며, 이 경우 Gemini 가 사진 내용만으로 평가합니다.'
+             : IS_IOS ? '\niOS 는 웹으로 사진을 넘길 때 ISO·셔터·초점거리 같은 카메라 정보를 지워요. 정상이며, 이때는 AI가 사진만 보고 평가해요.'
              : '\n사진에 ISO·셔터·초점거리 정보가 없어요.';
     }
 
@@ -590,10 +764,9 @@ const onPhoto = async e => {
       const geminiUsed = gemini && !gemini.skipped;
       const photoOk = geminiUsed ? !!gemini.overall_pass : localPass;
       const photo = {...base, gemini:geminiUsed?gemini:null, geminiSkipped:gemini?.skipped?gemini.reason:null, geminiError};
-      const status = photoOk ? 'pass' : 'fail'; // 카메라 정보(stream)는 참고용, 판정은 사진으로
-      record('camera', status, {stream:camStreamInfo, photo, profile, checks, verdictBasis: geminiUsed?'gemini':'local-heuristic'});
-      renderProfile(profile);
-      setDetail('camera', `${line1}\n` + (geminiUsed ? `Gemini: ${gemini.summary_ko||''}` : `Gemini 미사용(${geminiError||gemini?.reason}) → 로컬 기준으로 판정`));
+      cam.main = {status: photoOk?'pass':'fail', stream:camStreamInfo, photo, profile, checks, qa: geminiUsed?gemini:null, verdictBasis: geminiUsed?'gemini':'local-heuristic'};   // 카메라 정보(stream)는 참고용, 판정은 사진으로
+      commitCamera();
+      setDetail('camera', `${line1}\n` + (geminiUsed ? `AI: ${gemini.summary_ko||''}` : `AI 미사용(${geminiError||gemini?.reason}) → 측정값 기준으로 판정`));
     };
 
     const aiAvailable = API.server ? API.geminiEnabled : !!$('#gkey').value.trim();
@@ -602,13 +775,13 @@ const onPhoto = async e => {
       return;
     }
 
-    // 로컬 결과를 먼저 보여주고, AI 분석은 백그라운드로 돌립니다. 그동안 다른 항목을 진행할 수 있어요.
-    record('camera','pending',{stream:camStreamInfo, photo:{...base, gemini:null, geminiSkipped:null, geminiError:null}, profile:null, verdictBasis:null});
-    $('#b-camera').textContent = 'AI 분석 중';
+    // 측정값 기준 안내를 먼저 보여주고, AI 분석은 백그라운드로 돌립니다. 그동안 다른 항목을 진행할 수 있어요.
+    cam.main = {status:'pending', stream:camStreamInfo, photo:{...base, gemini:null, geminiSkipped:null, geminiError:null}, profile:null, checks:null, qa:null, verdictBasis:null};
+    commitCamera();
     const tA = Date.now();
     const tick = () => setDetail('camera', `${line1}\nAI가 사진을 분석하는 중... ${Math.round((Date.now()-tA)/1000)}초\n기다리지 말고 다른 항목을 먼저 진행해도 됩니다.`);
     tick(); aiIv = setInterval(tick, 1000);
-    const meta = buildMetadata(file, local, fullW, fullH, exif);
+    const meta = buildMetadata(file, local, fullW, fullH, exif, 'main');
     askGemini(aiB64, meta).then(r=>({r}), err=>({err})).then(out=>{
       if(seq !== analysisSeq) return;     // 그 사이 재촬영/재확인했다면 이 결과는 버림
       stopAiTimer();
@@ -616,85 +789,399 @@ const onPhoto = async e => {
     });
   }catch(err){
     stopAiTimer();
+    cam.main=null;
     record('camera','fail',{stage:'photo',stream:camStreamInfo, ...errInfo(err)}); setDetail('camera','사진 분석 실패: '+err.message);
   }
 };
 $('#cam-file').onchange = onPhoto;
 
+/* ---------- 카메라 · 어두운 곳 추가 테스트 (선택) ---------- */
+let llSeq = 0;
+function setLowLightBadge(label, cls, text){ const b=$('#b-lowlight'); b.textContent=label; b.className='status '+cls; if(text!=null) $('#d-lowlight').textContent=text; }
+$('#ll-photo').onclick = () => { llSeq++; $('#ll-file').click(); };
+$('#ll-file').onchange = async e => {
+  const file=e.target.files[0]; e.target.value=''; if(!file) return;
+  const seq=++llSeq;
+  setLowLightBadge('처리 중','running','사진 처리 중...');
+  try{
+    const bmp=await loadBitmap(file);
+    const fullW=bmp.width||bmp.naturalWidth, fullH=bmp.height||bmp.naturalHeight;
+    const c1024=drawScaled(bmp,1024);
+    const local=imageMetrics(drawScaled(bmp,512));
+    local.noiseSigma1024=imageMetrics(c1024).noiseSigma;   // 노이즈는 덜 줄인 사진에서 한 번 더
+    const th=$('#ll-thumb'); th.src=c1024.toDataURL('image/jpeg',0.75); th.style.display='block';
+    let exif=null; try{ exif=parseExif(await file.arrayBuffer()); }catch(_){}
+    const b=local.meanBrightness;
+    if(b>110){ setLowLightBadge('다시 찍기','warn',`아직 밝아요 (밝기 ${b}/255). 불을 끄거나 커튼을 쳐서, 물건 윤곽이 겨우 보일 만큼 어둡게 한 뒤 다시 찍어 주세요.`); return; }
+    if(b<6){ setLowLightBadge('다시 찍기','warn','너무 어두워서 아무것도 찍히지 않았어요. 작은 스탠드나 옆방 불빛 정도는 켜 두고 다시 찍어 주세요.'); return; }
+    const localScore=lowLightLocalScore(local);
+    const photo={fileSizeKB:round(file.size/1024,0), resolution:`${fullW}x${fullH}`, localMetrics:local, exif: exif?{iso:exif.iso??null, exposure_time_s:exif.exposure_time_s??null, f_number:exif.f_number??null, flash_fired:exif.flash_fired??null}:null};
+    const aiAvailable = API.server ? API.geminiEnabled : !!$('#gkey').value.trim();
+    let ai=null, aiErr=null;
+    if(aiAvailable){
+      setLowLightBadge('AI 분석 중','running','어두운 곳 사진을 AI가 분석하는 중... (다른 항목을 먼저 진행해도 돼요)');
+      try{ ai=await askGemini(c1024.toDataURL('image/jpeg',0.8).split(',')[1], buildMetadata(file, local, fullW, fullH, exif, 'low_light')); }
+      catch(err){ aiErr=err.message; }
+    }
+    if(seq!==llSeq) return;
+    const p=ai?.profile||null;
+    const aiScore=p?.scores?.low_light_potential ?? null;
+    const score=aiScore ?? localScore;
+    cam.lowLight={status:'done', score, scoreSource: aiScore!=null?'gemini':'local-heuristic', localScore,
+      noise_cleanliness:p?.scores?.noise_cleanliness??null, sharpness:p?.scores?.sharpness??null, defects:p?.defects??null,
+      summary_ko:p?.summary_ko || ai?.qa?.summary_ko || ai?.summary_ko || null, photo, geminiError:aiErr, geminiSkipped:ai?.skipped?ai.reason:null};
+    const lvl = score>=7?['좋음','pass']:score>=5?['보통','warn']:['약함','fail'];
+    setLowLightBadge(lvl[0], lvl[1], `저조도 점수 ${score}/10 (${aiScore!=null?'AI 분석':'노이즈 측정 기준'}) · 밝기 ${b} · 노이즈 ${local.noiseSigma1024}`
+      + (cam.lowLight.summary_ko?`\n${cam.lowLight.summary_ko}`:'') + (aiErr?`\nAI 분석 실패(${aiErr}) → 측정값으로 계산했어요.`:'')
+      + '\n이 결과는 위 카메라 프로필의 ‘저조도 잠재력’과 용도에 반영돼요.');
+    commitCamera();
+  }catch(err){ setLowLightBadge('실패','fail','사진 처리 실패: '+err.message); }
+};
+
 /* ---------- 마이크 ---------- */
-// 소리가 담기면 통과. 고장 난 마이크는 거의 무음(-70dB 이하)이라 이 값을 넘지 못합니다. 실기기에서 오판이 나면 여기만 조정.
+// 1단계(조용히 2.5초): 주변 잡음 + 잡음 스펙트럼 / 2단계(문장 읽기 4.5초): 목소리 크기·SNR·클리핑·음역대·끊김 → 등급
+// 통과 기준: 소리가 담기고(MIC_MIN_PEAK_DB 초과) 목소리가 잡음보다 MIC_MIN_SNR_DB 이상 커야 함. 실기기에서 오판이 나면 이 두 값만 조정.
 const MIC_MIN_PEAK_DB = -50;
+const MIC_MIN_SNR_DB = 10;
+const MIC_QUIET_MS = 2500, MIC_SPEAK_MS = 4500;
+const MIC_SCRIPT = '안녕하세요. 지금 이 폰의 마이크를 점검하고 있습니다. 하나, 둘, 셋, 넷, 다섯.';
+const MIC_BANDS = [
+  {key:'low',  label:'저음',   lo:100,  hi:300},
+  {key:'mid',  label:'중음',   lo:300,  hi:2000},
+  {key:'high', label:'고음',   lo:2000, hi:6000},
+  {key:'air',  label:'초고음', lo:6000, hi:10000},
+];
+const GRADES = ['A','B','C','D'];
+const dbOf = v => round(20*Math.log10(Math.max(v,1e-7)),1);
+const pct = (arr,p) => { if(!arr.length) return 0; const a=[...arr].sort((x,y)=>x-y); return a[Math.min(a.length-1,Math.floor(a.length*p))]; };
+function showPhase(prefix, k, t, s){ const box=$(`#${prefix}-phase`); box.classList.add('on'); $(`#${prefix}-phase-k`).textContent=k; $(`#${prefix}-phase-t`).textContent=t; const ss=$(`#${prefix}-phase-s`); ss.textContent=''; if(s instanceof Node) ss.append(s); else if(s) ss.textContent=s; }
+function hidePhase(prefix){ $(`#${prefix}-phase`).classList.remove('on'); }
+function meter(rms){ $('#mic-bar').style.width=Math.max(0,Math.min(100,(60+20*Math.log10(Math.max(rms,1e-6)))/60*100))+'%'; }
+// 막대 그래프: rows = [{label, value(0~1), text, cls}]
+function renderBars(id, title, rows, note){
+  const box=$('#'+id); box.textContent=''; box.classList.add('on');
+  box.append(el('div','pf-h',title));
+  rows.forEach(r=>{ const row=el('div','sc'); const m=el('div','m'); const i=el('i',r.cls||''); i.style.width=Math.round(Math.max(0,Math.min(1,r.value))*100)+'%'; m.append(i); row.append(el('div',null,r.label), m, el('div','v',r.text)); box.append(row); });
+  if(note) box.append(el('div','pf-note',note));
+}
+// 분석기에서 rAF 로 프레임을 읽어 onFrame(rms, clipSamples, samples, freqDb) 에 넘김
+function runFrames(an, ms, onFrame, onTick){
+  const td=new Float32Array(an.fftSize), fd=new Float32Array(an.frequencyBinCount);
+  return new Promise(res=>{
+    const t0=performance.now();
+    const tick=()=>{
+      an.getFloatTimeDomainData(td); an.getFloatFrequencyData(fd);
+      let s=0, clip=0; for(let i=0;i<td.length;i++){ const v=td[i]; s+=v*v; if(v>=0.99||v<=-0.99) clip++; }
+      const rms=Math.sqrt(s/td.length);
+      const el_=performance.now()-t0;
+      onFrame(rms, clip, td.length, fd, el_);
+      onTick && onTick(el_);
+      el_<ms ? requestAnimationFrame(tick) : res();
+    };
+    tick();
+  });
+}
+const binRange = (lo,hi,binHz,n) => [Math.max(1,Math.floor(lo/binHz)), Math.min(n-1,Math.ceil(hi/binHz))];
+const meanPow = (pow,[a,b]) => { let s=0; for(let k=a;k<=b;k++) s+=pow[k]; return s/(b-a+1); };
+
+let micRec = null;   // 녹음 다시 듣기용
 $('#mic-start').onclick = async () => {
-  if(!navigator.mediaDevices?.getUserMedia){ record('microphone','unsupported',{error:'getUserMedia 미지원'}); return; }
-  let stream, ac;
+  if(!navigator.mediaDevices?.getUserMedia || !AC){ record('microphone','unsupported',{error:'getUserMedia/WebAudio 미지원'}); setDetail('microphone','이 브라우저는 마이크 측정을 지원하지 않아요.'); return; }
+  const btn=$('#mic-start'); btn.disabled=true;
+  $('#mic-listen').classList.remove('on'); $('#mic-bands').classList.remove('on'); setDetail('microphone','');
+  const ac = new AC();   // iOS: 탭 안에서 바로 만들어야 소리가 켜짐
+  let stream, rec=null, chunks=[];
   try{
     stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-    ac = new AC(); await ac.resume();
-    const an = ac.createAnalyser(); an.fftSize=2048; ac.createMediaStreamSource(stream).connect(an);
-    const buf = new Float32Array(an.fftSize); const t0=performance.now();
-    let peak=0, sum=0, n=0; const rmsList=[];
-    setDetail('microphone','측정 중... 말하거나 박수를 치세요');
-    await new Promise(res=>{
-      const tick=()=>{
-        an.getFloatTimeDomainData(buf); let s=0; for(const v of buf) s+=v*v; const rms=Math.sqrt(s/buf.length);
-        peak=Math.max(peak,rms); rmsList.push(rms); sum+=rms; n++;
-        $('#mic-bar').style.width=Math.max(0,Math.min(100,(60+20*Math.log10(Math.max(rms,1e-6)))/60*100))+'%';
-        (performance.now()-t0<5000)?requestAnimationFrame(tick):res();
-      }; tick();
-    });
-    const db = v=>round(20*Math.log10(Math.max(v,1e-6)),1);
-    rmsList.sort((a,b)=>a-b); const floor = rmsList[Math.floor(rmsList.length*0.1)]||0;   // 하위 10% 지점 = 배경 소음
+    await ac.resume();
+    const an = ac.createAnalyser(); an.fftSize=4096; an.smoothingTimeConstant=0;
+    ac.createMediaStreamSource(stream).connect(an);
+    const binHz = ac.sampleRate/an.fftSize, nb = an.frequencyBinCount;
+    try{ if(window.MediaRecorder){ rec=new MediaRecorder(stream); rec.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); }; } }catch(_){ rec=null; }
+
+    // 1단계: 조용히
+    const quietRms=[]; const quietPow=new Float64Array(nb); let quietN=0; let peak=0, zeroFrames=0;
+    await runFrames(an, MIC_QUIET_MS, (rms,c,n,fd,t)=>{ if(t<250) return; quietRms.push(rms); peak=Math.max(peak,rms); for(let k=0;k<nb;k++) quietPow[k]+=10**(fd[k]/10); quietN++; meter(rms); },
+      t=>showPhase('mic','1단계 · 주변 잡음 측정','조용히 해 주세요',`말하지 말고 ${Math.max(0,(MIC_QUIET_MS-t)/1000).toFixed(1)}초만 기다려 주세요.`));
+    for(let k=0;k<nb;k++) quietPow[k]/=Math.max(1,quietN);
+    const noiseRms = pct(quietRms,0.5);
+
+    // 2단계: 문장 읽기 (녹음도 함께)
+    try{ rec && rec.start(); }catch(_){ rec=null; }
+    const speakRms=[]; const voicePow=new Float64Array(nb); let voiced=0, clip=0, samples=0, sum=0;
+    const q=document.createElement('q'); q.textContent=MIC_SCRIPT;
+    await runFrames(an, MIC_SPEAK_MS, (rms,c,n,fd)=>{
+        speakRms.push(rms); peak=Math.max(peak,rms); clip+=c; samples+=n; sum+=rms; if(rms===0) zeroFrames++;
+        if(rms > Math.max(noiseRms*3, 3e-4)){ voiced++; for(let k=0;k<nb;k++) voicePow[k]+=10**(fd[k]/10); }
+        meter(rms);
+      },
+      t=>{ const s=document.createElement('span'); s.append(`폰을 입에서 한 뼘 정도 떨어뜨리고 보통 목소리로 읽어 주세요 (${Math.max(0,(MIC_SPEAK_MS-t)/1000).toFixed(1)}초)`, q); showPhase('mic','2단계 · 음질 측정','아래 문장을 소리 내어 읽어 주세요', s); });
+    if(rec && rec.state==='recording'){ await new Promise(r=>{ rec.onstop=r; rec.stop(); }); }
+    hidePhase('mic');
+
+    // 계산
+    const speechDb = dbOf(pct(speakRms,0.9));
+    const noiseFloorDb = dbOf(noiseRms);
+    // 실제 마이크의 자체 잡음은 -100dBFS 보다 큼. 그보다 낮으면(완전 무음) 기기가 잡음을 잘라 낸 것이라 -100 으로 보고 계산
+    const snrDb = round(speechDb - Math.max(noiseFloorDb,-100),1);
+    const voicedPct = round(voiced/Math.max(1,speakRms.length)*100,1);
+    const clippingPct = round(clip/Math.max(1,samples)*100,3);
+    let bands = null;
+    if(voiced>=5){
+      for(let k=0;k<nb;k++) voicePow[k]/=voiced;
+      bands = MIC_BANDS.map(b=>{ const r=binRange(b.lo,b.hi,binHz,nb); const v=meanPow(voicePow,r), z=meanPow(quietPow,r);
+        return {band:b.key, hz:[b.lo,b.hi], levelDb:round(10*Math.log10(Math.max(v,1e-12)),1), snrDb:round(10*Math.log10(Math.max(v,1e-12)/Math.max(z,1e-12)),1)}; });
+    }
+    const issues=[];
+    if(noiseFloorDb > -45) issues.push('noisy_room');
+    if(clippingPct > 0.5) issues.push('clipping');
+    const hi = bands?.find(b=>b.band==='high');
+    if(hi && hi.snrDb < 6) issues.push('muffled_high');
+    if(zeroFrames > 3 && noiseFloorDb > -100) issues.push('dropouts');   // 기기가 잡음을 잘라 내는 경우(완전 무음)는 끊김으로 보지 않음
+    if(voicedPct < 15) issues.push('too_quiet');
+
+    const peakDb = dbOf(peak);
+    let gi = snrDb>=35 ? 0 : snrDb>=25 ? 1 : snrDb>=15 ? 2 : 3;
+    gi += (issues.includes('clipping')?1:0) + (issues.includes('muffled_high')?1:0) + (issues.includes('dropouts')?1:0);
+    const ok = peakDb > MIC_MIN_PEAK_DB && snrDb >= MIC_MIN_SNR_DB && voicedPct >= 5;
+    if(!ok) gi = 3;
+    const quality = {grade:GRADES[Math.min(3,gi)], snrDb, noiseGateSuspected: noiseFloorDb<=-100, speechLevelDb:speechDb, voicedPct, clippingPct, dropoutFrames:zeroFrames, bands, issues, userPlayback:null, method:'quiet 2.5s → read-aloud 4.5s'};
     const track=stream.getAudioTracks()[0];
-    const data = {peakDb:db(peak), avgDb:db(sum/n), noiseFloorDb:db(floor), peakRms:round(peak,4), sampleRate:ac.sampleRate, label:track.label, settings:dropIds(track.getSettings()), unit:'dBFS'};
-    const ok = data.peakDb > MIC_MIN_PEAK_DB;
+    const data = {peakDb, avgDb:dbOf(sum/Math.max(1,speakRms.length)), noiseFloorDb, peakRms:round(peak,4), sampleRate:ac.sampleRate, label:track.label, settings:dropIds(track.getSettings()), unit:'dBFS', quality};
     record('microphone', ok?'pass':'fail', data);
-    setDetail('microphone', ok
-      ? `소리가 잘 담겼어요 (최대 ${data.peakDb}dB · 0에 가까울수록 큰 소리)`
-      : `소리가 거의 담기지 않았어요 (최대 ${data.peakDb}dB). 폰에 가까이 대고 말하거나 박수를 쳐 주세요.`);
+
+    if(bands) renderBars('mic-bands','음역대별 감도 (목소리 − 잡음)', bands.map((b,i)=>({label:MIC_BANDS[i].label, value:b.snrDb/40, text:`${b.snrDb}dB`, cls:b.snrDb<6?'bad':b.snrDb<12?'weak':''})),
+      '고음이 유독 낮으면 마이크 구멍이 먼지·케이스로 막혔을 수 있어요.');
+    const hint = {
+      noisy_room:'주변이 시끄러워요. 조용한 곳에서 다시 해 주세요.',
+      clipping:'소리가 너무 커서 찢어졌어요(클리핑). 폰을 조금 떨어뜨리고 보통 목소리로 읽어 주세요.',
+      muffled_high:'고음이 잘 안 담겨요. 마이크 구멍(폰 아래쪽)을 막고 있지 않은지, 먼지가 끼지 않았는지 확인해 주세요.',
+      dropouts:'녹음 중 소리가 완전히 끊긴 순간이 있었어요. 다시 해도 같다면 마이크 불량일 수 있어요.',
+      too_quiet:'목소리가 거의 들어오지 않았어요. 문장을 끝까지 소리 내어 읽어 주세요.',
+    };
+    setDetail('microphone', (ok ? `음질 ${quality.grade}등급 · 목소리가 잡음보다 ${snrDb}dB 커요 (클수록 깨끗해요)` : `소리가 충분히 담기지 않았어요 (최대 ${peakDb}dB · 잡음 대비 ${snrDb}dB)`)
+      + `\n잡음 ${noiseFloorDb}dB · 목소리 ${speechDb}dB · 말한 구간 ${voicedPct}% · 클리핑 ${clippingPct}%`
+      + (issues.length ? '\n' + issues.map(k=>'· '+hint[k]).join('\n') : ''));
+
+    if(rec && chunks.length){
+      micRec && URL.revokeObjectURL(micRec);
+      micRec = URL.createObjectURL(new Blob(chunks,{type:chunks[0].type||rec.mimeType||'audio/webm'}));
+      $('#mic-audio').src = micRec; $('#mic-listen').classList.add('on');
+    }
   }catch(e){
+    hidePhase('mic');
     record('microphone','fail',{...errInfo(e)}); setDetail('microphone', e.name==='NotAllowedError'?'마이크 권한이 거부되었습니다.':`오류: ${e.name} ${e.message}`);
   }finally{
-    stream?.getTracks().forEach(t=>t.stop()); ac?.close(); $('#mic-bar').style.width='0';
+    stream?.getTracks().forEach(t=>t.stop()); ac.close().catch(()=>{}); $('#mic-bar').style.width='0'; btn.disabled=false; btn.textContent='다시 측정';
   }
 };
+// 사용자가 녹음을 듣고 평가 (상태는 바꾸지 않고, 잡음이 있다고 하면 등급을 C 이하로)
+function micPlayback(v){
+  const m=results.microphone; if(!m?.quality) return;
+  const q={...m.quality, userPlayback:v};
+  if(v==='noisy' && GRADES.indexOf(q.grade)<2) q.grade='C';
+  record('microphone', m.status, {...m, quality:q});
+  $('#mic-listen').classList.remove('on');
+  setDetail('microphone', $('#d-microphone').textContent + (v==='clear' ? '\n녹음 확인: 또렷함' : `\n녹음 확인: 잡음·끊김 있음 → 음질 ${q.grade}등급으로 기록`));
+}
+$('#mic-clear').onclick=()=>micPlayback('clear');
+$('#mic-noisy').onclick=()=>micPlayback('noisy');
 
 /* ---------- 스피커 ---------- */
-let spkInfo=null;
+// ① 삐 소리 세기(필수): 무작위 2~5번 → 사용자가 횟수를 맞혀야 통과. "들렸어요" 한 번 누르기보다 확실합니다.
+// ② 음역대 자동 측정(권장): 6개 주파수를 재생하며 마이크로 다시 듣고, 각 음이 배경보다 몇 dB 큰지 잽니다.
+const SPK_FREQS = [250, 500, 1000, 2000, 4000, 8000];
+const SPK_DETECT_DB = 10;
+const spk = {info:null, played:null, attempts:0, count:null, loopback:null, status:null, confirmed:null};
+function commitSpeaker(){
+  if(!spk.status) return;
+  record('speaker', spk.status, {userConfirmed:spk.confirmed, ...(spk.info||{}), countTest:spk.count, loopback:spk.loopback});
+}
+const wait = ms => new Promise(r=>setTimeout(r,ms));
 $('#spk-play').onclick = async () => {
   if(!AC){ record('speaker','unsupported',{error:'WebAudio 미지원'}); return; }
+  const btn=$('#spk-play'); btn.disabled=true; $('#spk-count').classList.remove('on');
   try{
     const ac=new AC(); await ac.resume();
-    const o=ac.createOscillator(), g=ac.createGain(); g.gain.value=0.25;
-    o.frequency.setValueAtTime(440,ac.currentTime); o.frequency.linearRampToValueAtTime(1760,ac.currentTime+1.5);
-    o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime+1.6);
-    spkInfo={sampleRate:ac.sampleRate, baseLatencyMs:round((ac.baseLatency||0)*1000,1), outputLatencyMs:(ac.outputLatency>0 && ac.outputLatency<2)?round(ac.outputLatency*1000,1):null, tone:'440→1760Hz sweep 1.5s'};
-    setDetail('speaker','재생 중... 소리가 들렸는지 알려 주세요.'); $('#spk-confirm').style.display='flex';
-    o.onended=()=>ac.close();
-  }catch(e){ record('speaker','fail',errInfo(e)); }
+    let n; do{ n=2+Math.floor(Math.random()*4); }while(n===spk.played && Math.random()<0.8);   // 2~5번, 직전과 되도록 다르게
+    spk.played=n;
+    const g=ac.createGain(); g.gain.value=0; g.connect(ac.destination);
+    let t=ac.currentTime+0.25;
+    for(let i=0;i<n;i++){
+      const o=ac.createOscillator(); o.frequency.value=1000; o.connect(g);
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.3,t+0.015); g.gain.setValueAtTime(0.3,t+0.17); g.gain.linearRampToValueAtTime(0,t+0.19);
+      o.start(t); o.stop(t+0.2);
+      t += 0.2 + 0.3 + Math.random()*0.35;   // 간격도 무작위
+    }
+    spk.info={sampleRate:ac.sampleRate, baseLatencyMs:round((ac.baseLatency||0)*1000,1), outputLatencyMs:(ac.outputLatency>0 && ac.outputLatency<2)?round(ac.outputLatency*1000,1):null, tone:'1kHz beep ×N (random 2–5)'};
+    setDetail('speaker','삐 소리를 세어 주세요...');
+    await wait((t-ac.currentTime)*1000+150);
+    ac.close().catch(()=>{});
+    $('#spk-count').classList.add('on'); setDetail('speaker','');
+  }catch(e){ record('speaker','fail',errInfo(e)); setDetail('speaker','소리를 재생하지 못했어요: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='다시 듣기'; }
 };
-$('#spk-yes').onclick = () => { record('speaker','pass',{userConfirmed:true,...spkInfo}); setDetail('speaker','사용자가 소리를 확인했습니다.'); $('#spk-confirm').style.display='none'; };
-$('#spk-no').onclick  = () => { record('speaker','fail',{userConfirmed:false,...spkInfo}); setDetail('speaker','볼륨/무음 모드/블루투스 출력 여부를 확인하고 다시 시도하세요.'); $('#spk-confirm').style.display='none'; };
+$('#spk-count').addEventListener('click', e=>{
+  const b=e.target.closest('[data-n]'); if(!b || spk.played==null) return;
+  const k=Number(b.dataset.n); spk.attempts++;
+  const correct = k===spk.played;
+  spk.count={played:spk.played, answered:k, attempts:spk.attempts, correct};
+  $('#spk-count').classList.remove('on');
+  const final = correct || k===0 || spk.attempts>=3;
+  if(correct){ spk.status='pass'; spk.confirmed=true; commitSpeaker(); setDetail('speaker',`맞아요, ${k}번이에요. 스피커 소리가 정상적으로 나요.` + (spk.loopback?'':'\n아래 ② 자동 측정도 해 보면 음역대별 상태까지 기록돼요.')); }
+  else if(k===0 || spk.attempts>=3){ spk.status='fail'; spk.confirmed=false; commitSpeaker(); setDetail('speaker', k===0 ? '소리가 안 들렸다면 무음 스위치·볼륨·블루투스 연결을 확인하고 다시 들어 보세요.' : `실제로는 ${spk.played}번이었어요. 3번 모두 달라 실패로 기록했어요. 볼륨을 올리고 다시 들어 보세요.`); }
+  else setDetail('speaker',`실제 횟수와 달라요. 볼륨을 끝까지 올리고 조용한 곳에서 ‘다시 듣기’를 눌러 주세요. (${spk.attempts}/3)`);
+  if(final){ spk.played=null; spk.attempts=0; }
+});
 
-/* ---------- 터치 ---------- */
+$('#spk-auto').onclick = async () => {
+  if(!AC || !navigator.mediaDevices?.getUserMedia){ spk.loopback={status:'unsupported'}; commitSpeaker(); setDetail('speaker','이 브라우저는 자동 측정을 지원하지 않아요. ① 만으로도 점검을 마칠 수 있어요.'); return; }
+  const btn=$('#spk-auto'); btn.disabled=true;
+  const ac=new AC(); let stream;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    await ac.resume();
+    const an=ac.createAnalyser(); an.fftSize=8192; an.smoothingTimeConstant=0;
+    ac.createMediaStreamSource(stream).connect(an);   // 스피커로는 보내지 않음(분석만)
+    const nb=an.frequencyBinCount, binHz=ac.sampleRate/an.fftSize;
+    const collect = ms => { const acc=new Float64Array(nb); let c=0; return runFrames(an, ms, (r,cl,n,fd)=>{ for(let k=0;k<nb;k++) acc[k]+=10**(fd[k]/10); c++; }).then(()=>{ for(let k=0;k<nb;k++) acc[k]/=Math.max(1,c); return acc; }); };
+    const at = (pow,f) => { const k=Math.round(f/binHz); let m=0; for(let d=-2;d<=2;d++) m=Math.max(m,pow[Math.min(nb-1,Math.max(0,k+d))]||0); return m; };
+    setDetail('speaker','배경 소음을 재는 중... 조용히 해 주세요.');
+    await wait(200);
+    const base=await collect(500);
+    const tones=[];
+    for(const f of SPK_FREQS){
+      setDetail('speaker',`측정 중 ${tones.length+1}/${SPK_FREQS.length} · ${f>=1000?f/1000+'k':f}Hz`);
+      const o=ac.createOscillator(), g=ac.createGain(); o.frequency.value=f; g.gain.value=0; o.connect(g).connect(ac.destination);
+      const t=ac.currentTime; g.gain.linearRampToValueAtTime(0.35,t+0.03); o.start(t);
+      await wait(180);
+      const pow=await collect(320);
+      g.gain.setValueAtTime(0.35,ac.currentTime); g.gain.linearRampToValueAtTime(0,ac.currentTime+0.03); o.stop(ac.currentTime+0.05);
+      await wait(150);
+      const lv=at(pow,f), bz=at(base,f);
+      const snr=round(10*Math.log10(Math.max(lv,1e-12)/Math.max(bz,1e-12)),1);
+      tones.push({hz:f, levelDb:round(10*Math.log10(Math.max(lv,1e-12)),1), snrDb:snr, detected:snr>=SPK_DETECT_DB});
+    }
+    const det=tones.filter(t=>t.detected).length;
+    const mid=tones.filter(t=>t.hz>=500 && t.hz<=4000 && t.detected);   // 감지된 음끼리만 비교
+    const spreadDb = mid.length>=3 ? round(Math.max(...mid.map(t=>t.levelDb))-Math.min(...mid.map(t=>t.levelDb)),1) : null;
+    const grade = det>=6?'A':det>=5?'B':det>=4?'C':'D';
+    spk.loopback={status:'ok', tones, detectedCount:det, total:tones.length, grade, midSpreadDb:spreadDb, detectThresholdDb:SPK_DETECT_DB, method:'speaker→mic loopback, 6 tones'};
+    commitSpeaker();
+    renderBars('spk-bands','음역대별 출력 (배경 소음 대비)', tones.map(t=>({label:t.hz>=1000?`${t.hz/1000}kHz`:`${t.hz}Hz`, value:t.snrDb/50, text:t.detected?`${t.snrDb}dB`:'안 들림', cls:t.detected?(t.snrDb<20?'weak':''):'bad'})),
+      '250Hz 같은 아주 낮은 음은 폰 스피커가 원래 약해요. 중간 음역(500Hz~4kHz)이 고르게 나오면 정상이에요.');
+    setDetail('speaker', `자동 측정 ${grade}등급 · ${det}/${tones.length}개 음 감지` + (spreadDb!=null && spreadDb>25?`\n중간 음역 크기 차이가 ${spreadDb}dB로 커요. 스피커 구멍이 막혔거나 한쪽 스피커가 약할 수 있어요.`:'')
+      + (det<=2?'\n거의 감지되지 않았어요. 볼륨을 올리고 조용한 곳에서 다시 해 주세요. (iPhone 은 측정 중 소리가 작아질 수 있어요)':'')
+      + (spk.status?'':'\n위 ① 삐 소리 세기까지 해야 스피커 점검이 끝나요.'));
+  }catch(e){
+    spk.loopback={status:'error', ...errInfo(e)}; commitSpeaker();
+    setDetail('speaker', e.name==='NotAllowedError' ? '자동 측정에는 마이크 권한이 필요해요. ① 만으로도 점검을 마칠 수 있어요.' : `자동 측정 오류: ${e.message}`);
+  }finally{ stream?.getTracks().forEach(t=>t.stop()); ac.close().catch(()=>{}); btn.disabled=false; btn.textContent='다시 측정'; }
+};
+
+/* ---------- 터치 (전체 화면) ---------- */
+// 화면 전체를 약 60px 칸으로 나눠 손가락으로 모두 칠하게 합니다. 칸 판정은 좌표로 계산하므로 안내 상자 아래 칸도 칠해집니다.
+// 빠르게 쓸어도 칸을 건너뛰지 않도록 이전 좌표와 현재 좌표 사이를 보간합니다.
 (function(){
-  const pad=$('#pad'); const N=12;
-  const state={hit:new Set(),active:new Set(),maxSimultaneous:0,pointerTypes:new Set(),events:0};
-  function build(){
-    pad.innerHTML=''; for(let i=0;i<N;i++){ const c=document.createElement('div'); c.className='cell'; c.dataset.i=i; c.textContent=i+1; pad.appendChild(c); }
-    state.hit.clear(); state.active.clear(); state.maxSimultaneous=0; state.pointerTypes.clear(); state.events=0;
-    setDetail('touch',`0/${N} · 멀티터치 최대 0점`);
+  const TARGET_PX = 60;
+  const ov=document.createElement('div'); ov.id='touch-full'; ov.hidden=true;
+  ov.innerHTML='<div class="tf-grid"></div><div class="tf-hud"><div class="tf-count"></div><div class="tf-msg"></div><div class="tf-btns"></div></div>';
+  document.body.append(ov);
+  const grid=ov.querySelector('.tf-grid'), cnt=ov.querySelector('.tf-count'), msg=ov.querySelector('.tf-msg'), btns=ov.querySelector('.tf-btns');
+  let S=null;
+
+  const button=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='btn '+cls; b.textContent=label; b.onclick=fn; return b; };
+  function hud(){
+    btns.textContent='';
+    if(S.phase==='paint'){
+      cnt.textContent=`${S.hits}/${S.total}`;
+      msg.textContent = S.hits===0 ? '손가락으로 화면을 쓸어서 모든 칸을 칠해 주세요. 모서리·가장자리까지!' : '남은 칸을 찾아 칠해 주세요. 손을 떼면 이 안내가 다시 보여요.';
+      btns.append(button('그만하기','btn-secondary',confirmExit));
+    }else if(S.phase==='confirm'){
+      cnt.textContent=`${S.total-S.hits}칸 남음`;
+      msg.textContent='아직 안 칠해진 칸이 있어요. 아무리 눌러도 안 칠해지는 칸이 있다면 터치 불량일 수 있어요.';
+      btns.append(button('계속하기','btn-primary',()=>{ S.phase='paint'; hud(); }), button('여기서 끝내기','btn-danger',()=>finish(false)));
+    }else if(S.phase==='multi'){
+      cnt.textContent='마지막 단계';
+      msg.textContent='두 손가락을 동시에 화면에 대 주세요. (멀티터치 확인)';
+      btns.append(button('건너뛰기','btn-secondary',()=>finish(true)));
+    }
   }
-  function mark(el){ const c=el?.closest?.('.cell'); if(c){ c.classList.add('hit'); state.hit.add(c.dataset.i); } }
-  function update(){
-    const data={cellsHit:state.hit.size,cellsTotal:N,maxSimultaneousTouches:state.maxSimultaneous,multiTouchDetected:state.maxSimultaneous>=2,pointerTypes:[...state.pointerTypes],maxTouchPoints:navigator.maxTouchPoints,touchEventSupported:'ontouchstart' in window};
-    setDetail('touch',`${state.hit.size}/${N} · 멀티터치 최대 ${state.maxSimultaneous}점`);
-    if(state.hit.size===N) record('touch','pass',data);
+  function confirmExit(){ S.phase='confirm'; hud(); }
+  function cellIndex(x,y){
+    const c=Math.min(S.cols-1,Math.max(0,Math.floor(x/S.w*S.cols)));
+    const r=Math.min(S.rows-1,Math.max(0,Math.floor(y/S.h*S.rows)));
+    return r*S.cols+c;
   }
-  pad.addEventListener('pointerdown',e=>{ state.active.add(e.pointerId); state.pointerTypes.add(e.pointerType); state.maxSimultaneous=Math.max(state.maxSimultaneous,state.active.size); state.events++; mark(document.elementFromPoint(e.clientX,e.clientY)); update(); });
-  pad.addEventListener('pointermove',e=>{ if(state.active.has(e.pointerId)){ mark(document.elementFromPoint(e.clientX,e.clientY)); update(); } });
-  ['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,e=>state.active.delete(e.pointerId)));
-  $('#touch-reset').onclick=()=>{ build(); delete results.touch; setBadge('touch','pending'); refreshJson(); };
-  build();
+  function paint(x,y){
+    if(!S) return;
+    const i=cellIndex(x,y); if(S.hit[i]) return;
+    S.hit[i]=1; S.hits++; S.cells[i].classList.add('hit');
+    if(S.phase==='paint'){ cnt.textContent=`${S.hits}/${S.total}`; }
+    if(S.hits===S.total && S.phase!=='multi'){ S.completeMs=Math.round(performance.now()-S.t0); if(S.maxSim>=2) finish(true); else { S.phase='multi'; hud(); } }
+  }
+  function stroke(id,x,y){
+    if(!S) return;
+    const p=S.last.get(id);
+    if(p){ const dx=x-p.x, dy=y-p.y, d=Math.hypot(dx,dy), step=Math.max(4,Math.min(S.w/S.cols,S.h/S.rows)/3), n=Math.ceil(d/step);
+      for(let k=1;k<=n && S;k++) paint(p.x+dx*k/n, p.y+dy*k/n); }
+    else paint(x,y);
+    if(S) S.last.set(id,{x,y});
+  }
+  const pos=e=>{ const r=ov.getBoundingClientRect(); S.w=r.width; S.h=r.height; return [e.clientX-r.left, e.clientY-r.top]; };
+  ov.addEventListener('pointerdown',e=>{
+    if(!S) return; e.preventDefault();
+    S.active.add(e.pointerId); S.types.add(e.pointerType); S.maxSim=Math.max(S.maxSim,S.active.size); S.events++;
+    ov.classList.add('touching');
+    const [x,y]=pos(e); S.last.delete(e.pointerId); stroke(e.pointerId,x,y);
+    if(S && S.phase==='multi' && S.active.size>=2) finish(true);
+  });
+  ov.addEventListener('pointermove',e=>{
+    if(!S || !S.active.has(e.pointerId)) return; e.preventDefault();
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for(const ce of (evs.length?evs:[e])){ if(!S) break; const [x,y]=pos(ce); stroke(e.pointerId,x,y); }
+  });
+  const up=e=>{ if(!S) return; S.active.delete(e.pointerId); S.last.delete(e.pointerId); if(!S.active.size) ov.classList.remove('touching'); };
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>ov.addEventListener(t,up));
+  // iOS 사파리: 스크롤·확대·길게 누르기 메뉴 막기
+  ['touchstart','touchmove'].forEach(t=>ov.addEventListener(t,e=>{ if(e.target.closest('button')) return; e.preventDefault(); },{passive:false}));
+  ov.addEventListener('contextmenu',e=>e.preventDefault());
+
+  function open(){
+    const w=innerWidth, h=innerHeight;
+    const cols=Math.max(4,Math.min(10,Math.round(w/TARGET_PX))), rows=Math.max(6,Math.min(20,Math.round(h/TARGET_PX)));
+    S={cols,rows,total:cols*rows,hit:new Uint8Array(cols*rows),hits:0,cells:[],active:new Set(),last:new Map(),types:new Set(),maxSim:0,events:0,phase:'paint',t0:performance.now(),completeMs:null,w,h,fullscreen:false};
+    grid.textContent=''; grid.style.gridTemplateColumns=`repeat(${cols},1fr)`; grid.style.gridTemplateRows=`repeat(${rows},1fr)`;
+    for(let i=0;i<S.total;i++){ const c=document.createElement('i'); S.cells.push(c); grid.append(c); }
+    ov.hidden=false; document.documentElement.classList.add('tf-lock'); hud();
+    const rq=ov.requestFullscreen||ov.webkitRequestFullscreen;   // 안드로이드: 주소창까지 숨김 / 아이폰: 지원 안 함 → 화면 덮기만
+    if(rq){ try{ const p=rq.call(ov,{navigationUI:'hide'}); if(p&&p.then) p.then(()=>{S&&(S.fullscreen=true);},()=>{}); }catch(_){} }
+  }
+  function close(){
+    ov.hidden=true; document.documentElement.classList.remove('tf-lock');
+    const fe=document.fullscreenElement||document.webkitFullscreenElement;
+    if(fe){ try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(_){} }
+  }
+  function finish(allowPass){
+    const s=S; if(!s) return; S=null; close();
+    const missed=[]; for(let i=0;i<s.total;i++) if(!s.hit[i]) missed.push({row:Math.floor(i/s.cols), col:i%s.cols});
+    const edge=missed.filter(m=>m.row===0||m.col===0||m.row===s.rows-1||m.col===s.cols-1).length;
+    const data={cellsHit:s.hits, cellsTotal:s.total, maxSimultaneousTouches:s.maxSim, multiTouchDetected:s.maxSim>=2, pointerTypes:[...s.types],
+      maxTouchPoints:navigator.maxTouchPoints, touchEventSupported:'ontouchstart' in window,
+      mode:'fullscreen-grid', grid:{cols:s.cols, rows:s.rows, cellPx:round(Math.min(s.w/s.cols,s.h/s.rows),0)}, viewport:{width:Math.round(s.w), height:Math.round(s.h)},
+      fullscreenApi:s.fullscreen, coveragePct:round(s.hits/s.total*100,1), missedCells:missed.slice(0,200), missedEdgeCells:edge,
+      durationMs:Math.round(performance.now()-s.t0), completeMs:s.completeMs, events:s.events};
+    const pass = allowPass && s.hits===s.total;
+    record('touch', pass?'pass':'fail', data);
+    const map=$('#touch-map'); map.textContent=''; map.classList.add('on'); map.style.gridTemplateColumns=`repeat(${s.cols},1fr)`;
+    for(let i=0;i<s.total;i++){ const c=document.createElement('i'); if(!s.hit[i]) c.className='miss'; map.append(c); }
+    setDetail('touch', pass
+      ? `화면 전체 ${s.total}칸 모두 정상 · 멀티터치 최대 ${s.maxSim}점` + (s.maxSim<2?' (멀티터치는 건너뜀)':'')
+      : `${s.total}칸 중 ${s.total-s.hits}칸을 칠하지 못했어요 (빨간 칸${edge?`, 그중 가장자리 ${edge}칸`:''}). 그 부분이 눌러도 반응이 없다면 터치 불량일 수 있어요. ‘다시 하기’로 한 번 더 확인해 주세요.`);
+    $('#touch-start').textContent='다시 하기';
+  }
+  $('#touch-start').onclick=open;
+  document.addEventListener('keydown',e=>{ if(S && e.key==='Escape') confirmExit(); });
 })();
 
 /* ---------- 자이로 ---------- */

@@ -9,6 +9,19 @@ You receive ONE photo and a JSON block of metadata.
 - The photo was taken by the person with the phone's own camera through a web browser file input, so it is already processed by the phone's computational photography (HDR, smoothing, sharpening). That processing is part of what the buyer would get, so judge the result as delivered.
 - Metadata may contain: `device` (platform, user agent, screen), `camera_stream` (label, settings, capabilities such as zoom range, focus distance, torch, max resolution), `photo` (resolution, megapixels, file size), `user_declared_device` (brand and model the person picked from a dropdown; NOT verified, may be wrong or null), `exif` (Make, Model, LensModel, FNumber, ExposureTime, ISO, FocalLength, FocalLengthIn35mm, LensSpecification; may be null because browsers or apps can strip it) and `local_metrics` (brightness, contrast, laplacianVariance, clipping).
 
+# Capture context
+`metadata.capture_context.purpose` tells you what the person was asked to shoot. If it is missing, treat it as `main`.
+- `main`: the person was asked to shoot a well-lit, detailed subject (text on paper) to judge general image quality. A separate, optional low-light photo is taken later by the same tool (`low_light_photo_planned: true`), so:
+  - If the scene is well lit, set `low_light_potential` to null.
+  - Do NOT put `night_lowlight` in `not_ideal_for` just because low light was not tested or because phones are "usually weak at night". Put it there only when THIS photo is dim and itself shows weak low-light behavior (heavy noise, smearing, lost detail). Prefer other uses you can actually support from the photo.
+  - Never put `night_lowlight` in `best_for` from a bright photo.
+- `low_light`: the person was deliberately asked to shoot in a dark room without flash. The darkness is intended.
+  - Do not treat darkness itself as a defect: do not list `underexposed`, and set `qa.exposure` to "ok" unless the image is almost completely black or blown out.
+  - `low_light_potential` MUST be an integer 1-10 here (not null). Judge how well the camera handled the dark: retained detail and texture, noise level and its character (fine grain vs. color blotches), smearing from noise reduction, color fidelity, highlight control around light sources, and motion blur from long exposure. Use ISO and shutter from EXIF when present.
+  - `noise_cleanliness` and `sharpness` describe this dark photo.
+  - `summary_ko` must describe low-light performance in one or two sentences (for example "어두운 방에서도 노이즈가 적고 글씨 윤곽이 남아요").
+  - `qa.overall_pass` is false only if the lens is obstructed or the image is unusable (almost black, or blurred beyond recognition).
+
 # Hard rules
 - Judge the camera rendering, never the subject, scene, people, or composition.
 - Do NOT invent hardware specs. Use only what the metadata states or what is directly visible. If something is unknown, use null (or "unknown" for enums).
@@ -60,7 +73,7 @@ List every visible camera-caused defect from the allowed values. Use only ["none
 
 # Best for / not ideal for
 - `best_for`: up to 3 uses this camera rendering suits, each with a short Korean `reason_ko` grounded in what you observed or in the metadata (for example the focal length or the look).
-- `not_ideal_for`: up to 3 uses where it would disappoint.
+- `not_ideal_for`: up to 3 uses where it would disappoint, based on evidence in this photo. Follow the `night_lowlight` rules in "Capture context". It is fine to return an empty list when nothing in the photo points to a weak use.
 
 # Grade
 `grade` is about this camera's image quality in this photo, from the buyer's view:
