@@ -354,7 +354,7 @@ $('#issue').addEventListener('click', async () => {
     } catch { $('#err').textContent = '브라우저에 관리키를 저장하지 못했어요. 표시된 관리키를 반드시 별도 보관하세요.'; }
     $('#done').style.display = 'block';
     $('#link').textContent = full;
-    $('#open').href = j.url + '?t=' + encodeURIComponent(T);
+    $('#open').href = j.url + '?manage=1&t=' + encodeURIComponent(T);
     $('#qr').innerHTML = '';
     if (window.QRCode) new QRCode($('#qr'), { text: full, width: 168, height: 168 });
     $('#done').scrollIntoView({ behavior: 'smooth' });
@@ -420,7 +420,8 @@ $('#copy').addEventListener('click', () => navigator.clipboard.writeText($('#lin
 $('#copy-owner').addEventListener('click', () => navigator.clipboard.writeText($('#owner-key').value));
 function renderMine() {
   try {
-    $('#my-listings').innerHTML = Object.keys(localStorage).filter(k => /^gc-owner-[A-Za-z0-9]+$/.test(k)).map(k => `<a class="btn btn-secondary" href="/c/${k.slice(9)}?t=${encodeURIComponent(T)}">내 매물 ${esc(k.slice(9))} 관리</a>`).join('');
+    const n = Object.keys(localStorage).filter(k => /^gc-owner-[A-Za-z0-9]+$/.test(k)).length;
+    $('#my-listings').innerHTML = `<a class="btn btn-secondary" href="/my?t=${encodeURIComponent(T)}">내 매물${n ? ` ${n}건` : ''} · 받은 요청 보기</a>`;
   } catch {}
 }
 renderMine();

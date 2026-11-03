@@ -5,7 +5,7 @@
   try { if (t) localStorage.setItem('gc-token', t); else t = localStorage.getItem('gc-token'); } catch {}
   const q = t ? '?t=' + encodeURIComponent(t) : '';
   const p = location.pathname;
-  const active = p.startsWith('/buyer') ? 'buyer' : (p === '/' || p.startsWith('/index') || p.startsWith('/seller')) ? 'seller' : '';
+  const active = p.startsWith('/buyer') ? 'buyer' : (p === '/' || p.startsWith('/my') || p.startsWith('/index') || p.startsWith('/seller')) ? 'seller' : '';
   const tabs = [
     ['seller', '판매자', '/' + q],
     ['buyer', '구매자', '/buyer' + q],

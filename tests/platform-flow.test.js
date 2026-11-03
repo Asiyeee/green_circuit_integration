@@ -75,6 +75,10 @@ test('요청 영속 저장 → 소유 판매자 확인 → 명시적 판매 완�
   assert.equal((await restored.inbox(a.id, a.ownerToken)).length, 1);
   assert.equal((await api(`/api/public/certificates/${a.id}/requests/mine`, { buyer: other, auth: false })).data.items.length, 0);
   assert.equal((await api(`/api/certificates/${a.id}/requests`, { owner: other })).status, 403);
+  const owned = await api('/api/certificates/owned', { method: 'POST', owner: a.ownerToken });
+  assert.equal(owned.data.item.id, a.id); assert.equal(owned.data.requests.length, 1);
+  assert.equal((await api('/api/certificates/owned', { method: 'POST', owner: other })).status, 404);
+  assert.equal((await api('/api/certificates/owned', { method: 'POST', owner: a.ownerToken, auth: false })).status, 401);
   const inbox = await api(`/api/certificates/${a.id}/requests`, { owner: a.ownerToken });
   assert.equal(inbox.data.items[0].contact, body.contact);
   assert.ok(!JSON.stringify(inbox.data).includes('buyerHash'));

@@ -15,6 +15,8 @@
 //  - POST /api/price/quote                : 시세 + 탄소 + 처분 추천·처리 매뉴얼 미리보기
 //  - POST /api/assess                     : ② 외관 사진·배터리 캡처 → Gemini 상태 제안·배터리 판독
 //  - POST /api/certificates               : 보증서 발급 (Gemini 요약 포함)
+//  - GET  /my                             : 내 매물 (관리키로 매물·받은 요청 조회)
+//  - POST /api/certificates/owned         : x-owner-token 관리키 → 그 매물 + 받은 요청
 //  - POST /api/certificates/{id}/outcome  : 판매/기부/배출 완료 처리 → 환경 온도 반영
 
 const fs = require('fs');
@@ -284,6 +286,7 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
     if (p.startsWith('/api/public/') || p.startsWith('/c/')) res.setHeader('Access-Control-Allow-Origin', '*');
 
     if (req.method === 'GET' && (p === '/seller' || p === '/seller.html')) { sendFile(res, 'seller.html', 'text/html; charset=utf-8'); return true; }
+    if (req.method === 'GET' && (p === '/my' || p === '/my.html')) { sendFile(res, 'my.html', 'text/html; charset=utf-8'); return true; }
     if (req.method === 'GET' && (g = m(/^\/c\/([A-Za-z0-9]+)\/?$/))) { sendFile(res, 'certificate.html', 'text/html; charset=utf-8'); return true; }
     if (req.method === 'GET' && (g = m(/^\/c\/([A-Za-z0-9]+)\/photos\/(\d+)\.jpg$/))) {
       const ph = await store.getPhoto(g[1], g[2]);
@@ -375,6 +378,11 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
       const ownerToken = secret();
       const cert = await createCertificate(await readJson(req), { ownerHash: hash(ownerToken) });
       sendJson(res, 200, { ok: true, id: cert.id, url: `/c/${cert.id}`, certificate: cert, ownerToken });
+      return true;
+    }
+    if (req.method === 'POST' && p === '/api/certificates/owned') {
+      const { cert, requests } = await market.owned(req.headers['x-owner-token']);
+      sendJson(res, 200, { item: listItem(cert), requests });
       return true;
     }
     if (req.method === 'GET' && (g = m(/^\/api\/certificates\/([A-Za-z0-9]+)\/requests$/))) {

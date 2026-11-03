@@ -66,6 +66,12 @@ function localStore(dir, resultsDir) {
         .sort((a, b) => String(b.issuedAt).localeCompare(String(a.issuedAt)))
         .slice(0, limit);
     },
+    // ponytail: 매물 수만큼 파일 스캔. 매물이 많아지면 ownerHash 색인 파일
+    async findOwned(ownerHash) {
+      if (!fs.existsSync(marketDir)) return null;
+      const n = fs.readdirSync(marketDir).find((n) => n.endsWith('.json') && readJson(path.join(marketDir, n))?.ownerHash === ownerHash);
+      return n ? n.slice(0, -5) : null;
+    },
     async getPhoto(id, n) {
       const f = path.join(photoDir, safe(id), `${Number(n)}.jpg`);
       return fs.existsSync(f) ? { buffer: fs.readFileSync(f), mime: 'image/jpeg' } : null;
@@ -170,6 +176,10 @@ function firestoreStore() {
       return q.docs.map((d) => d.data())
         .filter((c) => !activeOnly || Date.parse(c.expiresAt) > Date.now())
         .sort((a, b) => String(b.issuedAt).localeCompare(String(a.issuedAt))).slice(0, limit);
+    },
+    async findOwned(ownerHash) {
+      const q = await markets.where('ownerHash', '==', ownerHash).limit(1).get();
+      return q.empty ? null : q.docs[0].id;
     },
     async getPhoto(id, n) {
       const s = await photos.doc(`${id}_${Number(n)}`).get();

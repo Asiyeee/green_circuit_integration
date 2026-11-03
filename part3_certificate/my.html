@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>내 매물</title>
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+  .item{display:flex;gap:12px;align-items:center;padding:14px;border-radius:12px;background:var(--surface-2);margin-top:12px}
+  .item img{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none}
+  .item div{flex:1;min-width:0}
+  .item b{display:block;font-size:15px}
+  .item p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+  .pending{color:var(--danger);font-weight:700}
+  .err{color:var(--danger);font-size:14px;margin:12px 0 0}
+  .err:empty{display:none}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">판매자</p>
+    <h1 class="title">내 매물</h1>
+    <p class="lead">관리키를 넣으면 내가 올린 매물과 받은 요청을 볼 수 있어요. 요청 확인·판매 완료 처리는 각 매물의 관리 화면에서 해요.</p>
+  </div>
+  <section class="section">
+    <label class="field-label" for="key">매물 관리키 (43자)</label>
+    <input class="input" type="password" id="key" autocomplete="off">
+    <div class="btn-row"><button class="btn btn-primary" id="add">관리키로 매물 불러오기</button></div>
+    <p class="err" id="err" role="status"></p>
+  </section>
+  <section class="section">
+    <h2 class="section-title">이 브라우저에 저장된 매물</h2>
+    <div id="list"><p class="muted">불러오는 중</p></div>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const T = new URLSearchParams(location.search).get('t') || (() => { try { return localStorage.getItem('gc-token') || ''; } catch { return ''; } })();
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const STATUS = { listed: '판매 중', expired: '유효기간 만료', sold: '판매 완료', donated: '기부 완료', recycled: '재활용·배출 완료' };
+const storedKeys = () => { try { return Object.keys(localStorage).filter(k => /^gc-owner-[A-Za-z0-9]+$/.test(k)).map(k => localStorage.getItem(k)); } catch { return []; } };
+
+async function lookup(key) {
+  const r = await fetch('/api/certificates/owned', { method: 'POST', headers: { 'x-access-token': T, 'x-owner-token': key } });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+  return j;
+}
+function card({ item: c, requests }) {
+  const pending = requests.filter(r => r.status === 'pending').length;
+  const price = c.askingPriceKrw ? c.askingPriceKrw.toLocaleString('ko-KR') + '원' : '희망가 미정';
+  return `<a class="item" href="/c/${encodeURIComponent(c.id)}?manage=1&t=${encodeURIComponent(T)}" style="text-decoration:none;color:inherit">
+    ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" alt="">` : ''}
+    <div><b>${esc(c.device.brand)} ${esc(c.device.model)} ${esc(c.device.storage || '')}</b>
+    <p>${STATUS[c.status] || esc(c.status)} · ${price} · 받은 요청 ${requests.length}건${pending ? ` · <span class="pending">확인 대기 ${pending}</span>` : ''}</p></div>
+    <span class="btn btn-secondary">관리</span></a>`;
+}
+async function render() {
+  const keys = storedKeys();
+  if (!keys.length) { $('#list').innerHTML = '<p class="muted">저장된 매물이 없어요. 위에 관리키를 넣어 불러오세요.</p>'; return; }
+  const rows = await Promise.all(keys.map(k => lookup(k).catch(e => ({ error: e.message }))));
+  $('#list').innerHTML = rows.map(r => r.error ? `<p class="err">${esc(r.error)}</p>` : card(r)).join('');
+}
+$('#add').onclick = async () => {
+  $('#err').textContent = '';
+  const key = $('#key').value.trim();
+  try {
+    const j = await lookup(key);
+    try { localStorage.setItem('gc-owner-' + j.item.id, key); } catch { $('#err').textContent = '브라우저에 관리키를 저장하지 못했어요. 이번만 표시합니다.'; }
+    $('#key').value = '';
+    await render();
+    if (!storedKeys().includes(key)) $('#list').insertAdjacentHTML('afterbegin', card(j));
+  } catch (e) { $('#err').textContent = e.message; }
+};
+render();
+</script>
+<script src="/assets/nav.js"></script>
+</body>
+</html>

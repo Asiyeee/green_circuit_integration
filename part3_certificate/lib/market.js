@@ -41,6 +41,16 @@ function createMarketService(store) {
         return { result: (market?.requests || []).filter((r) => r.buyerHash === buyerHash).map(publicRequest) };
       });
     },
+    // 관리키만으로 내 매물 찾기 (내 매물 탭)
+    async owned(token) {
+      if (!validSecret(token)) fail(403, '43자 매물 관리키를 입력하세요');
+      const id = await store.findOwned(hash(token));
+      if (!id) fail(404, '이 관리키에 해당하는 매물이 없습니다');
+      return store.transactMarket(id, ({ cert, market }) => {
+        owner(cert, market, token);
+        return { result: { cert, requests: market.requests.map(publicRequest) } };
+      });
+    },
     async inbox(id, token) {
       return store.transactMarket(id, ({ cert, market }) => {
         owner(cert, market, token);

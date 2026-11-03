@@ -307,7 +307,7 @@ async function handle(req, res, cfg, state) {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
     // 토큰 없이 들어오면 토큰을 붙여서 다시 보냄 (데모용)
-  if (req.method === 'GET' && ['/', '/index.html', '/seller'].includes(p) && !url.searchParams.get('t')) {
+  if (req.method === 'GET' && ['/', '/index.html', '/seller', '/my'].includes(p) && !url.searchParams.get('t')) {
     res.writeHead(302, { Location: `${p}?t=${cfg.token}` });
     return res.end();
   }
