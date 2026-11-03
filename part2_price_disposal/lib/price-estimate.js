@@ -21,7 +21,7 @@ function loadPrompt() {
   };
 }
 
-const slim = (r) => ({ model: r.model, storage: r.storage, condition: r.conditionCode, minKrw: r.min, maxKrw: r.max, vendorCount: r.vendorCount });
+const slim = (r) => ({ referenceId: r.referenceId, model: r.model, storage: r.storage, condition: r.conditionCode, minKrw: r.min, maxKrw: r.max, vendorCount: r.vendorCount, checkedOn: r.checkedOn, sources: r.quotes.map(q => ({ vendor: q.vendor_name, grade: q.grade, url: q.source_url, collectedAt: q.collected_at || null, priceDate: q.price_date || q.price_date_source || null })) });
 
 function contextFor({ brand, modelKey, storage, conditionCode }) {
   const rows = price.allRows().filter((r) => r.brand === brand);
@@ -34,8 +34,8 @@ function contextFor({ brand, modelKey, storage, conditionCode }) {
 // Gemini 출력 검증: 정수·범위·상한(같은 기종 clean 최고가) 확인, 1,000원 단위
 function normalize(o, ctx) {
   if (!o || o.possible !== true) return null;
-  let min = Number(o.minKrw), max = Number(o.maxKrw);
-  if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max <= 0) return null;
+  let min = o.minKrw, max = o.maxKrw;
+  if (!Number.isSafeInteger(min) || !Number.isSafeInteger(max) || min < 1000 || max < 1000 || min > 5000000 || max > 5000000 || typeof o.basis_ko !== 'string' || !o.basis_ko.trim()) return null;
   if (min > max) [min, max] = [max, min];
   const cleanMax = Math.max(0, ...ctx.sameModel.filter((r) => r.condition === 'clean').map((r) => r.maxKrw));
   if (cleanMax && max > cleanMax) max = cleanMax;
@@ -55,27 +55,39 @@ function normalize(o, ctx) {
 async function estimate({ looked, input, geminiJson, model }) {
   if (!looked || looked.status !== 'no_data' || !geminiJson) return looked;
   const targetCode = price.appliedCode(input.conditionCode, input.knownFault);
-  const key = [input.brand, looked.modelKey, input.storage, targetCode, input.faultDetail_ko || ''].join('|');
+  if (!price.CONDITIONS.some(c => c.code === targetCode) || !input.storage || input.storage === 'unknown') return looked;
+  const revision = price.datasetInfo().revision;
+  const prompt = loadPrompt();
+  const promptHash = require('crypto').createHash('sha256').update(JSON.stringify(prompt)).digest('hex');
+  const key = JSON.stringify([revision, promptHash, model, input.brand, looked.modelKey, input.storage, targetCode, input.knownFault, input.faultDetail_ko || '']);
+  if (cache.size > 200) cache.clear();
+  const ctx = contextFor({ brand: input.brand, modelKey: looked.modelKey, storage: input.storage, conditionCode: targetCode });
   if (!cache.has(key)) {
     cache.set(key, (async () => {
-      const ctx = contextFor({ brand: input.brand, modelKey: looked.modelKey, storage: input.storage, conditionCode: targetCode });
       if (!ctx.sameModel.length && !ctx.sameBrand.length) return null;
       const cond = price.CONDITIONS.find((c) => c.code === targetCode) || {};
       const target = { brand: input.brand, model: input.model, storage: input.storage, conditionCode: targetCode, conditionLabel_ko: cond.label_ko, conditionHint_ko: cond.hint_ko, knownFault: input.knownFault, faultDetail_ko: input.faultDetail_ko || null };
-      const { system, schema } = loadPrompt();
+      const { system, schema } = prompt;
       const out = await geminiJson({ system, schema, text: `TARGET (JSON):\n${JSON.stringify(target)}\n\nSAME_MODEL_ROWS (JSON):\n${JSON.stringify(ctx.sameModel)}\n\nSAME_BRAND_ROWS (JSON):\n${JSON.stringify(ctx.sameBrand)}` });
       return normalize(out, ctx);
     })().catch((e) => { cache.delete(key); console.log(`  시세 AI 추정 실패 (${e.message})`); return null; }));
   }
   const est = await cache.get(key);
-  if (!est) return looked;
+  if (!est) { cache.delete(key); return { ...looked, aiUnavailable_ko: 'AI 추정 실패 또는 근거 부족. 희망가를 직접 입력해 등록할 수 있습니다.' }; }
+  if (price.datasetInfo().revision !== revision) { cache.delete(key); return { ...looked, aiUnavailable_ko: '처리 중 기준 시세가 갱신되었습니다. 다시 조회해 주세요.' }; }
   const cond = price.CONDITIONS.find((c) => c.code === targetCode) || {};
   return {
     ...looked,
     status: 'ok',
     estimated: true,
+    sourceKind: 'ai_estimate',
+    originalLookup: { status: looked.status, message_ko: looked.message_ko },
+    datasetRevision: revision,
+    estimatedAt: new Date().toISOString(),
+    evidenceRows: [...ctx.sameModel, ...ctx.sameBrand],
     by: 'gemini',
-    model,
+    model: input.model,
+    aiModel: model || null,
     minKrw: est.minKrw,
     maxKrw: est.maxKrw,
     singleAmount: est.minKrw === est.maxKrw,

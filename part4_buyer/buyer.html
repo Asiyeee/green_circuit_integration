@@ -59,7 +59,8 @@
   <div class="page-head">
     <p class="eyebrow">보증서 있는 중고폰</p>
     <h1 class="title">내게 맞는 중고 스마트폰 찾기</h1>
-    <p class="lead">기종과 중요한 성능 3가지를 고르면, 가격이 합리적이고 환경온도가 높은 순으로 보여 드려요.</p>
+    <p class="lead">판매 중 매물을 살펴보고 보증서 상세에서 문의·거래 요청을 남기세요. 추천은 선택한 성능과 환경온도를 비교해요.</p>
+    <p class="muted">검증된 개인 거래 가격 자료가 없어 가격 점수는 제외해요. 성능 61.5% · 환경온도 38.5%로 환산하며 환경온도 기준은 데모용이에요. 중요 성능 중 미확인·미통과 항목이 있으면 추천에서 빠지지만 아래 전체 목록에는 표시돼요. 업체 매입 참고가는 개인 간 적정가가 아니며 검수·조건에 따라 달라져요.</p>
   </div>
 
   <section class="section">
@@ -80,6 +81,7 @@
 
   <div id="msg" role="status" aria-live="polite"></div>
   <div id="results"></div>
+  <section class="section"><h2 class="section-title">판매 중 전체 매물</h2><p class="muted">파손·시세 없음·미확인 매물을 포함해요. 결제·배송·에스크로·실시간 채팅은 제공하지 않아요.</p><button class="btn btn-secondary" id="refresh-listings">목록 새로고침</button><div id="all-listings"></div></section>
 </main>
 
 <script>
@@ -129,15 +131,15 @@ function bar(label, v, eco) {
 function card(item, i) {
   const b = item.breakdown;
   const tests = picked.map(k => `<span class="tag">${LABEL[k]} ${item.scores[k] ?? "미확인"}</span>`).join("");
-  const ref = item.reference ? `${item.reference.label_ko === '업체 매입 참고 범위' || item.reference.label_ko === '단일 업체 참고가' ? '업체 매입 참고' : item.reference.label_ko} ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""}` : "시세 정보 없음";
-  const facts = [item.storage, item.condition, item.battery && item.battery.healthPct != null ? `배터리 ${item.battery.healthPct}% (판매자 캡처)` : "배터리 미점검", `신뢰도 ${TRUST[item.trust] || item.trust}`];
+  const ref = item.reference ? `${item.reference.label_ko} ${item.reference.estimated ? '(해당 조합 업체 자료 없음)' : '(업체 ' + item.reference.vendorCount + '곳 기준)'}${item.reference.faultAdjusted ? ' · AI 감가 추정' : ''} ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""} · 검수·조건에 따라 상이` : "시세 정보 없음";
+  const facts = [item.storage, item.condition, `기능 이상: ${item.knownFaultLabel || '모름'}`, item.battery && item.battery.healthPct != null ? `배터리 ${item.battery.healthPct}% (판매자 캡처)` : "배터리 미점검", `신뢰도 ${TRUST[item.trust] || item.trust}`];
   return `
   <article class="result ${i === 0 ? "top" : ""}">
     <div class="result-top">
       <div>
         ${i === 0 ? '<span class="tag good">가장 추천</span>' : ""}
         <h2>${esc(item.model)}</h2>
-        <div class="price">${item.price ? won(item.price) : "가격 미정"}</div>
+        <div class="price">판매 희망가 ${item.price ? won(item.price) : "미정"}</div>
         <p class="muted" style="margin:4px 0 0">${esc(ref)}</p>
         <p class="muted" style="margin:2px 0 0">${facts.map(esc).join(" · ")}</p>
       </div>
@@ -155,7 +157,7 @@ function card(item, i) {
         ${item.eco_temp}°C
       </span>
     </div>
-    <a class="btn btn-secondary btn-block" style="margin-top:12px" href="${esc(item.cert_url)}" target="_blank" rel="noopener">보증서 보기 · 판매자 ${esc(item.seller)}</a>
+    <a class="btn btn-secondary btn-block" style="margin-top:12px" href="${esc(item.cert_url)}" target="_blank" rel="noopener">매물 상세 · 보증서 · 구매 문의 (판매자 ${esc(item.seller)})</a>
   </article>`;
 }
 
@@ -185,6 +187,17 @@ go.addEventListener("click", async () => {
 });
 
 renderChips();
+async function loadAllListings() {
+  const el = document.getElementById('all-listings');
+  try {
+    const r = await fetch('/api/public/certificates');
+    if (!r.ok) throw new Error('목록을 불러오지 못했어요');
+    const { items } = await r.json();
+    el.innerHTML = items.length ? items.map(c => `<article class="result"><h3>${esc(c.device.model)} ${esc(c.device.storage)}</h3><p>판매 희망가 ${c.askingPriceKrw ? won(c.askingPriceKrw) : '미정'}</p><p>${esc(c.condition.label_ko)} · 기능 이상 ${esc(c.condition.knownFaultLabel_ko)} · 점검 ${c.test.passedCount}/${c.test.totalCount}</p><p class="muted">${c.price.status === 'ok' ? esc(c.price.label_ko) + (c.price.estimated ? ' · 해당 조합 업체 자료 없음 · ' : ' · 업체 ' + c.price.vendorCount + '곳 기준 · ') + won(c.price.minKrw) + '~' + won(c.price.maxKrw) + ' (검수·조건에 따라 상이)' : '시세 정보 없음 또는 조회 제한'}</p><a class="btn btn-secondary" href="${esc(c.url)}">상세 · 보증서 · 문의</a></article>`).join('') : '<p>판매 중 매물이 없어요.</p>';
+  } catch (e) { el.textContent = e.message; }
+}
+document.getElementById('refresh-listings').onclick = loadAllListings;
+loadAllListings();
 // 지금 판매 중인 기종으로 자동완성 채우기
 fetch("/api/public/models").then(r => r.json()).then(ms => {
   document.getElementById("models").innerHTML = ms.map(m => `<option value="${esc(m)}">`).join("");

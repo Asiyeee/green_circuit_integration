@@ -1,0 +1,217 @@
+{
+  "schema": "latest-main-integration-verification/v1",
+  "verifiedAt": "2026-11-03T04:55:58.899Z",
+  "timezone": "Asia/Seoul",
+  "branch": "codex/price-platform-flow",
+  "preservedCommits": [
+    "45f7693d8e59fa0fe0e931b430435b13b817e4af",
+    "857914a9776bbaac9f60432d38887ebba4b34299"
+  ],
+  "integratedMain": "496c6ca988ed645aa58e9f5eafa63942e51eacc6",
+  "testCommand": "npm test",
+  "automatedTests": 27,
+  "selfChecks": 4,
+  "gemini": "test doubles only; no credentials configured",
+  "hardwareMatchesOriginMain": true,
+  "recordedRealCollectionReplay": {
+    "verifiedAt": "2026-11-03T04:55:58.860Z",
+    "sourceRunId": "2026-11-02T18-26-22-746Z-7548",
+    "model": "iPhone 17e",
+    "storage": "256GB",
+    "condition": "clean",
+    "before": {
+      "min": 520000,
+      "max": 607000
+    },
+    "after": {
+      "min": 470000,
+      "max": 607000
+    },
+    "serverRestarted": false,
+    "oldCertificatePreserved": true,
+    "newCertificateUsesRefreshedSnapshot": true,
+    "invalidSnapshotRejected": true,
+    "rawEvidenceReproducedSha256": "fefb516e6eef6a02c70de78347f65ec767ff6e12a5a5fedbe1b968fd824148b3",
+    "rowsPreserved": 1784,
+    "note_ko": "실제 수집 원자료로 재생성한 CSV의 서버 반영 검증. 실제 기기 검수/매입 정확도 검증 아님"
+  },
+  "newLiveCollectionStageOnly": {
+    "schema": "price-daily-receipt/v1",
+    "runId": "2026-11-03T04-41-21-113Z-15496",
+    "startedAt": "2026-11-03T04:41:21.133Z",
+    "finishedAt": "2026-11-03T04:41:23.293Z",
+    "status": "partial_success",
+    "applied": false,
+    "requestedVendors": [
+      "phonesam"
+    ],
+    "selectedModelKeys": [
+      "iphone17e"
+    ],
+    "pageLimitPerVendor": 1,
+    "stats": {
+      "phonesam": {
+        "targets": 1,
+        "fetched": 1,
+        "parsed": 1,
+        "eligibleOffers": 6,
+        "rejectedOffers": 2,
+        "errors": 0
+      }
+    },
+    "rowsBefore": 1784,
+    "rowsAfter": 1784,
+    "updatedQuotes": 6,
+    "retainedQuotes": 2835,
+    "priceChanges": 0,
+    "baseSha256": "fefb516e6eef6a02c70de78347f65ec767ff6e12a5a5fedbe1b968fd824148b3",
+    "candidateSha256": "627d5ffde5a5035a5b5bb3a146c2902339cd7cd1a8982a6e1dd620b5ef97283a",
+    "issues": [],
+    "conflicts": [],
+    "changes": [
+      {
+        "referenceId": "54365cca8e9d2c21bde9",
+        "vendor": "phonesam",
+        "model": "iPhone 17e",
+        "storage": "256GB",
+        "condition": "clean",
+        "grade": "S급",
+        "oldMin": 470000,
+        "oldMax": 470000,
+        "newMin": 470000,
+        "newMax": 470000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      },
+      {
+        "referenceId": "2c8ad38e677dbc1d28d8",
+        "vendor": "phonesam",
+        "model": "iPhone 17E",
+        "storage": "256GB",
+        "condition": "minor_wear",
+        "grade": "A급",
+        "oldMin": 440000,
+        "oldMax": 440000,
+        "newMin": 440000,
+        "newMax": 440000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      },
+      {
+        "referenceId": "d24ed0401b0b14794a02",
+        "vendor": "phonesam",
+        "model": "iPhone 17E",
+        "storage": "256GB",
+        "condition": "visible_wear",
+        "grade": "B급",
+        "oldMin": 290000,
+        "oldMax": 290000,
+        "newMin": 290000,
+        "newMax": 290000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      },
+      {
+        "referenceId": "c4b4dd21905b284b2608",
+        "vendor": "phonesam",
+        "model": "iPhone 17E",
+        "storage": "512GB",
+        "condition": "clean",
+        "grade": "S급",
+        "oldMin": 550000,
+        "oldMax": 550000,
+        "newMin": 550000,
+        "newMax": 550000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      },
+      {
+        "referenceId": "ee1ab8324fd8a706b7ce",
+        "vendor": "phonesam",
+        "model": "iPhone 17E",
+        "storage": "512GB",
+        "condition": "minor_wear",
+        "grade": "A급",
+        "oldMin": 440000,
+        "oldMax": 440000,
+        "newMin": 440000,
+        "newMax": 440000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      },
+      {
+        "referenceId": "1944ef68f04a3835a910",
+        "vendor": "phonesam",
+        "model": "iPhone 17E",
+        "storage": "512GB",
+        "condition": "visible_wear",
+        "grade": "B급",
+        "oldMin": 350000,
+        "oldMax": 350000,
+        "newMin": 350000,
+        "newMax": 350000,
+        "sourceUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "evidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html",
+        "conditionEvidenceFile": "evidence/fc9d8abdbd97-461caa70e536.html"
+      }
+    ],
+    "sourceDocuments": [
+      {
+        "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "finalUrl": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "fetchedAt": "2026-11-03T04:41:22.253Z",
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "461caa70e53687d00430d6518ff6a43827b9ade4339656ebef2fa4d6ca865e85",
+        "file": "evidence/fc9d8abdbd97-461caa70e536.html"
+      }
+    ],
+    "directory": "part2_price_disposal/data/refresh-staging/runs/2026-11-03T04-41-21-113Z-15496"
+  },
+  "browser": {
+    "verifiedAt": "2026-11-03T04:55:56.127Z",
+    "browser": "Chrome headless",
+    "viewports": [
+      1280,
+      390
+    ],
+    "oldAndNewHardware": true,
+    "aiEstimateAndDeduction": "Gemini test double only",
+    "exteriorPhoto": "synthetic 1px PNG and test double, not accuracy test",
+    "requestAcknowledgementAndExplicitSale": true,
+    "manualSelectionDoesNotComplete": true,
+    "unknownPreserved": true,
+    "quoteLayoutNoHorizontalOverflow": true,
+    "pageErrors": [],
+    "qr": "CDN QR library stubbed",
+    "screenshots": [
+      "certificate-ai-reference-and-inbox.png",
+      "seller-ai-deduction-desktop.png",
+      "seller-ai-estimate-mobile.png"
+    ]
+  },
+  "pr1": {
+    "state": "open",
+    "merged": false,
+    "head": "b413803faac006180e8bb81dbc1048351fc0f23e",
+    "action": "diff reviewed, not merged"
+  },
+  "npmStart": {
+    "seller": 200,
+    "buyer": 200,
+    "priceReferenceAsset": 200,
+    "hardwareDetailsAsset": 200,
+    "quote": "ok",
+    "typedManual": "sold; read-only smoke"
+  },
+  "actualGeminiVerified": false,
+  "actualDamagedPhotoAccuracyVerified": false,
+  "actualBuybackAccuracyVerified": false,
+  "cloudOperationalVerified": false,
+  "schedulerActivated": false
+}

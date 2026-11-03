@@ -1,48 +1,20 @@
-> **이 폴더: ② 시세·처분 판단** · 담당 신현서 · 서석훈
-> 파일: `lib/price.js`(시세 CSV 조회) · `lib/fault-adjust.js` + `prompts/fault-deduction.*`(알려진 기능 고장 내용이 있으면 '기능 정상' 기준 시세에서 그 고장만큼 Gemini 가 판단해 차감) · `lib/price-estimate.js` + `prompts/price-estimate.*`(CSV 에 없는 조합을 같은 CSV 의 같은 기종·같은 제조사 행 근거로 Gemini 추정, 'AI 추정 참고가' 로 표시) · `lib/assessment.js`(Gemini 외관·배터리 판별 정리, 처분 추천 규칙, 매뉴얼 섹션) · `prompts/assessment.*` · `data/`(시세 CSV, 처리 매뉴얼, `raw/` 업체별 원자료)
-> ③ 과 겹치는 곳: API 라우트(`/api/assess`, `/api/price/quote` 의 `disposal`)와 발급 시 `assessment` 저장은 `part3_certificate/lib/seller-routes.js` 에, 판별 UI 는 `part3_certificate/seller.html` 4단계에 있습니다.
-> 자체 점검: 루트에서 `npm test`
+# ② 업체 매입 참고가 · 상태 제안 · 처리 안내
 
-# ② Gemini 시세·처분 판단
+담당 영역: `lib/price.js`, `lib/assessment.js`, `prompts/assessment.*`, `data/`, `scripts/price-refresh.js`. 공개 수집/증분 병합은 `lib/price-sources.js`/`price-collection.js`, 일별 실행은 `scripts/price-daily.js`, 별도 Gemini 검색은 `lib/price-search.js`, Cloud Run 연결은 `lib/price-cloud.js`입니다.
+통합 API/화면은 ③의 `lib/seller-routes.js`, `seller.html`과 연결됩니다.
 
-담당: 신현서 · 서석훈 (시세 기준표 데이터: 고영휘 · 서석훈)
+1. 점검 JSON에서 제조사·기종을 읽고 판매자가 저장 용량·외관 상태·알려진 기능 이상(없음/있음/모름)을 추가합니다. RAM과 카메라 사진 화질은 시세 조회 조건이 아닙니다.
+2. 선택 사항인 외관 사진·배터리 캡처를 `/api/assess`에 보내면 Gemini가 외관을 **제안**합니다. 자동 선택하지 않으며 판매자가 확인·적용합니다. 내부 기능 정상 여부는 사진으로 판단하지 않습니다. 키 부재·실패·판단 불가에도 수동 선택과 등록이 가능합니다.
+3. 업체 원문 참고가는 `brand + model_key + storage + condition_code`로 정확히 조회합니다. 알려진 고장이 있으면 최신 main의 명시적 `damage_or_fault` 재분류를 표시합니다. 없으면 `no_data`, 용량 미확인은 `needs_input`, 기능 조건 미확인은 `needs_check`입니다. 모름을 다섯 테스트 통과로 정상으로 바꾸지 않습니다.
+4. 별도 `price-estimate.js`는 `no_data` 조합만 같은 CSV 근거로 AI 추정합니다. 자료 없음·근거 행·출처·불확실성을 보존하고 업체 원문/검증 CSV에 섞지 않습니다. `fault-adjust.js`는 손상이 포함되지 않은 clean/minor_wear/visible_wear 기준가에 판매자의 기능 고장 설명을 해석해 AI 감가합니다. 파손/잔상/화면 고장 기준의 추가 차감은 중복 우려로 생략합니다. 감가액은 검증된 수리비나 직접 진단이 아닙니다. 키/근거 부족·실패에도 수동 입력·등록이 가능합니다. 캐시는 CSV 해시·모델·프롬프트 변경 때 무효화됩니다.
+5. 판매자가 정한 희망가로 우리 플랫폼에 보증서 연결 매물을 등록합니다. 파손·시세 없음·낮은 참고가만으로 판매를 배제하지 않습니다. 기부·재활용·배출 안내는 대안이며 실제 완료 기록은 별도입니다.
 
-```
-/seller 4단계: 앞·뒷면 사진 + 배터리 캡처 → [AI로 상태·배터리 판별]
-   POST /api/assess ── Gemini 1회 (prompts/assessment.*) ──▶ 외관 상태 "제안" + 배터리 % 판독
-        │  결과는 서버 메모리에 assessId 로 보관 (클라이언트가 보낸 판별값은 믿지 않음)
-        ▼
-   판매자가 상태 확정 → POST /api/price/quote
-        시세(lib/price.js) + 처분 추천(lib/assessment.js recommend, 규칙) + 처리 매뉴얼 섹션 본문
-        ▼
-   POST /api/certificates { ..., assessId } → 보증서 assessment 칸에 저장 (무결성 해시 포함)
-```
+가격은 업체 매입 **참고가**입니다. 업체 1곳 여부는 금액이 아닌 `vendorCount`로 표시합니다. 서로 다른 업체의 원래 등급·조건·링크를 유지하며 공통 공식 등급처럼 설명하지 않습니다. `checkedOn`은 자료 확인일, `quotes[].priceDate`/`priceDateSource`는 원문 가격 기준일입니다. 배터리·잔상·수리 이력·검수 조건에 따라 실제 매입가가 달라집니다. 개인 간 실거래가·보장 판매가·배터리별 정밀 보정 가격이 아닙니다.
 
-## 보증서 `assessment`
+배터리 제출은 선택입니다. 판독값의 `source: seller_screenshot`은 판매자 캡처 AI 판독이며 직접 측정이 아닙니다. 미확인은 정상으로 보지 않습니다. 기존 80% 미만 참고 플래그는 금액 보정이나 처분 분기에 사용하지 않습니다.
 
-| 필드 | 내용 |
-|---|---|
-| `ai` | Gemini 판별 원본 정리값. AI 판별을 안 했으면 `null` |
-| `ai.condition` | `code`(7개 상태 중 하나, 판단 불가면 `null`), `confidence`, `damages[]`, `evidence_ko`, `caveats_ko[]` |
-| `battery` | `healthPct`, `statusLabel`, `cycleCount`, `osHint`, `low`(80% 미만), `source: "seller_screenshot"`. 캡처가 배터리 화면이 아니면 `null` |
-| `sellerAgreesWithAi` | AI 제안과 판매자 확정 상태가 같은가 (다르면 신뢰도 사유에 표시) |
-| `disposal` | `action`(`sell` / `sell_parts` / `donate`), `label_ko`, `reasons_ko[]`, `alternatives[]`, `manualSections[]` |
+`assessment`의 기존 필드를 유지합니다. `disposal.action` 기본값은 `sell`, `alternatives`는 `donate/recycle`, `registrationUrl`을 추가했습니다. 과거 `sell_parts`/`donate` 보증서는 그대로 읽습니다. `DONATE_BELOW_KRW` export는 과거 코드 호환용이며 추천 분기에는 쓰지 않습니다.
 
-④ 구매자용 공개 목록(`/api/public/certificates`)에도 `battery.healthPct`, `disposal` 이 추가됩니다.
+실제 공개 출처에서 수집해 기존 1,784행의 참고가를 갱신했습니다. 수집 원자료와 서비스 집계를 분리하고 실패/미확인 견적은 유지합니다. 파일 갱신 시 서버가 검증 후 캐시를 자동 교체하며 기존 보증서의 발급 당시 가격은 보존합니다. `checkedOn`/원문 기준일/수집 시각을 구분합니다.
 
-## 규칙 (매뉴얼 기준)
-
-- 가격은 Gemini가 만들지 않음. 항상 `price.lookup()` 결과.
-- AI 외관 판별은 제안. 확정은 판매자가 하고 보증서에는 둘 다 남김.
-- 처분 추천은 규칙(`recommend`)으로 결정하고 사용자에게 강제하지 않음.
-  - 파손 상태(`rear_damage`, `display_fault`, `damage_or_fault`) + 시세 있음 → 파손폰 업체 매입, 시세 없음 → 기부·배출
-  - 매입 최고가 `DONATE_BELOW_KRW`(임시 3만원) 미만 → 기부·배출
-  - 그 외 → 판매
-- 배터리 %는 판매자가 올린 캡처를 읽은 값이라 "판매자 캡처 기준"으로만 표시.
-
-## 확인
-
-```bash
-node lib/assessment.js   # 처분 규칙·정규화·매뉴얼 섹션 자체 점검
-```
-Gemini 키가 없으면 `/api/assess` 는 503 으로 "직접 골라 주세요"를 돌려주고, 나머지(시세·추천·발급)는 그대로 동작합니다.
+실행: `npm run price:collect`(후보만), `npm run price:daily`(검증 후 반영), `npm run price:status`(마지막 성공/실패). 예약/클라우드는 준비만 했으며 가동하지 않았습니다. 검증은 루트 `npm test`, `npm run price:validate`. [실제 결과·제한·예약/검색 실행법](PRICE_REFRESH.md), [플랫폼 인계](../common/docs/PRICE_PLATFORM_HANDOFF.md).

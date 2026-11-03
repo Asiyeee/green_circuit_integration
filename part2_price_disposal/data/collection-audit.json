@@ -1,0 +1,1533 @@
+{
+  "schema": "price-collection-audit/v1",
+  "verifiedAt": "2026-11-02T18:30:30.969Z",
+  "baselineCommit": "45f7693d8e59fa0fe0e931b430435b13b817e4af",
+  "baselineSha256": "d40f23e120d3a2814f11b69e1e6dc010d19fe592bdce54cf39a3267603ba7a5a",
+  "currentSha256": "fefb516e6eef6a02c70de78347f65ec767ff6e12a5a5fedbe1b968fd824148b3",
+  "latestRunId": "2026-11-02T18-26-22-746Z-7548",
+  "rowsBefore": 1784,
+  "rowsAfter": 1784,
+  "totalQuotes": 2841,
+  "refreshedQuotes": 2737,
+  "retainedQuotes": 104,
+  "amountChangedFromBaseline": 949,
+  "referenceRangesChanged": 741,
+  "existingKeysAndMappingsPreserved": true,
+  "vendors": {
+    "phonesam": {
+      "total": 1416,
+      "refreshed": 1396,
+      "retained": 20,
+      "amountChanged": 629
+    },
+    "rediva": {
+      "total": 312,
+      "refreshed": 312,
+      "retained": 0,
+      "amountChanged": 0
+    },
+    "retemz": {
+      "total": 556,
+      "refreshed": 556,
+      "retained": 0,
+      "amountChanged": 320
+    },
+    "kspe": {
+      "total": 411,
+      "refreshed": 411,
+      "retained": 0,
+      "amountChanged": 0
+    },
+    "mintit": {
+      "total": 84,
+      "refreshed": 0,
+      "retained": 84,
+      "amountChanged": 0
+    },
+    "moa": {
+      "total": 39,
+      "refreshed": 39,
+      "retained": 0,
+      "amountChanged": 0
+    },
+    "uzphone": {
+      "total": 23,
+      "refreshed": 23,
+      "retained": 0,
+      "amountChanged": 0
+    }
+  },
+  "retained": [
+    {
+      "referenceId": "af5f08854fb5f1e87dce",
+      "vendor": "mintit",
+      "model": "iPhone 11",
+      "storage": "64GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP11-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "583daa5716d98ee7d1da",
+      "vendor": "mintit",
+      "model": "iPhone 11",
+      "storage": "64GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP11-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "351b41163358453b3017",
+      "vendor": "mintit",
+      "model": "iPhone 12",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP12-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "2b3dadf2610fcdbcdcd9",
+      "vendor": "mintit",
+      "model": "iPhone 12",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP12-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "0b70d6ca9d044824b184",
+      "vendor": "mintit",
+      "model": "iPhone 13",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP13-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c59a9808954e47c5b89f",
+      "vendor": "mintit",
+      "model": "iPhone 13",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP13-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "27773059edfb1f9807a7",
+      "vendor": "mintit",
+      "model": "iPhone 14",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP14-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "fb02a8e2b5de66b58d7e",
+      "vendor": "mintit",
+      "model": "iPhone 14",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP14-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "d651ff68b64ae7c70f8d",
+      "vendor": "mintit",
+      "model": "iPhone 15",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP15-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "5763d4ff6a1749b477ad",
+      "vendor": "mintit",
+      "model": "iPhone 15",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP15-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "086e9ba97120f9b0467c",
+      "vendor": "mintit",
+      "model": "iPhone 16",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP16-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "48502254670b579a4d1a",
+      "vendor": "mintit",
+      "model": "iPhone 16",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP16-128G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "22b1e49f98007cf8dfd9",
+      "vendor": "mintit",
+      "model": "iPhone 17e",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP17%20e-256G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "54365cca8e9d2c21bde9",
+      "vendor": "mintit",
+      "model": "iPhone 17e",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP17%20e-256G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "3a458d3ed4ccda99aa98",
+      "vendor": "mintit",
+      "model": "iPhone 3GS",
+      "storage": "16GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP3-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "35eb0c1150b885cd177f",
+      "vendor": "mintit",
+      "model": "iPhone 3GS",
+      "storage": "16GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP3-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "acaaf5714a0608482f2f",
+      "vendor": "mintit",
+      "model": "iPhone 4",
+      "storage": "16GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP4-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "f184939e8aaed2df6531",
+      "vendor": "mintit",
+      "model": "iPhone 4",
+      "storage": "16GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP4-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "8538edf0dd7a26933fed",
+      "vendor": "mintit",
+      "model": "iPhone 5",
+      "storage": "16GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP5-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "6f8d5b361739a35a98ad",
+      "vendor": "mintit",
+      "model": "iPhone 5",
+      "storage": "16GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP5-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "7dfa122ba715f2e4df8a",
+      "vendor": "mintit",
+      "model": "iPhone 6",
+      "storage": "16GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP6-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "5039e0fcb067af4fa378",
+      "vendor": "mintit",
+      "model": "iPhone 6",
+      "storage": "16GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP6-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "290d327e78fd8d9b8024",
+      "vendor": "mintit",
+      "model": "iPhone 7",
+      "storage": "32GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP7-32G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "4aad289786fffe5306b6",
+      "vendor": "mintit",
+      "model": "iPhone 7",
+      "storage": "32GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP7-32G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c0ad2cb254bfd22d0528",
+      "vendor": "mintit",
+      "model": "iPhone 8",
+      "storage": "64GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP8-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "f10993c5064c672477f0",
+      "vendor": "mintit",
+      "model": "iPhone 8",
+      "storage": "64GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIP8-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "bec6320194f9e19fab60",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "clean",
+      "grade": "S급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "f0045937e2e69b5e0898",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "damage_or_fault",
+      "grade": "C급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "df6f43fda39f1e7d0c95",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "display_fault",
+      "grade": "LCD불량",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "35a365e8ea01ac8b249b",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "minor_wear",
+      "grade": "A급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "ffe5931e751b5e439c5a",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "1TB",
+      "condition": "visible_wear",
+      "grade": "B급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "8b2ca51c509a0421043e",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "S급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "15fe7a53233c92f4b2cc",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "256GB",
+      "condition": "damage_or_fault",
+      "grade": "C급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "b89a8afb2fe9dea69cf3",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "256GB",
+      "condition": "display_fault",
+      "grade": "LCD불량",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "a6e75fad4a2f20f9428f",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "256GB",
+      "condition": "minor_wear",
+      "grade": "A급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "fe5b48108c735fe06a1f",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "256GB",
+      "condition": "visible_wear",
+      "grade": "B급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "8127496f64adf45e1e31",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "512GB",
+      "condition": "clean",
+      "grade": "S급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "b70b0c341dca42811dad",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "512GB",
+      "condition": "damage_or_fault",
+      "grade": "C급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "5c5aaedf54dd62b4bfb8",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "512GB",
+      "condition": "display_fault",
+      "grade": "LCD불량",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "1f314700fefddafb4dab",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "512GB",
+      "condition": "minor_wear",
+      "grade": "A급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "d09034f6ae46ff8e56e3",
+      "vendor": "phonesam",
+      "model": "iPhone Air",
+      "storage": "512GB",
+      "condition": "visible_wear",
+      "grade": "B급",
+      "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17-%EC%97%90%EC%96%B4",
+      "reason": "아이폰 17 에어와 서비스 iPhone Air의 동일 모델 연결을 확정하지 않음"
+    },
+    {
+      "referenceId": "d86ec42120cd400315fc",
+      "vendor": "mintit",
+      "model": "iPhone SE",
+      "storage": "16GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "82979c41fb239f30909e",
+      "vendor": "mintit",
+      "model": "iPhone SE",
+      "storage": "16GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE-16G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "8e61ccc3210e3ec4bb63",
+      "vendor": "mintit",
+      "model": "iPhone SE (2세대)",
+      "storage": "64GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE%20(2020)-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "cb6e0ab00e50b9080fc9",
+      "vendor": "mintit",
+      "model": "iPhone SE (2세대)",
+      "storage": "64GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE%20(2020)-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c5b33e7497c15560caf0",
+      "vendor": "mintit",
+      "model": "iPhone SE (3세대)",
+      "storage": "64GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE3-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "1a65b9223f199540d55f",
+      "vendor": "mintit",
+      "model": "iPhone SE (3세대)",
+      "storage": "64GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPSE3-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "9af43fd84303c31adfd6",
+      "vendor": "mintit",
+      "model": "iPhone XR",
+      "storage": "64GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPXR-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c13139799ceb875f706a",
+      "vendor": "mintit",
+      "model": "iPhone XR",
+      "storage": "64GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=AIPXR-64G&manufacturer_idx=1209",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "352caf827fae509bb6c6",
+      "vendor": "phonesam",
+      "model": "Galaxy M36 점프4",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "S급",
+      "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+      "reason": "동일 페이지의 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+    },
+    {
+      "referenceId": "ec3aa0b78ccfa50f1968",
+      "vendor": "phonesam",
+      "model": "Galaxy M36 점프4",
+      "storage": "128GB",
+      "condition": "damage_or_fault",
+      "grade": "C급",
+      "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+      "reason": "동일 페이지의 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+    },
+    {
+      "referenceId": "46917de0390f070ae7f3",
+      "vendor": "phonesam",
+      "model": "Galaxy M36 점프4",
+      "storage": "128GB",
+      "condition": "display_fault",
+      "grade": "LCD불량",
+      "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+      "reason": "동일 페이지의 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+    },
+    {
+      "referenceId": "bf8363ff806189742464",
+      "vendor": "phonesam",
+      "model": "Galaxy M36 점프4",
+      "storage": "128GB",
+      "condition": "minor_wear",
+      "grade": "A급",
+      "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+      "reason": "동일 페이지의 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+    },
+    {
+      "referenceId": "116bbd2c4edf0037be79",
+      "vendor": "phonesam",
+      "model": "Galaxy M36 점프4",
+      "storage": "128GB",
+      "condition": "visible_wear",
+      "grade": "B급",
+      "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+      "reason": "동일 페이지의 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+    },
+    {
+      "referenceId": "e0082686df6c1db3cabb",
+      "vendor": "mintit",
+      "model": "Galaxy S10",
+      "storage": "128GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-G973-128G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "725983015a3589900759",
+      "vendor": "mintit",
+      "model": "Galaxy S10",
+      "storage": "128GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-G973-128G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "05ab0af75c442d022801",
+      "vendor": "mintit",
+      "model": "Galaxy S21 Ultra",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-G998-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "f8ae5f03cd44650f9676",
+      "vendor": "mintit",
+      "model": "Galaxy S21 Ultra",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-G998-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "7117f4c6960eab0b93a5",
+      "vendor": "mintit",
+      "model": "Galaxy S22 Ultra",
+      "storage": "1TB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S908-1T&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "d08af1975cc7e8b58880",
+      "vendor": "mintit",
+      "model": "Galaxy S22 Ultra",
+      "storage": "1TB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S908-1T&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "7fb284aae8523db8b35f",
+      "vendor": "mintit",
+      "model": "Galaxy S23",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S911-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "e93a7e757a4c62c5731e",
+      "vendor": "mintit",
+      "model": "Galaxy S23",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S911-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "043aab1a2bad21f79db3",
+      "vendor": "mintit",
+      "model": "Galaxy S23 FE",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S711-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "66f63dfcac569448fba5",
+      "vendor": "mintit",
+      "model": "Galaxy S23 FE",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S711-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "7d6a407523cfaa78b8ef",
+      "vendor": "mintit",
+      "model": "Galaxy S23 Ultra",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S918-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c99357046dceda586859",
+      "vendor": "mintit",
+      "model": "Galaxy S23 Ultra",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S918-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "a0d7a7165682b7e0ea79",
+      "vendor": "mintit",
+      "model": "Galaxy S24",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S921-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "85bccdea19c450eb9779",
+      "vendor": "mintit",
+      "model": "Galaxy S24",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S921-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "9b4e28a5e464007011c0",
+      "vendor": "mintit",
+      "model": "Galaxy S24+",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S926-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "19e8e675387a887fb22c",
+      "vendor": "mintit",
+      "model": "Galaxy S24+",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S926-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "6946b37a02e86dbf6206",
+      "vendor": "mintit",
+      "model": "Galaxy S24 Ultra",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S928-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "d091bd1fe12d3677de11",
+      "vendor": "mintit",
+      "model": "Galaxy S24 Ultra",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S928-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c061a4e92b219a44ec0f",
+      "vendor": "mintit",
+      "model": "Galaxy S25",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S931-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "bf4c110a08c6830f734d",
+      "vendor": "mintit",
+      "model": "Galaxy S25",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S931-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "e5fda7e163de99614549",
+      "vendor": "mintit",
+      "model": "Galaxy S25 Edge",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S937-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "58751d648498a1ed7e84",
+      "vendor": "mintit",
+      "model": "Galaxy S25 Edge",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S937-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "dc1b61df9a56ab4cbd1f",
+      "vendor": "mintit",
+      "model": "Galaxy S25+",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S936-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "a8b6722d10accf6487e3",
+      "vendor": "mintit",
+      "model": "Galaxy S25+",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S936-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "656a15b96732f061c4e1",
+      "vendor": "mintit",
+      "model": "Galaxy S25 Ultra",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S938-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "130efbd15c38ce60af30",
+      "vendor": "mintit",
+      "model": "Galaxy S25 Ultra",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S938-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "8a6009fcc50e8e0e0a33",
+      "vendor": "mintit",
+      "model": "Galaxy S26",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S942-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "7e364b61b6bfd91c8746",
+      "vendor": "mintit",
+      "model": "Galaxy S26",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S942-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "9a340f4c86384bc4e6a5",
+      "vendor": "mintit",
+      "model": "Galaxy S26 Plus",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S947-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "eb6535e38975725c6b4d",
+      "vendor": "mintit",
+      "model": "Galaxy S26 Plus",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S947-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "e2fedc1adb66b80d84ef",
+      "vendor": "mintit",
+      "model": "Galaxy S26 Ultra",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S948-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "a772e18da74570d5d49d",
+      "vendor": "mintit",
+      "model": "Galaxy S26 Ultra",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-S948-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "1c1686b818e0d8e50871",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 4",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F721-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "4c16a72153e8a324354e",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 4",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F721-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "52d1d862a1709e257861",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 5",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F731-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c02edb6634df4950ce30",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 5",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F731-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "5aa40eb21916ee21d521",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 6",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F741-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "4597d19295baf42c94dd",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 6",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F741-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "dbdedd4abd027324fc1a",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 7",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F766-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "4bde0904ccc70a3416b9",
+      "vendor": "mintit",
+      "model": "Galaxy Z Flip 7",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F766-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "c0ac3c00e7d6e2ed91c8",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 3",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F926-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "53065f04a93973bff95c",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 3",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F926-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "fb2aad9ba65429564aa7",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 4",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F936-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "e4a76c6529d60e1a89a0",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 4",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F936-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "a13e8ea261bbaf71f362",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 5",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F946-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "2d30374e5fffdf007552",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 5",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F946-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "6d02c79a56fa4581ea5d",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 6",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F956-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "95ddb668b450cb730e77",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 6",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F956-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "292ed1834f5113844620",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 7",
+      "storage": "256GB",
+      "condition": "burn_in",
+      "grade": "B등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F966-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    },
+    {
+      "referenceId": "0a78c2f4f35925025c07",
+      "vendor": "mintit",
+      "model": "Galaxy Z Fold 7",
+      "storage": "256GB",
+      "condition": "clean",
+      "grade": "A등급",
+      "url": "https://mintit.co.kr/price-check/results?petname=SM-F966-256G&manufacturer_idx=1207",
+      "reason": "공개 API 조건/모델 응답 손상 또는 모델 코드·용량 미확인"
+    }
+  ],
+  "latestRun": {
+    "startedAt": "2026-11-02T18:26:22.758Z",
+    "finishedAt": "2026-11-02T18:26:26.005Z",
+    "stats": {
+      "phonesam": {
+        "targets": 2,
+        "fetched": 2,
+        "parsed": 2,
+        "eligibleOffers": 6,
+        "rejectedOffers": 7,
+        "errors": 0
+      }
+    },
+    "issues": [
+      {
+        "vendor": "phonesam",
+        "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+        "reason": "동일 페이지 상태 선택은 문의인데 용량 표에는 숫자가 있어 반영 보류"
+      }
+    ],
+    "conflicts": []
+  },
+  "credentials": {
+    "geminiConfigured": false,
+    "gcpAdcConfigured": false,
+    "checkScope": "project .env/.env.txt and process/user/machine environment; default gcloud ADC file presence only; no values logged"
+  },
+  "schedule": {
+    "windowsXmlGenerated": true,
+    "registered": false,
+    "queryResult": "schtasks: task not found",
+    "cloudDeployed": false
+  },
+  "photoValidation": {
+    "realUserDamagePhotoAvailable": false,
+    "filesExamined": "provided attachment folder, project and original outputs; only request text and prior UI screenshots found",
+    "actualGeminiOrBuybackAccuracyTested": false
+  },
+  "tests": {
+    "npmCi": true,
+    "nodeVersion": "v24.22.1",
+    "npmVersion": "12.2.1",
+    "nodeTests": 20,
+    "browserFlow": true,
+    "liveReloadActualCollection": true,
+    "cloudTestUsesStub": true,
+    "npmStart": true,
+    "finalRegressionAt": "2026-11-02T18:55:09.282Z"
+  },
+  "latestFullScopeRun": {
+    "runId": "2026-11-02T18-13-35-821Z-25448",
+    "stats": {
+      "phonesam": {
+        "targets": 145,
+        "fetched": 145,
+        "parsed": 143,
+        "eligibleOffers": 1395,
+        "rejectedOffers": 219,
+        "errors": 2
+      },
+      "retemz": {
+        "targets": 63,
+        "fetched": 63,
+        "parsed": 63,
+        "eligibleOffers": 594,
+        "rejectedOffers": 241,
+        "errors": 0
+      },
+      "rediva": {
+        "targets": 1,
+        "fetched": 1,
+        "parsed": 1,
+        "eligibleOffers": 416,
+        "rejectedOffers": 0,
+        "errors": 0
+      },
+      "kspe": {
+        "targets": 1,
+        "fetched": 1,
+        "parsed": 1,
+        "eligibleOffers": 996,
+        "rejectedOffers": 259,
+        "errors": 0
+      },
+      "moa": {
+        "targets": 1,
+        "fetched": 1,
+        "parsed": 1,
+        "eligibleOffers": 39,
+        "rejectedOffers": 0,
+        "errors": 0
+      },
+      "uzphone": {
+        "targets": 10,
+        "fetched": 10,
+        "parsed": 10,
+        "eligibleOffers": 135,
+        "rejectedOffers": 5,
+        "errors": 0
+      },
+      "mintit": {
+        "targets": 42,
+        "fetched": 40,
+        "parsed": 39,
+        "eligibleOffers": 0,
+        "rejectedOffers": 156,
+        "errors": 3
+      }
+    },
+    "issues": [
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP11-64G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP12-128G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP13-128G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP14-128G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP15-128G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP16-128G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP17%20e-256G&manufacturer_idx=1209",
+        "reason": "민팃 모델 코드 미확인"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP3-16G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP4-16G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP5-16G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP6-16G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP7-32G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIP8-64G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIPSE-16G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIPSE%20(2020)-64G&manufacturer_idx=1209",
+        "reason": "민팃 모델 코드 미확인"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIPSE3-64G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=AIPXR-64G&manufacturer_idx=1209",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "35d6bc6e79eda3b139eb50a042b4cad4927a8c7cf4835ed7adeb51db53e4a985"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-G973-128G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-G998-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S908-1T&manufacturer_idx=1207",
+        "reason": "민팃 용량/등급 미확인"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S911-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S711-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S918-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S921-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S926-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S928-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S931-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S937-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S936-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S938-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S942-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S947-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-S948-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F721-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F731-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F741-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F766-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F926-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F936-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F946-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F956-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "mintit",
+        "url": "https://mintit.co.kr/price-check/results?petname=SM-F966-256G&manufacturer_idx=1207",
+        "reason": "등급 조건 변경/미검토. 원자료만 저장하고 참고가 반영 금지",
+        "conditionSignature": "7e1b28a50cd40769b7d69c31250dc6f600457bf79fccd4e235c307ca6ce02366"
+      },
+      {
+        "vendor": "phonesam",
+        "url": "https://phonesam.com/sell/%EC%95%84%EC%9D%B4%ED%8F%B0-17e",
+        "reason": "폰삼 등급 조건 누락: C급"
+      },
+      {
+        "vendor": "phonesam",
+        "url": "https://phonesam.com/sell/%EA%B0%A4%EB%9F%AD%EC%8B%9C-m36-%EC%A0%90%ED%94%844",
+        "reason": "폰삼 등급 조건 누락: S급"
+      }
+    ],
+    "conflicts": [
+      {
+        "key": "kspe|Apple|iphone15promax|512GB|미개봉/새상품",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "kspe|Apple|iphone15promax|512GB|A급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "kspe|Apple|iphone15promax|512GB|B급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "kspe|Apple|iphone15promax|512GB|LCD파손",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "kspe|Apple|iphone15promax|512GB|후면파손",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???s|256GB|A등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???s|256GB|B등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???s|256GB|C등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???s|256GB|D등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???z??|256GB|A등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???z??|256GB|B등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???z??|256GB|C등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      },
+      {
+        "key": "mintit|Samsung|???z??|256GB|D등급",
+        "reason": "동일 업체·모델·용량·등급의 출처 충돌"
+      }
+    ]
+  },
+  "totalRecordedRuns": 5,
+  "runtimeBlockers": {
+    "gemini": "project/process/user/machine key absent",
+    "googleCloud": "ADC and project runtime credentials absent; no remote operations performed",
+    "docker": "CLI present, dockerDesktopLinuxEngine named pipe absent; image build not executed"
+  }
+}

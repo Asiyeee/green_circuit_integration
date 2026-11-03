@@ -6,6 +6,8 @@
 
 # ③ 판매자: 성능 보증서 + 탄소 영수증 + 환경 온도
 
+**2026-11-03 통합 변경:** 보증서 `listed` 자체가 플랫폼 매물입니다. 판매 화면은 희망가 입력 후 등록하고 상세에서 문의를 받습니다. 파손·시세 없음도 등록할 수 있습니다. 새 문의 확인·완료 처리는 **서버 토큰 + 해당 매물의 비밀 관리키**가 필요합니다. 관리키는 발급 응답의 `ownerToken`으로 한 번 전달되어 브라우저에 보관되며 공개 보증서에는 들어가지 않습니다. 기존 관리키 없는 보증서는 열람을 유지하고 변경은 차단합니다. 아래 초기 구현 설명보다 [현재 인계 문서](../common/docs/PRICE_PLATFORM_HANDOFF.md)를 우선합니다.
+
 담당: 송영찬 · 다음 담당: ④ 구매자 비교
 
 ```
@@ -32,7 +34,7 @@ npm run share
 1. 테스트 결과 고르기 (results/ 목록 또는 JSON 파일 업로드)
 2. 저장 용량 · 외관 상태 · 기능 이상 선택 → 시세와 탄소 회피량이 바로 미리 보입니다
 3. 앞·뒷면 사진, 닉네임 → **보증서 발급**
-4. 링크·QR 이 나옵니다. `/c/{id}?t=토큰` 으로 열면 아래에 "거래 처리(데모)" 버튼이 보이고, 누르면 환경 온도가 오릅니다.
+4. 링크·QR과 별도 관리키가 나옵니다. `/c/{id}?t=토큰`에서 이 브라우저에 저장된 해당 관리키로 요청 확인·완료 처리를 합니다. 요청만으로 완료되지 않으며 실제 판매·기부·배출 후 확인란을 체크하고 완료를 기록합니다.
 
 폰 없이 확인하려면 `/seller` 에서 `sample-result.json` 을 업로드하거나, `npm run seed` 로 데모 보증서 9장을 한 번에 만드세요(`demo: true` 표시, `npm run seed -- --reset` 으로 다시 만들기). 결과 예시는 [`sample-certificate.json`](../sample-certificate.json) 입니다.
 
@@ -52,7 +54,7 @@ npm run share
 | `trust` | `level`(`high`/`medium`/`low`), `reasons[]` |
 | `photos[]` | `kind`(`test_camera`/`front`/`back`…), `url`, `sha256` |
 | `status`, `outcome` | `listed` → `sold` / `donated` / `recycled`. 처리 결과와 오른 온도 |
-| `assessment` | **② Gemini 시세·처분 판단 결과를 넣을 빈자리** (지금은 `null`) |
+| `assessment` | ② 상태 제안·판매자 확인·선택적 배터리 캡처 판독·플랫폼 판매 안내. AI 미사용 시 `ai: null` |
 | `integrity.sha256` | 발급 시점 내용의 해시. 페이지에 "원본과 일치"로 표시 |
 
 `condition.code`: `clean` 깨끗함 · `minor_wear` 생활 흠집 · `visible_wear` 뚜렷한 흠집 · `burn_in` 잔상 · `rear_damage` 후면 파손 · `display_fault` 화면 불량 · `damage_or_fault` 파손·기능 이상
@@ -68,7 +70,7 @@ npm run share
 | `GET /api/public/users/{nickname}` | 환경 온도, 행동 기록, 온도 규칙 |
 | `GET /c/{id}` | 보증서 페이지 (구매자에게 보여 줄 화면) |
 
-판매 완료 처리는 토큰이 필요합니다: `POST /api/certificates/{id}/outcome` `{ "type": "sold" | "donated" | "recycled" }`. 구매자 파트에서 "거래 확정" 버튼을 만들면 이 API 를 부르면 됩니다.
+판매 완료는 판매자 전용입니다: `POST /api/certificates/{id}/outcome` `{ "type": "sold" | "donated" | "recycled" }`. `x-access-token`과 `x-owner-token` 헤더가 모두 필요합니다. 구매자는 이 API로 완료하지 않고 구매 요청을 저장합니다. 목록 API는 판매 중/유효 보증서만 반환하며 종료 기록은 상세 API로 계속 읽습니다.
 
 조건 비교 예 (JS):
 ```js

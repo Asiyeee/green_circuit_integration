@@ -29,6 +29,7 @@ const priceEstimate = require('../../part2_price_disposal/lib/price-estimate.js'
 const faultAdjust = require('../../part2_price_disposal/lib/fault-adjust.js');
 const { validateReport } = require('../../common/scripts/validate.js');
 const { FIRESTORE_PHOTO_LIMIT } = require('../../common/lib/certificate-store.js');
+const { createMarketService, secret, hash } = require('./market.js');
 
 const ROOT = path.join(__dirname, '..');
 const MAX_PHOTOS = 4;
@@ -38,11 +39,9 @@ const FAULTS = ['none', 'yes', 'unknown'];
 const OUTCOMES = ['sold', 'donated', 'recycled'];
 const ASSESS_TTL_MS = 60 * 60 * 1000;
 
-// 판매자가 고장 여부를 '모름'으로 뒀어도 하드웨어 점검 5개가 모두 정상이면 '없음'으로 봅니다 (점검 결과가 근거).
-// '있음'은 판매자 말을 그대로 따릅니다.
+// 다섯 가지 웹 점검은 미점검 기능까지 보장하지 않음. 판매자의 모름 응답을 보존.
 function resolveFault(knownFault, summary) {
   const k = FAULTS.includes(knownFault) ? knownFault : 'unknown';
-  if (k === 'unknown' && summary && summary.completed && summary.allPassed) return { knownFault: 'none', source: 'hardware_test' };
   return { knownFault: k, source: 'seller_declared' };
 }
 
@@ -67,7 +66,7 @@ function listItem(cert) {
     device: cert.device,
     condition: cert.condition,
     test: { passedCount: cert.test.passedCount, totalCount: cert.test.totalCount, allPassed: cert.test.allPassed, statuses: Object.fromEntries(certificate.KEYS.map((k) => [k, cert.test.items[k].status])), cameraPhotoGrade: cert.test.items.camera.photoGrade },
-    price: cert.price.status === 'ok' ? { status: 'ok', minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, label_ko: cert.price.label_ko } : { status: cert.price.status },
+    price: cert.price.status === 'ok' ? { status: 'ok', minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, label_ko: cert.price.label_ko, estimated: !!cert.price.estimated, faultAdjusted: !!cert.price.faultAdjusted, sourceKind: cert.price.sourceKind || 'vendor_reference', vendorCount: cert.price.vendorCount } : { status: cert.price.status },
     carbon: { avoidedKg: cert.carbon.avoidedKg, basis: cert.carbon.basis },
     trust: cert.trust.level,
     askingPriceKrw: cert.askingPriceKrw ?? null,
@@ -137,27 +136,41 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
     const id = crypto.randomBytes(8).toString('hex');
     const now = Date.now();
     for (const [k, v] of analyses) if (now - v.at > ASSESS_TTL_MS) analyses.delete(k);
-    analyses.set(id, { at: now, a });
+    analyses.set(id, { at: now, a, device });
     console.log(`✔ AI 판별 ${id} · ${device.brand} ${device.model} · 상태 제안 ${a.condition.code || '없음'}(${a.condition.confidence}) · 배터리 ${a.battery ? (a.battery.healthPct ?? '?') + '%' : '없음'}`);
     return { assessId: id, analysis: a };
   }
-  const analysisOf = (id) => (id && analyses.has(id) ? analyses.get(id).a : null);
+  const analysisOf = (id, device) => {
+    const entry = id && analyses.get(id);
+    if (!entry || Date.now() - entry.at > ASSESS_TTL_MS) return null;
+    if (device && (entry.device.brand !== device.brand || entry.device.model !== device.model)) return null;
+    return entry.a;
+  };
 
   // 시세: CSV 에 있으면 그대로, 없으면(no_data) Gemini 추정 (키가 없으면 no_data 그대로)
   async function priceOf(input) {
     const ai = !!(cfg.key && geminiJson);
     // 고장 내용이 있으면: 고른 외관 그대로의 '기능 정상' 시세 − 그 고장만큼 차감 (AI)
-    if (ai && input.knownFault === 'yes' && input.faultDetail_ko) {
+    const canDeduct = ['clean', 'minor_wear', 'visible_wear'].includes(input.conditionCode);
+    const wantsDeduction = canDeduct && input.knownFault === 'yes' && input.faultDetail_ko;
+    let adjustmentUnavailable = wantsDeduction && !ai ? 'AI 감가 연결을 사용할 수 없어 검증된 상태별 원문 자료만 조회했습니다.' : null;
+    if (ai && canDeduct && input.knownFault === 'yes' && input.faultDetail_ko) {
       const normal = { ...input, knownFault: 'none', faultDetail_ko: null }; // 기준가는 고장 내용과 무관 (캐시 공유)
       let base = price.lookup(normal);
       if (base.status === 'no_data') base = await priceEstimate.estimate({ looked: base, input: normal, geminiJson, model: cfg.model });
       const adjusted = await faultAdjust.adjust({ base, input, geminiJson, model: cfg.model });
-      if (adjusted) return adjusted;
+      if (adjusted) return { ...adjusted, knownFault: input.knownFault };
+      adjustmentUnavailable = 'AI 감가 실패 또는 근거 부족. 별도의 감가액을 반영하지 않고 상태별 원문 자료를 조회했습니다.';
     }
     // 그 외(고장 내용 없음·AI 판단 실패): 고장이면 '파손 또는 기능 이상' 분류, 자료에 없으면 AI 추정
     const looked = price.lookup(input);
-    if (looked.status !== 'no_data' || !ai) return looked;
-    return priceEstimate.estimate({ looked, input, geminiJson, model: cfg.model });
+    const result = looked.status !== 'no_data' || !ai ? looked : await priceEstimate.estimate({ looked, input, geminiJson, model: cfg.model });
+    if (adjustmentUnavailable) result.aiUnavailable_ko = adjustmentUnavailable;
+    else if (!ai && looked.status === 'no_data') result.aiUnavailable_ko = 'AI 추정 연결을 사용할 수 없습니다. 판매 희망가를 직접 정해 등록할 수 있습니다.';
+    if (input.knownFault === 'yes' && input.faultDetail_ko && !canDeduct) {
+      result.adjustmentSkipped_ko = '이미 파손·화면 손상 등이 포함된 기준입니다. 같은 손상의 중복 차감을 피하기 위해 추가 AI 감가를 하지 않았습니다.';
+    }
+    return result;
   }
 
   // 시세 미리보기와 보증서 발급이 같은 규칙을 쓰도록 한 곳에 둡니다.
@@ -182,14 +195,15 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
       conditionCode: String(body.conditionCode || ''),
       knownFault: FAULTS.includes(body.knownFault) ? body.knownFault : 'unknown',
       nickname: String(body.nickname || '').normalize('NFC').trim().slice(0, 20),
-      // 판매 희망가 (선택). ④ 구매자 추천의 가격 합리성 계산에 씁니다.
-      askingPriceKrw: Number.isInteger(body.askingPriceKrw) && body.askingPriceKrw >= 1000 && body.askingPriceKrw <= 10000000 ? body.askingPriceKrw : null,
+      // 기존 보증서 API의 가격 미정(null)은 호환. 새 화면은 희망가 입력 후 등록.
+      askingPriceKrw: body.askingPriceKrw ?? null,
     };
     const fault = resolveFault(input.knownFault, report.summary);
     input.knownFault = fault.knownFault;
     input.knownFaultSource = fault.source;
     input.faultDetail_ko = input.knownFault === 'yes' ? (String(body.faultDetail || '').normalize('NFC').trim().slice(0, 200) || null) : null;
     if (!input.nickname) throw httpError(400, '닉네임이 필요합니다');
+    if (input.askingPriceKrw !== null && (!Number.isSafeInteger(input.askingPriceKrw) || input.askingPriceKrw < 1)) throw httpError(400, '판매 희망가는 양의 정수 원 단위로 입력하세요');
     if (!price.CONDITIONS.some((c) => c.code === input.conditionCode)) throw httpError(400, '외관·화면 상태(conditionCode)를 골라 주세요');
     if (!input.storage) throw httpError(400, '저장 용량을 골라 주세요');
 
@@ -215,7 +229,7 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
 
     const priceResult = await priceOf(input);
     const carbonResult = carbon.receipt(input);
-    let analysis = analysisOf(body.assessId);
+    let analysis = analysisOf(body.assessId, input);
     if (!analysis && cfg.key && geminiJson && (body.batteryShot || (Array.isArray(body.photos) && body.photos.length))) {
       try { analysis = (await analyzePhotos({ ...body, brand, model })).analysis; }
       catch (e) { console.log(`  발급 중 AI 판별 실패 → 판별 없이 발급 (${e.message})`); }
@@ -245,36 +259,21 @@ Images given: ${images.map((i) => i.label).join(', ')}` });
       },
     });
     cert.summary = await summarize(cert);
-    await store.createCertificate(cert, photoBufs);
-    user = eco.apply(user, { type: 'certificate_issued', certificateId: id });
-    await store.saveUser(user);
+    await store.createCertificate(cert, photoBufs, opts.ownerHash);
+    await store.transactMarket(id, ({ user: current }) => ({ user: eco.apply(current || eco.newUser(input.nickname), { type: 'certificate_issued', certificateId: id }) }));
     console.log(`✔ 보증서 발급 ${id} · ${brand} ${model} ${input.storage} · 시세 ${priceResult.status} · 탄소 ${carbonResult.avoidedKg}kg (${carbonResult.basis}) · 요약 ${cert.summary.by}`);
     return cert;
   }
 
-  async function recordOutcome(id, type) {
-    if (!OUTCOMES.includes(type)) throw httpError(400, `type 은 ${OUTCOMES.join(' / ')} 중 하나입니다`);
-    const cert = await store.getCertificate(id);
-    if (!cert) throw httpError(404, '보증서가 없습니다');
-    if (cert.status !== 'listed') throw httpError(409, `이미 처리된 보증서입니다 (${cert.status})`);
-    let user = await userOf(cert.seller.nickname);
-    const avoided = type === 'recycled' ? 0 : cert.carbon.avoidedKg;
-    user = eco.apply(user, { type, certificateId: id, avoidedKg: avoided });
-    const last = user.actions[user.actions.length - 1];
-    await store.saveUser(user);
-    const updated = await store.updateCertificate(id, {
-      status: type,
-      outcome: { type, at: last.at, creditedKg: last.creditedKg, delta: last.delta, temperatureAfter: last.after },
-    });
-    console.log(`✔ 보증서 ${id} → ${type} · ${cert.seller.nickname} 환경 온도 ${last.before}°C → ${last.after}°C`);
-    return { certificate: updated, user };
-  }
+  const recordOutcome = (id, type, ownerToken) => createMarketService(store).outcome(id, type, ownerToken);
 
   return { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor, priceOf };
 }
 
 function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJson }) {
   const { loadResultFile, createCertificate, recordOutcome, analyzePhotos, analysisOf, disposalFor, priceOf } = createSellerService({ cfg, store, httpError, geminiJson });
+  const market = createMarketService(store);
+  let searchCalls = [];
 
   // 처리했으면 true
   return async function handle(req, res, url, tokenValid) {
@@ -295,8 +294,20 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
     }
 
     if (req.method === 'GET' && p === '/api/public/certificates') {
-      const list = await store.listCertificates({ limit: Math.min(200, Number(url.searchParams.get('limit')) || 50) });
-      sendJson(res, 200, { schema: certificate.SCHEMA, count: list.length, items: list.map(listItem) });
+      const list = await store.listCertificates({ limit: Math.max(1, Math.min(200, Number(url.searchParams.get('limit')) || 50)), activeOnly: true });
+      const items = list.map(listItem).filter((c) => c.status === 'listed');
+      sendJson(res, 200, { schema: certificate.SCHEMA, count: items.length, items });
+      return true;
+    }
+    if (req.method === 'GET' && p === '/api/public/manual' && !url.searchParams.has('type')) {
+      const rec = assessment.recommend({ brand: url.searchParams.get('brand'), conditionCode: 'damage_or_fault' });
+      sendJson(res, 200, { items: rec.manualSections.map(assessment.manualSection).filter(Boolean) });
+      return true;
+    }
+    if ((g = m(/^\/api\/public\/certificates\/([A-Za-z0-9]+)\/requests(?:\/mine)?$/))) {
+      if (req.method === 'POST' && !p.endsWith('/mine')) sendJson(res, 200, await market.request(g[1], await readJson(req), req.headers['x-buyer-token']));
+      else if (req.method === 'GET' && p.endsWith('/mine')) sendJson(res, 200, { items: await market.mine(g[1], req.headers['x-buyer-token']) });
+      else sendJson(res, 405, { error: '지원하지 않는 메서드입니다' });
       return true;
     }
     if (req.method === 'GET' && (g = m(/^\/api\/public\/certificates\/([A-Za-z0-9]+)$/))) {
@@ -337,27 +348,46 @@ function createSellerRoutes({ cfg, store, readJson, sendJson, httpError, geminiJ
       sendJson(res, 200, price.options(url.searchParams.get('brand'), url.searchParams.get('model')));
       return true;
     }
+    if (req.method === 'GET' && p === '/api/price/status') {
+      sendJson(res, 200, price.datasetInfo()); return true;
+    }
     if (req.method === 'POST' && p === '/api/price/quote') {
       const b = await readJson(req);
       const kf = resolveFault(b.knownFault, b.testSummary).knownFault;
       const input = { brand: b.brand, model: b.model, storage: b.storage, conditionCode: b.conditionCode, knownFault: kf, faultDetail_ko: kf === 'yes' ? String(b.faultDetail || '').trim().slice(0, 200) || null : null };
       const pr = await priceOf(input);
-      const disposal = disposalFor({ brand: b.brand, conditionCode: b.conditionCode, price: pr, report: { summary: b.testSummary }, analysis: analysisOf(b.assessId) });
+      const disposal = disposalFor({ brand: b.brand, conditionCode: b.conditionCode, price: pr, report: { summary: b.testSummary }, analysis: analysisOf(b.assessId, input) });
       sendJson(res, 200, { price: pr, carbon: carbon.receipt(input), disposal: { ...disposal, manual: disposal.manualSections.map(assessment.manualSection).filter(Boolean) } });
       return true;
+    }
+    if (req.method === 'POST' && p === '/api/price/search') {
+      searchCalls = searchCalls.filter(at => Date.now() - at < 60000);
+      if (searchCalls.length >= 3) throw httpError(429, '시세 검색은 분당 3회까지 가능합니다');
+      searchCalls.push(Date.now());
+      const result = await require('../../part2_price_disposal/lib/price-search').searchPrices({ cfg, query: await readJson(req) });
+      sendJson(res, 200, result); return true;
     }
     if (req.method === 'POST' && p === '/api/assess') {
       sendJson(res, 200, await analyzePhotos(await readJson(req)));
       return true;
     }
     if (req.method === 'POST' && p === '/api/certificates') {
-      const cert = await createCertificate(await readJson(req));
-      sendJson(res, 200, { ok: true, id: cert.id, url: `/c/${cert.id}`, certificate: cert });
+      const ownerToken = secret();
+      const cert = await createCertificate(await readJson(req), { ownerHash: hash(ownerToken) });
+      sendJson(res, 200, { ok: true, id: cert.id, url: `/c/${cert.id}`, certificate: cert, ownerToken });
+      return true;
+    }
+    if (req.method === 'GET' && (g = m(/^\/api\/certificates\/([A-Za-z0-9]+)\/requests$/))) {
+      sendJson(res, 200, { items: await market.inbox(g[1], req.headers['x-owner-token']) });
+      return true;
+    }
+    if (req.method === 'POST' && (g = m(/^\/api\/certificates\/([A-Za-z0-9]+)\/requests\/([a-f0-9]+)\/acknowledge$/))) {
+      sendJson(res, 200, { request: await market.acknowledge(g[1], g[2], req.headers['x-owner-token']) });
       return true;
     }
     if (req.method === 'POST' && (g = m(/^\/api\/certificates\/([A-Za-z0-9]+)\/outcome$/))) {
       const b = await readJson(req);
-      sendJson(res, 200, { ok: true, ...(await recordOutcome(g[1], b.type)) });
+      sendJson(res, 200, { ok: true, ...(await recordOutcome(g[1], b.type, req.headers['x-owner-token'])) });
       return true;
     }
     sendJson(res, 404, { error: '없는 API 입니다' });

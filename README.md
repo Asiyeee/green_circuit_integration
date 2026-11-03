@@ -1,15 +1,20 @@
 # Green Circuit
 
-중고 스마트폰 **① 웹 하드웨어 테스트 → ② Gemini 시세·처분 판단 → ③ 성능 보증서 → ④ 구매자 추천** 을 서버 하나로 잇는 GDGoC 해커톤 1팀 프로젝트.
+중고 스마트폰 **웹 점검 → 상태 확인·업체 매입 참고가 → 판매 희망가 → 보증서 연결 매물 등록 → 구매자 목록·추천 → 문의·거래 요청 → 판매자 확인 → 명시적 판매 완료**를 서버 하나로 잇는 GDGoC 해커톤 1팀 프로젝트.
+
+2026-11-03 최신 main 통합·AI 가격·하드웨어 호환 검증: [`common/docs/LATEST_MAIN_INTEGRATION.md`](common/docs/LATEST_MAIN_INTEGRATION.md). 판매 흐름 인계: [`common/docs/PRICE_PLATFORM_HANDOFF.md`](common/docs/PRICE_PLATFORM_HANDOFF.md).
+파손·시세 없음·기능 이상 모름도 공개하고 등록할 수 있습니다. 기부·배출은 별도 선택이며 안내 열람만으로 완료되지 않습니다. 가격 추천 점수는 개인 거래 비교 근거 부족으로 제외합니다.
+
+**인증은 데모 범위**입니다. 공용 서버 토큰 + 매물별 비밀 관리키로 문의 확인·완료를 제한합니다. 닉네임은 계정이 아닙니다. 결제·에스크로·배송·실시간 채팅은 없습니다. 관리키는 발급 시 보관하며 URL·공개 보증서에 포함하지 않습니다. 기존 보증서 열람은 유지하고 관리키 없는 매물의 변경은 차단합니다.
 
 ## 실행
 
 ```bash
-npm install
+npm ci
 cp .env.example .env        # 복사해서 새로 만든 .env 파일에 GEMINI_API_KEY=본인키 입력 (윈도우 PowerShell: copy .env.example .env)
 npm run share               # 서버 + 폰용 HTTPS 터널(cloudflared) + QR
 npm run seed                # (선택) 데모 보증서 9장
-npm test                    # ②·④ 자체 점검
+npm test                    # ②·④ 자체 점검 4개 + 통합/회귀 테스트 27개
 ```
 
 | 화면 | 주소 | 토큰 |
@@ -45,7 +50,7 @@ npm test                    # ②·④ 자체 점검
      형식: common/result.schema.json · common/scripts/validate.js
                                    │
 ② /api/assess (사진·배터리 → Gemini) ─┤  part3 seller-routes.js 안에 라우트, 로직은 part2
-② price.lookup · assessment.recommend ┤
+② price.lookup → 별도 AI 추정/감가 → assessment.recommend ┤
                                    ▼
 ③ POST /api/certificates ──▶ 보증서 seller-certificate/v1 (assessment 칸에 ② 결과)
      저장: common/lib/certificate-store.js (로컬 store/ · results/ 또는 Firestore)
@@ -60,7 +65,8 @@ npm test                    # ②·④ 자체 점검
 
 ## 다음 할 일 (2026-11-03 기준)
 
-- ① 마이크·스피커 정밀 측정(녹음 품질 등급), 카메라 촬영 가이드, 전체 화면 터치 테스트
-- ② 시세 갱신 정책 (Gemini 검색·일별 수집), 실제 화면 파손 사진으로 시세·추천 검증, 처분 추천 기준금액(`DONATE_BELOW_KRW`, 임시 3만원) 확정
+- ① 마이크·스피커 정밀 측정, 카메라 가이드·저조도 비교, 가변 전체 화면 터치는 최신 main에서 반영됨. 이전/새 JSON은 보증서·구매자와 호환 검증. 실제 iPhone Safari / Android Chrome의 측정 정확도 확인은 필요.
+- ② 석훈님의 AI 시세 추정·기능 감가·원문 견적 목록·외관 불일치 제안을 보존했습니다. 업체 원문/AI 추정/AI 감가/희망가를 구분하며 Gemini 키가 없는 현재 환경에서는 실제 AI 호출을 검증하지 않았습니다.
+- ② [실제 공개 출처 수집·일별 실행·검색 인계](part2_price_disposal/PRICE_REFRESH.md). `npm run price:daily`로 수집/검증/기존 견적 갱신, `npm run price:status`로 성공/실패 확인. 일별 예약/Cloud Run 설정은 준비했으나 가동·배포하지 않았습니다. Gemini 검색은 별도 연결했으며 키가 없어 실제 호출 미검증입니다. 실제 파손 사진 검증도 남아 있습니다.
 - ③ Firebase Authentication(구글 로그인) → 판매자 계정별 보증서·환경 온도 (지금은 공용 토큰 + 닉네임)
 - 배포: Cloud Run + Firestore (`common/docs/DEPLOY.md`)

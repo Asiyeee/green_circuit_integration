@@ -13,3 +13,5 @@
 | `docs/DEPLOY.md` | Cloud Run 배포 | — |
 
 루트 `server.js` 도 공통입니다: `.env` 읽기, 토큰 확인, Gemini 호출(`geminiJson`, 이미지 포함 가능), ① 카메라 분석·결과 저장, ③④ 라우트 연결.
+
+2026-11-03: `assets/market.js`는 상세 화면의 구매 요청·판매자 관리 UI입니다. `certificate-store.js`에 비공개 관리키 해시/요청 저장과 완료 트랜잭션을 추가했습니다. 로컬은 단일 Node 프로세스+복구 journal, Firestore는 트랜잭션을 사용합니다. 공개 JSON·v1 무결성 해시 구조는 유지합니다. [통합 주의사항](docs/PRICE_PLATFORM_HANDOFF.md).

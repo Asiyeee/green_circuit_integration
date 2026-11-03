@@ -9,8 +9,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
-const CSV_PATH = path.join(__dirname, '..', 'data', '중고폰_시세_통합.csv');
+const csvPath = () => path.resolve(process.env.PRICE_CSV_PATH || path.join(__dirname, '..', 'data', '중고폰_시세_통합.csv'));
 
 const CONDITIONS = [
   { code: 'clean', label_ko: '흠집·파손·잔상 없음', hint_ko: '외관이 깨끗하고 파손·잔상이 없음' },
@@ -57,9 +58,19 @@ function parseCsv(text) {
 }
 
 let cache = null;
+let externalWarning = null;
 function load() {
-  if (cache) return cache;
+  const CSV_PATH = csvPath();
+  const stat = fs.statSync(CSV_PATH);
+  const signature = `${CSV_PATH}|${stat.mtimeMs}|${stat.size}|${stat.ctimeMs}`;
+  if (cache?.signature === signature) return cache;
   const text = fs.readFileSync(CSV_PATH, 'utf8').replace(/^﻿/, '');
+  // atomic rename 후 변경을 감지해 검증된 새 스냅샷만 사용. 잘못된 파일은 마지막 정상 캐시 보존.
+  const errors = require('../scripts/price-refresh').validate(text).errors;
+  if (errors.length) {
+    if (cache) { cache.warning = '갱신 파일 검증 실패. 마지막 정상 시세 자료를 사용합니다.'; return cache; }
+    throw new Error('시세 자료 검증 실패: ' + errors.slice(0, 3).join('; '));
+  }
   const [header, ...lines] = parseCsv(text);
   const index = new Map();
   const models = new Map(); // brand|model_key → { brand, model, storages:Set }
@@ -91,7 +102,7 @@ function load() {
     models.get(mk).conditions.add(row.conditionCode);
   }
   const faultFree = new Set([...index.values()].filter((r) => r.requiresNoKnownFault).map((r) => r.conditionCode));
-  cache = { index, models, faultFree };
+  cache = { index, models, faultFree, signature, revision: crypto.createHash('sha256').update(text).digest('hex'), warning: null, loadedAt: new Date().toISOString() };
   return cache;
 }
 
@@ -111,14 +122,20 @@ function options(brand, model) {
 
 // knownFault: 'none' | 'yes' | 'unknown'
 function lookup({ brand, model, storage, conditionCode, knownFault }) {
-  const base = { brand, model, modelKey: modelKey(model), storage, conditionCode, knownFault };
+  const data = load();
+  const base = { brand, model, modelKey: modelKey(model), storage, conditionCode, knownFault, datasetRevision: data.revision, dataWarning: externalWarning || data.warning };
   if (!storage || storage === 'unknown') {
     return { ...base, status: 'needs_input', message_ko: '저장 용량 미확인. 시세 추정 안 함' };
+  }
+  if (!CONDITIONS.some(c => c.code === conditionCode)) return { ...base, status: 'needs_input', message_ko: '외관·화면 상태를 선택해 주세요' };
+  // 해당 조합의 행이 없어도 '모름'을 정상 전제 AI 추정으로 우회하지 않습니다.
+  if (data.faultFree.has(conditionCode) && knownFault !== 'none' && knownFault !== 'yes') {
+    return { ...base, status: 'needs_check', message_ko: '고장 여부 미확인. 상태별 시세 미확정' };
   }
   // 고장 재분류를 먼저: 고른 외관 상태의 행이 없어도 '파손 또는 기능 이상' 행이 있으면 그 값을 씀
   if (appliedCode(conditionCode, knownFault) !== conditionCode) {
     const faultRow = load().index.get([brand, base.modelKey, storage, 'damage_or_fault'].join('|'));
-    if (!faultRow) return { ...base, status: 'no_data', message_ko: "알려진 기능 고장 있음. '파손 또는 기능 이상' 시세 정보 없음" };
+    if (!faultRow) return { ...base, status: 'no_data', appliedConditionCode: 'damage_or_fault', message_ko: "알려진 기능 고장 있음. '파손 또는 기능 이상' 시세 정보 없음" };
     const declared = CONDITIONS.find((c) => c.code === conditionCode);
     return {
       ...okResult(base, faultRow),
@@ -136,9 +153,13 @@ function lookup({ brand, model, storage, conditionCode, knownFault }) {
 
 function okResult(base, row) {
   const single = row.vendorCount === 1;
+  const collected = row.quotes.map(q => q.collected_at).filter(Boolean).sort();
+  const latestCollectedAt = collected.at(-1) || null;
+  const kstDay = stamp => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(stamp));
   return {
     ...base,
     status: 'ok',
+    sourceKind: 'vendor_reference',
     referenceId: row.referenceId,
     displayModel: row.model,
     conditionLabel: row.conditionLabel,
@@ -151,20 +172,32 @@ function okResult(base, row) {
     quoteCount: row.quoteCount,
     checkedOn: row.checkedOn,
     notice_ko: row.notice,
+    latestCollectedAt,
+    partiallyRefreshed: row.quotes.some(q => !q.collected_at || kstDay(q.collected_at) !== kstDay(latestCollectedAt)),
     quotes: row.quotes.map((q) => ({
       vendor: q.vendor_name,
       grade: q.grade,
       minKrw: q.min_krw,
       maxKrw: q.max_krw,
       conditions_ko: q.conditions_ko,
-      priceDate: q.price_date || q.price_date_source || null,
+      priceDate: q.price_date || null,
+      priceDateSource: q.price_date_source || null,
+      conditionSourceUrl: q.condition_source_url || null,
+      verificationMethod: q.verification_method || null,
+      collectedAt: q.collected_at || null,
+      sourceConditions_ko: q.source_conditions_ko || null,
+      sourceModel: q.source_model || row.model,
+      sourceGrade: q.source_grade || q.grade,
+      evidenceSha256: q.source_evidence_sha256 || null,
       url: q.source_url,
     })),
   };
 }
 
+function datasetInfo() { const data = load(); return { rows: data.index.size, revision: data.revision, loadedAt: data.loadedAt, dataWarning: externalWarning || data.warning, mode: 'collected_csv_snapshot', automaticFetchOnQuote: false }; }
+const setExternalWarning = warning => { externalWarning = warning || null; };
 const allRows = () => [...load().index.values()];
 // 알려진 기능 고장 '있음'이면 '기능 정상 전제' 상태는 '파손 또는 기능 이상' 으로 분류
 const appliedCode = (conditionCode, knownFault) => (knownFault === 'yes' && load().faultFree.has(conditionCode) ? 'damage_or_fault' : conditionCode);
 
-module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup, allRows, appliedCode };
+module.exports = { CONDITIONS, modelKey, parseCsv, options, lookup, datasetInfo, setExternalWarning, allRows, appliedCode };

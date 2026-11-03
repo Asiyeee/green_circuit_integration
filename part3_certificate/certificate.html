@@ -84,6 +84,8 @@
 </div></header>
 <main class="page" id="app"><p class="muted" style="padding:40px 0">보증서 불러오는 중</p></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/assets/price-reference.js"></script>
+<script src="/assets/hardware-details.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
 const id = location.pathname.split('/').filter(Boolean)[1];
@@ -93,7 +95,7 @@ const won = (n) => n.toLocaleString('ko-KR') + '원';
 const man = (n) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : won(n));
 const deg = (n) => Number(n).toFixed(1) + '°C';
 const date = (s) => { const d = new Date(s); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
-const STATUS = { pass: '정상', fail: '이상', unsupported: '미지원', pending: '미점검' };
+const STATUS = { pass: '점검 통과', fail: '점검 실패', unsupported: '미지원', pending: '미완료' };
 const STATUS_CLASS = { pass: 'pass', fail: 'fail', unsupported: 'warn', pending: 'warn' };
 const LABEL = { camera: '카메라', microphone: '마이크', speaker: '스피커', touch: '터치', gyro: '센서' };
 const CERT_STATUS = { listed: ['판매 중', 'good'], sold: ['판매 완료', ''], donated: ['기부 완료', ''], recycled: ['배출 완료', ''], expired: ['유효기간 만료', 'warn'] };
@@ -101,14 +103,7 @@ const TRUST = { high: ['신뢰도 높음', 'good'], medium: ['신뢰도 보통',
 const OUTCOME = { sold: '판매(재사용)', donated: '기부(재사용)', recycled: '분리배출' };
 const PHOTO = { test_camera: '점검 촬영', front: '앞면', back: '뒷면', side: '옆면', other: '기타' };
 
-function measure(k, it) {
-  if (k === 'camera') return [it.photoGrade ? `화질 ${it.photoGrade}등급` : null, it.megapixels ? `${it.megapixels}MP` : null].filter(Boolean).join(' · ') || '-';
-  if (k === 'microphone') return it.status === 'pass' ? '소리 정상 녹음' : it.peakDb != null ? `소리 약함 (최대 ${it.peakDb}dB)` : '-';
-  if (k === 'speaker') return it.userConfirmed ? '재생음 확인' : '-';
-  if (k === 'touch') return it.cellsHit != null ? `${it.cellsHit}/${it.cellsTotal}칸 · 동시 ${it.maxSimultaneousTouches}점` : '-';
-  if (k === 'gyro') return it.maxOrientationRangeDeg != null ? `회전 범위 ${Math.round(it.maxOrientationRangeDeg)}°` : '-';
-  return '-';
-}
+function measure(k, it) { return hardwareDetails(k, it); }
 
 function render({ certificate: c, verified, expired, seller }) {
   document.title = `${c.device.model} 성능 보증서`;
@@ -121,18 +116,7 @@ function render({ certificate: c, verified, expired, seller }) {
   const pv = c.ecoPreview && c.ecoPreview.sold;
 
   // 시세 막대: 같은 기종 범위 안에서 최저~최고를 0~100% 로
-  const priceHtml = p.status === 'ok' ? `
-    <div class="price">${p.singleAmount ? won(p.minKrw) : `${man(p.minKrw)} ~ ${man(p.maxKrw)}`}</div>
-    <div class="price-sub">${p.faultAdjusted ? `${esc(p.label_ko)} · 업체 ${p.vendorCount}곳 기준` : p.estimated ? `AI 추정 참고가 · 시세 자료 없음 (확신 ${({ high: '높음', medium: '보통', low: '낮음' })[p.confidence]})` : p.singleAmount ? '업체 1곳 매입가' : `업체 ${p.vendorCount}곳 · 견적 ${p.quoteCount}건`} · ${esc(c.device.storage)} · ${esc(c.condition.label_ko)}</div>${p.reclassified_ko ? `<div class="price-sub">${esc(p.reclassified_ko)}</div>` : ''}
-    ${p.faultAdjusted ? `<div class="price-sub">기능 정상 기준 ${man(p.basePrice.minKrw)} ~ ${man(p.basePrice.maxKrw)}${p.basePrice.estimated ? ' (AI 추정)' : ''} − ${esc(p.deduction.faultLabel_ko)} ${man(p.deduction.minKrw)} ~ ${man(p.deduction.maxKrw)} (${({ minor: '가벼움', moderate: '보통', severe: '심각' })[p.deduction.severity]})</div><p class="muted" style="margin:10px 0 0">${esc(p.deduction.basis_ko)} ${esc(p.notice_ko || '')}</p>` : ''}
-    ${p.estimated && !p.faultAdjusted ? `<p class="muted" style="margin:10px 0 0">${esc(p.basis_ko || '')} ${esc(p.notice_ko || '')}</p>` : ''}
-    <details style="margin-top:14px;${p.estimated ? 'display:none' : ''}"><summary>업체별 견적${p.faultAdjusted ? ' (기능 정상 기준)' : ''}</summary>
-      <table><tr><th>업체</th><th>업체 등급</th><th class="r">금액</th></tr>
-      ${p.quotes.map((q) => `<tr><td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a></td><td>${esc(q.grade)}<small>${esc(q.conditions_ko)}</small></td><td class="r">${q.minKrw === q.maxKrw ? won(q.minKrw) : won(q.minKrw) + '~' + won(q.maxKrw)}</td></tr>`).join('')}
-      </table>
-      <p class="muted" style="margin:10px 0 0">${esc(p.checkedOn)} 조사 기준. 실시간 가격 아님.</p>
-    </details>`
-    : `<div class="price" style="font-size:18px;font-weight:700">시세 정보 없음</div><div class="price-sub">${esc(p.message_ko)}</div>`;
+  const priceHtml = renderPriceReference(p);
 
   const carbonSource = cb.basis === 'official'
     ? `${esc(cb.source.name)}${cb.source.report ? ' · ' + esc(cb.source.report) : ''}${cb.region ? ' · ' + esc(cb.region) + ' 기준' : ''}`
@@ -170,7 +154,10 @@ function render({ certificate: c, verified, expired, seller }) {
   </section>
 
   <section class="section">
-    <h2 class="section-label">업체 매입 시세</h2>
+    <h2 class="section-label">판매 희망가</h2>
+    <div class="price">${c.askingPriceKrw ? won(c.askingPriceKrw) : '가격 미정 (이전 매물)'}</div>
+    <p class="price-sub">판매자가 정한 플랫폼 등록 가격입니다.</p>
+    <h2 class="section-label" style="margin-top:20px">업체 매입 참고가</h2>
     ${priceHtml}
   </section>
 
@@ -253,64 +240,12 @@ function render({ certificate: c, verified, expired, seller }) {
     </div>
   </section>
 
-  <section class="section demo" id="demo">
-    <h2 class="section-label">거래 처리 · 판매자 전용</h2>
-    <p class="small" style="margin:0">방법을 누르면 처리 안내가 먼저 나와요. 읽어 보고 <b>이 방법으로 확정</b>을 눌러야 처리돼요. 확정하면 환경 온도가 오르고 보증서가 판매 종료로 바뀌며, 한 번만 할 수 있어요.</p>
-    <div class="btn-row" role="tablist">
-      <button class="btn btn-secondary" data-type="sold" aria-pressed="false">판매 완료</button>
-      <button class="btn btn-secondary" data-type="donated" aria-pressed="false">기부</button>
-      <button class="btn btn-secondary" data-type="recycled" aria-pressed="false">분리배출</button>
-    </div>
-    <div id="preview" style="display:none;margin-top:14px">
-      <div id="preview-manual" class="muted"></div>
-      <p class="small" id="preview-eco" style="margin:12px 0 0"></p>
-      <div class="btn-row"><button class="btn btn-primary" id="confirm">이 방법으로 확정</button></div>
-    </div>
-    <p class="err" id="demo-err"></p>
-  </section>
-  ${done ? `<section class="section" id="after"><h2 class="section-label">${esc(OUTCOME[done.type] || done.type)} 안내</h2><div id="after-manual" class="muted">처리 매뉴얼 불러오는 중</div></section>` : ''}`;
-  if (done) showManual(done.type, c.device.brand, $('#after-manual'));
+  <section class="section" id="market-controls"></section>`;
 
   const share = location.origin + location.pathname;
   if (window.QRCode) new QRCode($('#qr'), { text: share, width: 96, height: 96 });
   $('#copy').onclick = () => navigator.clipboard.writeText(share).then(() => { $('#copy').textContent = '복사됨'; });
-  if (T && c.status === 'listed') {
-    $('#demo').style.display = 'block';
-    let chosen = null;
-    const ECO = { sold: c.ecoPreview && c.ecoPreview.sold, donated: c.ecoPreview && c.ecoPreview.donated, recycled: c.ecoPreview && c.ecoPreview.recycled };
-    document.querySelectorAll('#demo [data-type]').forEach((b) => b.onclick = () => {
-      chosen = b.dataset.type;
-      document.querySelectorAll('#demo [data-type]').forEach((x) => { x.setAttribute('aria-pressed', x === b); x.className = 'btn ' + (x === b ? 'btn-primary' : 'btn-secondary'); });
-      $('#preview').style.display = 'block';
-      $('#preview-manual').className = 'muted'; $('#preview-manual').textContent = '처리 안내 불러오는 중';
-      showManual(chosen, c.device.brand, $('#preview-manual'));
-      const e = ECO[chosen];
-      $('#preview-eco').textContent = e ? `확정하면 환경 온도 ${e.before}°C → ${e.after}°C (+${e.delta})` : '';
-      $('#confirm').textContent = `'${OUTCOME[chosen]}'(으)로 확정`;
-      $('#demo-err').textContent = '';
-    });
-    $('#confirm').onclick = async () => {
-      if (!chosen) return;
-      $('#confirm').disabled = true;
-      const r = await fetch(`/api/certificates/${encodeURIComponent(c.id)}/outcome`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-access-token': T }, body: JSON.stringify({ type: chosen }) });
-      const j = await r.json();
-      if (!r.ok) { $('#demo-err').textContent = j.error || 'HTTP ' + r.status; $('#confirm').disabled = false; return; }
-      load();
-    };
-  }
-}
-
-// 판매 완료·기부·분리배출 뒤 할 일 (② 처리 매뉴얼에서 해당 섹션)
-const md = (t) => esc(t)
-  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-  .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-  .replace(/\n/g, '<br>');
-async function showManual(type, brand, el) {
-  try {
-    const j = await (await fetch(`/api/public/manual?type=${encodeURIComponent(type)}&brand=${encodeURIComponent(brand || '')}`)).json();
-    el.className = '';
-    el.innerHTML = j.sections.map((s, i) => `<details ${i ? '' : 'open'} style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">${esc(s.title)}</summary><div style="font-size:14px;line-height:1.7;margin-top:8px">${md(s.markdown)}</div></details>`).join('');
-  } catch { el.textContent = '처리 매뉴얼을 불러오지 못함'; }
+  window.renderMarketControls({ certificate: c, expired, token: T, reload: load });
 }
 
 async function load() {
@@ -323,8 +258,10 @@ async function load() {
     $('#app').innerHTML = `<p class="err" style="padding:40px 0">보증서를 불러오지 못함: ${esc(e.message)}</p>`;
   }
 }
-load();
+// 관리 스크립트 로드 뒤 시작.
 </script>
+<script src="/assets/market.js"></script>
+<script>load();</script>
 <script src="/assets/nav.js"></script>
 </body>
 </html>
