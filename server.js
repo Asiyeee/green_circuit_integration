@@ -415,7 +415,7 @@ function start(options = {}) {
   state.buyerRoutes = createBuyerRoutes({ store, listItem, readJson, sendJson });
   state.sellerRoutes = createSellerRoutes({
     cfg, state, store, readJson, sendJson, httpError,
-    geminiJson: (opts) => geminiJson(cfg, state, opts),
+    geminiJson: options.geminiJson || ((opts) => geminiJson(cfg, state, opts)),
   });
   const server = http.createServer((req, res) => {
     handle(req, res, cfg, state).catch((e) => {
@@ -438,7 +438,9 @@ function start(options = {}) {
       console.log(`결과 저장 위치: ${store.kind === 'local' ? RESULTS_DIR : store.where}`);
       console.log(`구매자 추천: http://localhost:${cfg.port}/buyer`);
       console.log(`보증서 발급: http://localhost:${cfg.port}/seller?t=${cfg.token}   (저장소: ${store.where})`);
-      checkGemini(cfg).finally(() => resolve({ server, cfg }));
+      // 로컬 통합 검증에서 명시적으로 주입한 대역은 실제 Gemini 연결 점검을 하지 않습니다.
+      if (options.geminiJson) resolve({ server, cfg });
+      else checkGemini(cfg).finally(() => resolve({ server, cfg }));
     });
   });
 }

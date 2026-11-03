@@ -58,7 +58,8 @@
           "contrastStd": 52.1,
           "laplacianVariance": 182.4,
           "darkClipPct": 0.4,
-          "brightClipPct": 1.1
+          "brightClipPct": 1.1,
+          "noiseSigma": 0.71
         },
         "exif": {
           "make": "Apple",
@@ -117,7 +118,7 @@
           "dynamic_range": 6,
           "exposure_accuracy": 8,
           "color_accuracy": 8,
-          "low_light_potential": null
+          "low_light_potential": 6
         },
         "look": {
           "style_tags": [
@@ -159,13 +160,13 @@
           }
         ],
         "not_ideal_for": [
-          "night_lowlight",
           "film_look_project"
         ],
         "confidence": "medium",
         "caveats_ko": [
           "사진 1장 기준이라 저조도 성능은 판단하기 어렵습니다."
-        ]
+        ],
+        "lowLightSource": "extra_photo"
       },
       "verdictBasis": "gemini",
       "checks": {
@@ -175,20 +176,102 @@
         "declared_matches_user_agent": true,
         "exposure_consistent_with_local": true,
         "sharpness_consistent_with_local": true,
-        "warnings": []
+        "warnings": [],
+        "capture_purpose": "main",
+        "lowlight_claim_removed": false
+      },
+      "coaching": [],
+      "lowLight": {
+        "status": "done",
+        "score": 6,
+        "scoreSource": "gemini",
+        "localScore": 5,
+        "noise_cleanliness": 5,
+        "sharpness": 6,
+        "defects": [
+          "heavy_noise"
+        ],
+        "summary_ko": "어두운 방에서도 물체 윤곽은 남지만 노이즈 제거로 질감이 조금 뭉개져요.",
+        "photo": {
+          "fileSizeKB": 1840,
+          "resolution": "4032x3024",
+          "localMetrics": {
+            "analysisSize": "512x384",
+            "meanBrightness": 41.2,
+            "contrastStd": 18.4,
+            "laplacianVariance": 210.5,
+            "darkClipPct": 9.1,
+            "brightClipPct": 0.3,
+            "noiseSigma": 3.1,
+            "noiseSigma1024": 4.2
+          },
+          "exif": null
+        },
+        "geminiError": null,
+        "geminiSkipped": null
       }
     },
     "microphone": {
       "status": "pass",
       "peakDb": -12.3,
-      "avgDb": -35.1,
-      "noiseFloorDb": -58.7,
+      "avgDb": -31.4,
+      "noiseFloorDb": -62.8,
       "peakRms": 0.2427,
       "sampleRate": 48000,
       "label": "iPhone Microphone",
       "settings": {
         "sampleRate": 48000,
         "channelCount": 1
+      },
+      "quality": {
+        "grade": "A",
+        "snrDb": 38.6,
+        "noiseGateSuspected": false,
+        "speechLevelDb": -24.2,
+        "voicedPct": 71.5,
+        "clippingPct": 0,
+        "dropoutFrames": 0,
+        "bands": [
+          {
+            "band": "low",
+            "hz": [
+              100,
+              300
+            ],
+            "levelDb": -58.1,
+            "snrDb": 31.2
+          },
+          {
+            "band": "mid",
+            "hz": [
+              300,
+              2000
+            ],
+            "levelDb": -55.4,
+            "snrDb": 36.8
+          },
+          {
+            "band": "high",
+            "hz": [
+              2000,
+              6000
+            ],
+            "levelDb": -71.9,
+            "snrDb": 24.5
+          },
+          {
+            "band": "air",
+            "hz": [
+              6000,
+              10000
+            ],
+            "levelDb": -86.3,
+            "snrDb": 12.1
+          }
+        ],
+        "issues": [],
+        "userPlayback": "clear",
+        "method": "quiet 2.5s → read-aloud 4.5s"
       }
     },
     "speaker": {
@@ -197,19 +280,89 @@
       "sampleRate": 48000,
       "baseLatencyMs": 10.7,
       "outputLatencyMs": null,
-      "tone": "440→1760Hz sweep 1.5s"
+      "tone": "1kHz beep ×N (random 2–5)",
+      "countTest": {
+        "played": 4,
+        "answered": 4,
+        "attempts": 1,
+        "correct": true
+      },
+      "loopback": {
+        "status": "ok",
+        "tones": [
+          {
+            "hz": 250,
+            "levelDb": -71.2,
+            "snrDb": 8.4,
+            "detected": false
+          },
+          {
+            "hz": 500,
+            "levelDb": -52.3,
+            "snrDb": 27.9,
+            "detected": true
+          },
+          {
+            "hz": 1000,
+            "levelDb": -44.1,
+            "snrDb": 38.5,
+            "detected": true
+          },
+          {
+            "hz": 2000,
+            "levelDb": -41.7,
+            "snrDb": 40.2,
+            "detected": true
+          },
+          {
+            "hz": 4000,
+            "levelDb": -47.9,
+            "snrDb": 33.6,
+            "detected": true
+          },
+          {
+            "hz": 8000,
+            "levelDb": -63.5,
+            "snrDb": 17.8,
+            "detected": true
+          }
+        ],
+        "detectedCount": 5,
+        "total": 6,
+        "grade": "B",
+        "midSpreadDb": 10.6,
+        "detectThresholdDb": 10,
+        "method": "speaker→mic loopback, 6 tones"
+      }
     },
     "touch": {
       "status": "pass",
-      "cellsHit": 12,
-      "cellsTotal": 12,
-      "maxSimultaneousTouches": 3,
+      "cellsHit": 98,
+      "cellsTotal": 98,
+      "maxSimultaneousTouches": 2,
       "multiTouchDetected": true,
       "pointerTypes": [
         "touch"
       ],
       "maxTouchPoints": 5,
-      "touchEventSupported": true
+      "touchEventSupported": true,
+      "mode": "fullscreen-grid",
+      "grid": {
+        "cols": 7,
+        "rows": 14,
+        "cellPx": 56
+      },
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullscreenApi": false,
+      "coveragePct": 100,
+      "missedCells": [],
+      "missedEdgeCells": 0,
+      "durationMs": 21480,
+      "completeMs": 19950,
+      "events": 31
     },
     "gyro": {
       "status": "pass",

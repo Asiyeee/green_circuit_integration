@@ -2,6 +2,7 @@
 > 파일: `index.html`(테스트 화면 `/`) · `lib/camera-profile.js` · `prompts/camera-profile.*` · `sample-result.json`(③④ 가 입력으로 쓰는 예시) · `examples/` · `summary.js`
 > 카메라 Gemini 호출 서버 코드(`/api/analyze-camera`, `analyzeCamera`)와 결과 저장(`/api/report`)은 루트 `server.js` 에 있습니다 (공통).
 > 결과 형식 규칙 `common/result.schema.json` · `common/scripts/validate.js` 를 바꾸면 ③ 보증서가 영향을 받으니 팀에 알리고 바꾸세요.
+> 2026-11-03 피드백 반영(카메라 촬영 코칭·어두운 곳 테스트, 마이크·스피커 정밀 측정, 전체 화면 터치): 결과 JSON 은 **필드 추가만** 했습니다. 공통 파일 관련 정리는 [`COMMON_CHANGES.md`](COMMON_CHANGES.md).
 > 아래 문서의 `lib/`, `prompts/`, `scripts/` 경로는 합치기 전 기준입니다. 실행은 저장소 루트에서 `npm run share`.
 
 # 기기 카메라·하드웨어 테스트 (GDGoC Hackathon Team 1) — v1
@@ -108,10 +109,10 @@ npm run share
 
 | 항목 | 하는 일 |
 |---|---|
-| 📷 카메라 | **① 카메라 확인** → **② 사진 촬영**. 밝은 곳에서 **글씨가 있는 종이나 디테일이 있는 물체**를 가까이서 찍어 주세요. 사진을 찍으면 AI 분석이 백그라운드로 돌아갑니다("AI 분석 중" 표시). **기다리지 말고 아래 항목을 먼저 진행**하세요. |
-| 🎤 마이크 | 시작 누르고 5초 동안 말하거나 박수 |
-| 🔊 스피커 | 소리가 나면 "들렸어요" |
-| ✋ 터치 | 12개 칸을 모두 눌러 보기 (여러 손가락으로 동시에 눌러 보면 멀티터치도 기록됩니다) |
+| 📷 카메라 | 화면의 **촬영 가이드 3가지**(렌즈 닦기 · 밝은 곳 · 글씨 있는 종이)를 맞추고 **사진 찍기**. 찍으면 바로 **촬영 코칭**이 나옵니다(어두움/과노출/흔들림/초점/렌즈 오염/밋밋한 피사체 → "밝기 막대를 올려 보세요" 같은 구체적 지시 + "안내대로 다시 찍기"). AI 분석은 백그라운드로 돌아가니 **기다리지 말고 다음 항목을 진행**하세요. 그 아래 **(선택) 어두운 곳 테스트**: 불을 끈 방에서 한 장 더 찍으면 저조도 점수를 실제로 재서 프로필의 `저조도 잠재력`·`야간·저조도` 용도에 반영합니다. |
+| 🎤 마이크 | **2단계 측정**: ① 2.5초 조용히(주변 잡음) → ② 화면 문장 소리 내어 읽기 4.5초(음질). SNR·클리핑·음역대(저/중/고/초고음)·끊김을 재서 **A~D 등급**. 끝나면 **녹음을 직접 들어 보고** "또렷해요 / 잡음·끊김 있어요" 선택 |
+| 🔊 스피커 | **① 삐 소리 세기(필수)**: 무작위 2~5번 울리는 삐 소리 횟수를 맞혀야 통과(3번 틀리거나 "안 들렸어요"면 실패). **② 음역대 자동 측정(권장)**: 250Hz~8kHz 6개 음을 내고 마이크로 다시 들어 음역대별 출력·등급 기록 |
+| ✋ 터치 | **전체 화면 팝업**이 열리고 화면 전체가 약 60px 칸(390×844 기준 7×14=98칸)으로 채워집니다. 손가락으로 쓸어 모든 칸을 칠하면 마지막에 두 손가락 멀티터치 확인. 못 칠한 칸은 빨간색으로 위치가 기록됩니다(가장자리 불량 확인) |
 | 🧭 자이로 | 권한 허용 후 폰을 이리저리 돌리기 |
 
 4. **5개 항목이 모두 끝나면 자동 저장**됩니다. 화면에 `✅ 서버에 저장됨: results/...`가 뜨고, 노트북 터미널에도 `✔ 저장됨 ...`이 나옵니다.
@@ -166,9 +167,10 @@ summary       항목별 status + completed(5개 모두 끝남) + allPassed(5개 
 | 항목 | 주요 필드 |
 |---|---|
 | `camera` | `stream`(라벨, 줌 범위 등), `photo`(해상도·EXIF·측정값·QA), **`profile`**(AI 카메라 프로필), `checks`(대조 결과), `verdictBasis` |
-| `microphone` | `peakDb`, `avgDb`, `noiseFloorDb`, `sampleRate` |
-| `speaker` | `userConfirmed`, `baseLatencyMs` |
-| `touch` | `cellsHit`, `maxSimultaneousTouches`, `multiTouchDetected` |
+| `camera` (추가) | `coaching`(촬영 코칭 목록 `{code, level, title_ko, text_ko}`), `lowLight`(어두운 곳 사진 결과 · 없으면 `null`), `photo.localMetrics.noiseSigma` |
+| `microphone` | `peakDb`, `avgDb`, `noiseFloorDb`(조용히 단계의 잡음), `sampleRate`, **`quality`**(`grade` A~D, `snrDb`, `clippingPct`, `voicedPct`, `dropoutFrames`, `bands[]`, `issues[]`, `userPlayback`) |
+| `speaker` | `userConfirmed`(횟수를 맞혔는가), `baseLatencyMs`, **`countTest`**(`played`, `answered`, `attempts`, `correct`), **`loopback`**(`status`, `tones[]`, `detectedCount`, `grade`, `midSpreadDb` · 자동 측정 안 했으면 없음) |
+| `touch` | `cellsHit`, `cellsTotal`(기기 화면 크기에 따라 다름), `maxSimultaneousTouches`, `multiTouchDetected`, **`mode`**(`fullscreen-grid`), `grid`, `missedCells[]`(`{row, col}`), `missedEdgeCells`, `coveragePct` |
 | `gyro` | `orientationEvents`, `maxOrientationRangeDeg`, `maxAccelRange`, `permission` |
 
 ### 카메라 프로필: `results.camera.profile`
@@ -254,7 +256,9 @@ curl "http://localhost:3000/api/results/latest?t=<토큰>"
 ## 9. 알려진 한계 (꼭 읽어 주세요)
 
 - **iPhone에서는 ISO·셔터·조리개·초점거리(EXIF)를 얻을 수 없습니다.** iPhone Safari에서 촬영과 앨범 선택 두 경로를 모두 확인했는데, iOS가 웹으로 사진을 넘길 때 카메라 정보를 지웁니다(`photo.exifStatus`가 `exif_without_camera_tags`). 이때 `profile.optics`의 수치는 `null`이고 `confidence`는 `high`가 될 수 없습니다. 대신 `camera.stream`(렌즈 라벨, 줌 범위 0.5~10이면 초광각 있음 등)과 사진 자체로 판단합니다. **Android Chrome에서는 다를 수 있으니 Android 팀원이 한 번 확인해 주세요**(`exifStatus`가 `ok`면 성공).
-- **사진 1장으로는 저조도·줌 성능을 알 수 없습니다.** `low_light_potential`이 `null`인 이유입니다. 여러 장 촬영(밝은 곳/어두운 곳/줌) 방식은 v2 후보입니다.
+- **밝은 사진 1장으로는 저조도 성능을 알 수 없습니다.** 그래서 메인 사진은 `low_light_potential`이 `null`이고, 서버(`lib/camera-profile.js`)가 근거 없이 붙은 `night_lowlight`(야간·저조도) 용도를 떼어 냅니다(`checks.lowlight_claim_removed`). 저조도는 **선택 항목 '어두운 곳 테스트'** 를 해야 `camera.lowLight.score`로 채워지고 프로필에 반영됩니다(`profile.lowLightSource: "extra_photo"`). 줌 성능은 아직 측정하지 않습니다.
+- **마이크·스피커 수치는 기기 간 절대 비교용이 아닙니다.** dBFS는 기기마다 마이크 감도가 달라서, 등급(`quality.grade`, `loopback.grade`)과 `issues`를 위주로 보세요. iPhone은 마이크가 켜져 있으면 스피커 소리가 작아질 수 있어 `loopback` 감지 수가 낮게 나올 수 있습니다(그래서 스피커 통과 여부는 ① 삐 소리 세기로만 정합니다).
+- **터치 칸 수는 화면 크기에 따라 다릅니다.** `cellsTotal`이 12로 고정이 아니니 `cellsHit/cellsTotal` 비율로 보세요. iPhone Safari는 전체 화면 API가 없어 주소창 아래 영역을 덮는 방식이고(`fullscreenApi: false`), 화면 왼쪽 끝을 쓸면 '뒤로 가기' 제스처가 먼저 걸릴 수 있습니다.
 - **같은 사진도 AI 점수가 조금 흔들립니다.** 특히 빈티지 같은 취향 항목은 참고용입니다.
 - **기종은 사용자가 고른 값**이라 틀릴 수 있습니다.
 - Gemini가 일시적으로 몰리면 `503`이 날 수 있습니다. 모델을 바꾸면 해결됩니다(10장).
@@ -278,7 +282,9 @@ curl "http://localhost:3000/api/results/latest?t=<토큰>"
 | `photo.exif`가 `null` | iPhone이면 정상입니다 (9장). Android도 그렇다면 `photo.exifStatus`와 `exifTagIds`를 팀에 공유 |
 | iOS 자이로 권한이 안 뜸 | Safari를 완전히 종료하고 QR 다시 스캔 |
 | 포트 사용 중 | `.env`에 `PORT=3001` 추가 |
-| 터치 칸이 안 눌림 | 화면을 스크롤하지 말고 칸을 정확히 눌러 보세요 |
+| 터치 칸이 안 눌림 | 손가락을 떼지 말고 천천히 쓸어 보세요. 같은 칸이 계속 안 칠해지면 그 위치가 터치 불량일 수 있습니다(빨간 칸으로 기록). 팝업을 닫으려면 가운데 '그만하기' |
+| 마이크가 C/D 등급 | 결과 아래 안내를 보세요: 시끄러운 곳(`noisy_room`), 너무 가까이서 큰 소리(`clipping`), 마이크 구멍 막힘(`muffled_high`) |
+| 스피커 자동 측정이 '안 들림' 투성이 | 볼륨 최대, 조용한 곳, 폰을 책상에 내려놓고 다시. iPhone 은 낮게 나올 수 있어요(9장). ①만 해도 점검은 끝납니다 |
 | 5개를 다 했는데 저장이 안 됨 | 카메라가 "AI 분석 중"이면 끝날 때까지 기다리세요(보통 5~10초, 최대 1분). 그래도 안 되면 하단의 "JSON 다운로드" 버튼으로 직접 저장 |
 
 ## 11. Gemini 프롬프트/모델 바꾸기

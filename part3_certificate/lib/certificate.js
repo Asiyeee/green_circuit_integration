@@ -13,7 +13,7 @@ const SCHEMA = 'seller-certificate/v1';
 const VALID_DAYS = 30;
 const KEYS = ['camera', 'microphone', 'speaker', 'touch', 'gyro'];
 const TEST_LABEL = { camera: '카메라', microphone: '마이크', speaker: '스피커', touch: '터치', gyro: '자이로' };
-const FAULT_LABEL = { none: '없음', yes: '있음', unknown: '모름' };
+const FAULT_LABEL = { none: '없음', yes: '있음', unknown: '모름' }; // 알려진 기능 고장
 
 const newId = () => crypto.randomBytes(8).toString('base64url').replace(/[-_]/g, '').slice(0, 10);
 
@@ -34,14 +34,22 @@ function summarizeTest(report) {
       megapixels: cam.photo ? cam.photo.megapixels ?? null : null,
       lensLabel: cam.stream ? cam.stream.label ?? null : null,
       verdictBasis: cam.verdictBasis || null,
+      lowLight: cam.lowLight ? { status: cam.lowLight.status || null, score: cam.lowLight.score ?? null, scoreSource: cam.lowLight.scoreSource || null, summary_ko: cam.lowLight.summary_ko || null } : null,
+      lowLightSource: prof?.lowLightSource || null,
+      coaching: (Array.isArray(cam.coaching) ? cam.coaching : []).map(c => ({ code: c.code || null, level: c.level || null, title_ko: c.title_ko || null, text_ko: c.text_ko || null })),
     },
-    microphone: { status: (r.microphone || {}).status || 'pending', peakDb: r.microphone?.peakDb ?? null, noiseFloorDb: r.microphone?.noiseFloorDb ?? null },
-    speaker: { status: (r.speaker || {}).status || 'pending', userConfirmed: r.speaker?.userConfirmed ?? null },
+    microphone: { status: (r.microphone || {}).status || 'pending', peakDb: r.microphone?.peakDb ?? null, noiseFloorDb: r.microphone?.noiseFloorDb ?? null, quality: r.microphone?.quality || null },
+    speaker: { status: (r.speaker || {}).status || 'pending', userConfirmed: r.speaker?.userConfirmed ?? null, countTest: r.speaker?.countTest || null, loopback: r.speaker?.loopback || null },
     touch: {
       status: (r.touch || {}).status || 'pending',
       cellsHit: r.touch?.cellsHit ?? null,
       cellsTotal: r.touch?.cellsTotal ?? null,
       maxSimultaneousTouches: r.touch?.maxSimultaneousTouches ?? null,
+      mode: r.touch?.mode || null,
+      grid: r.touch?.grid || null,
+      missedCells: r.touch?.missedCells || null,
+      missedEdgeCells: r.touch?.missedEdgeCells ?? null,
+      coveragePct: r.touch?.coveragePct ?? null,
     },
     gyro: { status: (r.gyro || {}).status || 'pending', maxOrientationRangeDeg: r.gyro?.maxOrientationRangeDeg ?? null },
   };
@@ -50,8 +58,8 @@ function summarizeTest(report) {
     schema: report.schema,
     sessionId: report.sessionId,
     testedAt: report.testedAt,
-    completed: !!(report.summary && report.summary.completed),
-    allPassed: !!(report.summary && report.summary.allPassed),
+    completed: KEYS.every(k => items[k].status !== 'pending'),
+    allPassed: passed === KEYS.length,
     passedCount: passed,
     totalCount: KEYS.length,
     batteryTested: false,
@@ -75,7 +83,7 @@ function trustOf(report, test, input) {
   else if (declared.matchesUserAgent === false) reasons.push('선택 기종과 접속 기기 정보 불일치');
   if (!test.completed) reasons.push('미완료 점검 항목 있음');
   else if (!test.allPassed) reasons.push(`이상·미지원 점검 항목 ${test.totalCount - test.passedCount}개`);
-  if (input.knownFault !== 'none') reasons.push(`알려진 고장: ${FAULT_LABEL[input.knownFault]} (판매자 입력)`);
+  if (input.knownFault !== 'none') reasons.push(`알려진 기능 고장: ${FAULT_LABEL[input.knownFault]}${input.faultDetail_ko ? ` (${input.faultDetail_ko})` : ''} (판매자 입력)`);
   const camWarn = report.results?.camera?.checks?.warnings || [];
   if (camWarn.length) reasons.push('카메라 AI 판정과 실측값 불일치');
   if (!v.exterior && !v.fault) reasons.push('외관 상태·고장 여부는 판매자 입력값');
@@ -136,7 +144,8 @@ function build({ id, demo, report, input, price, carbon, photos, sellerTemperatu
       label_ko: (CONDITIONS.find((c) => c.code === input.conditionCode) || {}).label_ko || null,
       knownFault: input.knownFault,
       knownFaultLabel_ko: FAULT_LABEL[input.knownFault] + (input.knownFaultSource === 'hardware_test' ? ' (하드웨어 점검 5/5 정상)' : ''),
-      knownFaultSource: input.knownFaultSource || 'seller_declared', // hardware_test = '모름'이었지만 점검 결과로 판단
+      knownFaultSource: input.knownFaultSource || 'seller_declared',
+      faultDetail_ko: input.faultDetail_ko || null, // 판매자가 적은 기능 고장 내용
       source: 'seller_declared',
       verified: verifiedOf(input, test), // { exterior: AI 판별 일치, fault: 점검 5/5 정상 }
     },
@@ -166,15 +175,16 @@ function factsFor(cert) {
     condition: {
       label_ko: cert.condition.label_ko,
       knownFault: cert.condition.knownFaultLabel_ko,
-      exteriorSource: cert.condition.verified && cert.condition.verified.exterior ? 'AI 사진 판별과 판매자 선택 일치 (확인됨)' : '판매자 선택',
+      exteriorSource: cert.condition.verified && cert.condition.verified.exterior ? 'AI 사진 제안과 판매자 선택 일치. 실물 검수 아님' : '판매자 선택',
       faultSource: cert.condition.verified && cert.condition.verified.fault ? '판매자 없음 응답 + 5가지 웹 점검 통과. 나머지 기능은 미검증' : '판매자 입력',
+      faultDetail_ko: cert.condition.faultDetail_ko || null,
     },
     aiExterior: cert.assessment && cert.assessment.ai && cert.assessment.ai.condition.code
       ? { label_ko: cert.assessment.ai.condition.label_ko, confidence: cert.assessment.ai.condition.confidence, damages: cert.assessment.ai.condition.damages, agreesWithSeller: cert.assessment.sellerAgreesWithAi }
       : null,
     battery: cert.assessment && cert.assessment.battery ? { healthPct: cert.assessment.battery.healthPct, statusLabel: cert.assessment.battery.statusLabel, cycleCount: cert.assessment.battery.cycleCount, low: cert.assessment.battery.low, source: '판매자 제공 캡처 AI 판독. 직접 측정·기기 일치 검증 아님' } : null,
     price: cert.price.status === 'ok'
-      ? { status: 'ok', label_ko: cert.price.label_ko, minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, vendorCount: cert.price.vendorCount }
+      ? { status: 'ok', label_ko: cert.price.label_ko, minKrw: cert.price.minKrw, maxKrw: cert.price.maxKrw, vendorCount: cert.price.vendorCount, basis_ko: cert.price.reclassified_ko || null, aiEstimate: cert.price.estimated ? { confidence: cert.price.confidence, basis_ko: cert.price.basis_ko } : null, faultDeduction: cert.price.faultAdjusted ? { basePrice: cert.price.basePrice, deduction: cert.price.deduction } : null }
       : { status: cert.price.status, message_ko: cert.price.message_ko },
     carbon: { avoidedKg: cert.carbon.avoidedKg, basis: cert.carbon.basis, oakTreesYear: cert.carbon.equivalence.oakTreesYear },
     trust: cert.trust,
@@ -189,7 +199,7 @@ function ruleSummary(cert) {
   const bad = KEYS.filter((k) => t.items[k].status !== 'pass').map((k) => TEST_LABEL[k]);
   const p = cert.price;
   const priceText = p.status === 'ok'
-    ? `${p.label_ko} ${won(p.minKrw)}${p.singleAmount ? '' : '~' + won(p.maxKrw)}. 검수·조건에 따라 상이하며 개인 거래 보장가 아님.`
+    ? `${p.label_ko} ${won(p.minKrw)}${p.singleAmount ? '' : '~' + won(p.maxKrw)}. ${p.estimated ? '해당 조건 업체 자료 없음. AI 추정.' : ''}${p.faultAdjusted ? '판매자 설명에 대한 AI 감가 추정. 검증된 수리비 아님.' : ''} 검수·조건에 따라 상이하며 개인 거래 보장가 아님.`
     : '해당 조건 시세 정보 없음.';
   const strengths = [];
   if (t.passedCount) strengths.push(`하드웨어 점검 ${t.passedCount}/${t.totalCount} 정상`);
@@ -205,7 +215,9 @@ function ruleSummary(cert) {
   if (!bat || bat.healthPct === null) cautions.push('배터리 상태 미점검');
   else if (bat.low) cautions.push(`배터리 최대 용량 ${bat.healthPct}% (80% 미만)`);
   if (!v.exterior) cautions.push('외관 상태는 판매자 입력값');
-  if (p.status !== 'ok') cautions.push(p.message_ko);
+  if (p.status !== 'ok') cautions.unshift(p.message_ko);
+  if (p.estimated) cautions.unshift('해당 조합 업체 자료 없음. AI 추정 참고가');
+  if (p.faultAdjusted) cautions.unshift('판매자 고장 설명에 대한 AI 감가. 검증된 수리비·직접 진단 아님');
   const c = cert.carbon;
   return {
     by: 'rule',

@@ -84,6 +84,8 @@
 </div></header>
 <main class="page" id="app"><p class="muted" style="padding:40px 0">보증서 불러오는 중</p></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/assets/price-reference.js"></script>
+<script src="/assets/hardware-details.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
 const id = location.pathname.split('/').filter(Boolean)[1];
@@ -93,7 +95,7 @@ const won = (n) => n.toLocaleString('ko-KR') + '원';
 const man = (n) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : won(n));
 const deg = (n) => Number(n).toFixed(1) + '°C';
 const date = (s) => { const d = new Date(s); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
-const STATUS = { pass: '정상', fail: '이상', unsupported: '미지원', pending: '미점검' };
+const STATUS = { pass: '점검 통과', fail: '점검 실패', unsupported: '미지원', pending: '미완료' };
 const STATUS_CLASS = { pass: 'pass', fail: 'fail', unsupported: 'warn', pending: 'warn' };
 const LABEL = { camera: '카메라', microphone: '마이크', speaker: '스피커', touch: '터치', gyro: '센서' };
 const CERT_STATUS = { listed: ['판매 중', 'good'], sold: ['판매 완료', ''], donated: ['기부 완료', ''], recycled: ['배출 완료', ''], expired: ['유효기간 만료', 'warn'] };
@@ -101,14 +103,7 @@ const TRUST = { high: ['신뢰도 높음', 'good'], medium: ['신뢰도 보통',
 const OUTCOME = { sold: '판매(재사용)', donated: '기부(재사용)', recycled: '분리배출' };
 const PHOTO = { test_camera: '점검 촬영', front: '앞면', back: '뒷면', side: '옆면', other: '기타' };
 
-function measure(k, it) {
-  if (k === 'camera') return [it.photoGrade ? `화질 ${it.photoGrade}등급` : null, it.megapixels ? `${it.megapixels}MP` : null].filter(Boolean).join(' · ') || '-';
-  if (k === 'microphone') return it.status === 'pass' ? '소리 정상 녹음' : it.peakDb != null ? `소리 약함 (최대 ${it.peakDb}dB)` : '-';
-  if (k === 'speaker') return it.userConfirmed ? '재생음 확인' : '-';
-  if (k === 'touch') return it.cellsHit != null ? `${it.cellsHit}/${it.cellsTotal}칸 · 동시 ${it.maxSimultaneousTouches}점` : '-';
-  if (k === 'gyro') return it.maxOrientationRangeDeg != null ? `회전 범위 ${Math.round(it.maxOrientationRangeDeg)}°` : '-';
-  return '-';
-}
+function measure(k, it) { return hardwareDetails(k, it); }
 
 function render({ certificate: c, verified, expired, seller }) {
   document.title = `${c.device.model} 성능 보증서`;
@@ -121,21 +116,7 @@ function render({ certificate: c, verified, expired, seller }) {
   const pv = c.ecoPreview && c.ecoPreview.sold;
 
   // 시세 막대: 같은 기종 범위 안에서 최저~최고를 0~100% 로
-  const priceHtml = p.status === 'ok' ? `
-    <div class="price">${p.singleAmount ? won(p.minKrw) : `${man(p.minKrw)} ~ ${man(p.maxKrw)}`}</div>
-    <div class="price-sub">${esc(p.label_ko)} · 업체 ${p.vendorCount}곳 · 견적 ${p.quoteCount}건 · ${esc(c.device.storage)} · ${esc(c.condition.label_ko)}</div>
-    <p class="price-sub">업체 검수·조건에 따라 실제 매입가가 달라집니다. 개인 간 실거래가·보장 판매가가 아닙니다. ${esc(p.notice_ko)}</p>
-    <p class="price-sub">업체 등급을 자체 상태로 연결했으며 평가 조건은 서로 다릅니다. 배터리별 정밀 보정 가격이 아닙니다.</p>
-    ${p.latestCollectedAt ? `<p class="price-sub">공개 출처 수집: ${esc(new Date(p.latestCollectedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }))} KST. ${p.partiallyRefreshed ? '일부 출처는 이전 자료 유지.' : ''} 원문 가격 기준일과 다릅니다.</p>` : ''}
-    ${p.dataWarning ? `<p class="notice">${esc(p.dataWarning)}</p>` : ''}
-    ${p.latestCollectedAt ? `<details><summary>수집 원문의 모델·등급·조건·시각</summary>${p.quotes.map(q => `<p class="price-sub">${esc(q.vendor)} · ${esc(q.sourceModel || c.device.model)} · ${esc(q.sourceGrade || q.grade)}<br>수집: ${esc(q.collectedAt || '이전 자료 유지')}<br>${esc(q.sourceConditions_ko || q.conditions_ko)}</p>`).join('')}</details>` : ''}
-    <details style="margin-top:14px"><summary>업체별 견적</summary>
-      <table><tr><th>업체</th><th>업체 등급</th><th class="r">금액</th></tr>
-      ${p.quotes.map((q) => `<tr><td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a><small>원문 기준일: ${esc(q.priceDate || q.priceDateSource || '미표시')}</small></td><td>${esc(q.grade)}<small>${esc(q.conditions_ko)}</small></td><td class="r">${q.minKrw === q.maxKrw ? won(q.minKrw) : won(q.minKrw) + '~' + won(q.maxKrw)}</td></tr>`).join('')}
-      </table>
-      <p class="muted" style="margin:10px 0 0">자료 확인일 ${esc(p.checkedOn)}. 원문 가격 기준일과 다름. 실시간 가격 아님.</p>
-    </details>`
-    : `<div class="price" style="font-size:18px;font-weight:700">시세 정보 없음</div><div class="price-sub">${esc(p.message_ko)}</div>`;
+  const priceHtml = renderPriceReference(p);
 
   const carbonSource = cb.basis === 'official'
     ? `${esc(cb.source.name)}${cb.source.report ? ' · ' + esc(cb.source.report) : ''}${cb.region ? ' · ' + esc(cb.region) + ' 기준' : ''}`
@@ -196,7 +177,7 @@ function render({ certificate: c, verified, expired, seller }) {
     <dl class="rows">
       <div><dt>외관·화면</dt><dd>${esc(c.condition.label_ko || c.condition.code)}</dd></div>
       ${c.assessment && c.assessment.ai && c.assessment.ai.condition.code ? `<div><dt>AI 외관 판별</dt><dd>${esc(c.assessment.ai.condition.label_ko)}${c.assessment.sellerAgreesWithAi === false ? ' · 판매자 선택과 다름' : ''}${c.assessment.ai.condition.damages.length ? `<br><small>${c.assessment.ai.condition.damages.map(esc).join(', ')}</small>` : ''}</dd></div>` : ''}
-      <div><dt>알려진 고장</dt><dd>${esc(c.condition.knownFaultLabel_ko)}</dd></div>
+      <div><dt>알려진 기능 고장</dt><dd>${esc(c.condition.knownFaultLabel_ko)}${c.condition.faultDetail_ko ? `<br><small>${esc(c.condition.faultDetail_ko)}</small>` : ''}</dd></div>
       <div><dt>저장 용량</dt><dd>${esc(c.device.storage)}</dd></div>
       ${c.askingPriceKrw ? `<div><dt>판매 희망가</dt><dd>${c.askingPriceKrw.toLocaleString('ko-KR')}원</dd></div>` : ''}
       <div><dt>기종 일치</dt><dd>${c.device.matchesUserAgent === false ? '접속 기기와 불일치' : c.device.matchesUserAgent ? '접속 기기와 일치' : '확인 불가'}</dd></div>

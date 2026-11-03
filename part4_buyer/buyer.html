@@ -131,7 +131,7 @@ function bar(label, v, eco) {
 function card(item, i) {
   const b = item.breakdown;
   const tests = picked.map(k => `<span class="tag">${LABEL[k]} ${item.scores[k] ?? "미확인"}</span>`).join("");
-  const ref = item.reference ? `${item.reference.label_ko} (업체 ${item.reference.vendorCount}곳) ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""} · 검수·조건에 따라 상이` : "시세 정보 없음";
+  const ref = item.reference ? `${item.reference.label_ko} ${item.reference.estimated ? '(해당 조합 업체 자료 없음)' : '(업체 ' + item.reference.vendorCount + '곳 기준)'}${item.reference.faultAdjusted ? ' · AI 감가 추정' : ''} ${won(item.reference.minKrw)}${item.reference.maxKrw !== item.reference.minKrw ? "~" + won(item.reference.maxKrw) : ""} · 검수·조건에 따라 상이` : "시세 정보 없음";
   const facts = [item.storage, item.condition, `기능 이상: ${item.knownFaultLabel || '모름'}`, item.battery && item.battery.healthPct != null ? `배터리 ${item.battery.healthPct}% (판매자 캡처)` : "배터리 미점검", `신뢰도 ${TRUST[item.trust] || item.trust}`];
   return `
   <article class="result ${i === 0 ? "top" : ""}">
@@ -193,7 +193,7 @@ async function loadAllListings() {
     const r = await fetch('/api/public/certificates');
     if (!r.ok) throw new Error('목록을 불러오지 못했어요');
     const { items } = await r.json();
-    el.innerHTML = items.length ? items.map(c => `<article class="result"><h3>${esc(c.device.model)} ${esc(c.device.storage)}</h3><p>판매 희망가 ${c.askingPriceKrw ? won(c.askingPriceKrw) : '미정'}</p><p>${esc(c.condition.label_ko)} · 기능 이상 ${esc(c.condition.knownFaultLabel_ko)} · 점검 ${c.test.passedCount}/${c.test.totalCount}</p><p class="muted">${c.price.status === 'ok' ? esc(c.price.label_ko) + ' · 업체 ' + c.price.vendorCount + '곳 · ' + won(c.price.minKrw) + '~' + won(c.price.maxKrw) + ' (검수·조건에 따라 상이)' : '시세 정보 없음 또는 조회 제한'}</p><a class="btn btn-secondary" href="${esc(c.url)}">상세 · 보증서 · 문의</a></article>`).join('') : '<p>판매 중 매물이 없어요.</p>';
+    el.innerHTML = items.length ? items.map(c => `<article class="result"><h3>${esc(c.device.model)} ${esc(c.device.storage)}</h3><p>판매 희망가 ${c.askingPriceKrw ? won(c.askingPriceKrw) : '미정'}</p><p>${esc(c.condition.label_ko)} · 기능 이상 ${esc(c.condition.knownFaultLabel_ko)} · 점검 ${c.test.passedCount}/${c.test.totalCount}</p><p class="muted">${c.price.status === 'ok' ? esc(c.price.label_ko) + (c.price.estimated ? ' · 해당 조합 업체 자료 없음 · ' : ' · 업체 ' + c.price.vendorCount + '곳 기준 · ') + won(c.price.minKrw) + '~' + won(c.price.maxKrw) + ' (검수·조건에 따라 상이)' : '시세 정보 없음 또는 조회 제한'}</p><a class="btn btn-secondary" href="${esc(c.url)}">상세 · 보증서 · 문의</a></article>`).join('') : '<p>판매 중 매물이 없어요.</p>';
   } catch (e) { el.textContent = e.message; }
 }
 document.getElementById('refresh-listings').onclick = loadAllListings;

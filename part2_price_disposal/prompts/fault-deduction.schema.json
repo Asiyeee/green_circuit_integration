@@ -1,0 +1,14 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "understood": { "type": "BOOLEAN" },
+    "faultLabel_ko": { "type": "STRING" },
+    "severity": { "type": "STRING", "enum": ["minor", "moderate", "severe"] },
+    "deductionMinKrw": { "type": "INTEGER", "nullable": true },
+    "deductionMaxKrw": { "type": "INTEGER", "nullable": true },
+    "confidence": { "type": "STRING", "enum": ["high", "medium", "low"] },
+    "basis_ko": { "type": "STRING" }
+  },
+  "required": ["understood", "faultLabel_ko", "severity", "deductionMinKrw", "deductionMaxKrw", "confidence", "basis_ko"],
+  "propertyOrdering": ["understood", "faultLabel_ko", "severity", "deductionMinKrw", "deductionMaxKrw", "confidence", "basis_ko"]
+}

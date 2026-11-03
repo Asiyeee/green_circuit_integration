@@ -1,0 +1,286 @@
+{
+  "schema": "device-hw-test/v1",
+  "sessionId": "3f2b8c1e-5a7d-4e90-9b1a-0c6d2e8f7a41",
+  "testedAt": "2026-11-01T13:20:00.000Z",
+  "tester": "hojune",
+  "page": "https://example.trycloudflare.com/",
+  "device": {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+    "platform": "iPhone",
+    "language": "ko-KR",
+    "secureContext": true,
+    "screen": {
+      "width": 390,
+      "height": 844,
+      "innerWidth": 390,
+      "innerHeight": 664,
+      "devicePixelRatio": 3,
+      "orientation": "portrait-primary"
+    },
+    "maxTouchPoints": 5,
+    "hardwareConcurrency": 6,
+    "deviceMemoryGB": null,
+    "connection": null,
+    "declared": {
+      "brand": "Apple",
+      "model": "iPhone 12",
+      "source": "dropdown",
+      "matchesUserAgent": true
+    }
+  },
+  "results": {
+    "camera": {
+      "status": "pass",
+      "stream": {
+        "label": "Back Camera",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "frameRate": 30,
+          "facingMode": "environment"
+        },
+        "capabilities": null,
+        "videoInputCount": 2,
+        "videoElement": {
+          "width": 1920,
+          "height": 1080
+        }
+      },
+      "photo": {
+        "fileName": "image.jpg",
+        "fileSizeKB": 2310,
+        "mime": "image/jpeg",
+        "resolution": "4032x3024",
+        "megapixels": 12.2,
+        "localMetrics": {
+          "analysisSize": "512x384",
+          "meanBrightness": 118.4,
+          "contrastStd": 52.1,
+          "laplacianVariance": 182.4,
+          "darkClipPct": 0.4,
+          "brightClipPct": 1.1
+        },
+        "exif": {
+          "make": "Apple",
+          "model": "iPhone 12",
+          "software": "18.0",
+          "lens_make": "Apple",
+          "lens_model": "iPhone 12 back dual wide camera 4.2mm f/1.6",
+          "f_number": 1.6,
+          "exposure_time_s": 0.0166667,
+          "iso": 125,
+          "focal_length_mm": 4.2,
+          "focal_length_35mm_equiv": 26,
+          "exposure_bias_ev": 0,
+          "flash_fired": false,
+          "white_balance": "auto",
+          "lens_spec": [
+            4.2,
+            4.2,
+            1.6,
+            1.6
+          ]
+        },
+        "localPass": true,
+        "gemini": {
+          "model": "gemini-flash-latest",
+          "sharpness": 8,
+          "exposure": "ok",
+          "noise": 2,
+          "color_accuracy": 8,
+          "motion_blur": false,
+          "lens_obstruction": false,
+          "overall_pass": true,
+          "issues": [],
+          "summary_ko": "선명하고 노출이 적절하며 렌즈 가림이나 흔들림이 없습니다."
+        },
+        "geminiSkipped": null,
+        "geminiError": null,
+        "imageFile": "2026-11-01T13-20-05_hojune_3f2b8c1e.jpg",
+        "exifStatus": "ok",
+        "jpegSegments": [
+          "APP1(Exif)",
+          "DQT",
+          "SOF"
+        ],
+        "declaredAtCapture": {
+          "brand": "Apple",
+          "model": "iPhone 12"
+        }
+      },
+      "profile": {
+        "grade": "B",
+        "summary_ko": "밝은 곳에서 선명하고 색이 자연스러운 일상용 카메라입니다. 어두운 환경과 필름 같은 느낌을 기대하는 용도에는 아쉽습니다.",
+        "scores": {
+          "sharpness": 7,
+          "noise_cleanliness": 7,
+          "dynamic_range": 6,
+          "exposure_accuracy": 8,
+          "color_accuracy": 8,
+          "low_light_potential": null
+        },
+        "look": {
+          "style_tags": [
+            "clean_modern",
+            "crisp_digital"
+          ],
+          "vintage_score": 2,
+          "warmth": 1,
+          "saturation": 6,
+          "contrast": 5,
+          "grain": "none",
+          "softness": "crisp",
+          "vignetting": "none",
+          "feel_ko": "깔끔하고 또렷한 최신 스마트폰 특유의 디지털 톤입니다."
+        },
+        "optics": {
+          "focal_length_35mm_equiv": 26,
+          "aperture_f": 1.6,
+          "iso": 125,
+          "shutter_s": 0.0166667,
+          "lens_label": "Wide (1x)",
+          "depth_of_field": "deep"
+        },
+        "defects": [
+          "none"
+        ],
+        "best_for": [
+          {
+            "use": "street_snap",
+            "reason_ko": "26mm 환산 화각이라 걸어 다니며 찍는 스냅에 다루기 쉽습니다."
+          },
+          {
+            "use": "document_text",
+            "reason_ko": "글씨 디테일이 또렷하게 남습니다."
+          },
+          {
+            "use": "social_feed",
+            "reason_ko": "색이 자연스럽고 노출이 안정적입니다."
+          }
+        ],
+        "not_ideal_for": [
+          "night_lowlight",
+          "film_look_project"
+        ],
+        "confidence": "medium",
+        "caveats_ko": [
+          "사진 1장 기준이라 저조도 성능은 판단하기 어렵습니다."
+        ]
+      },
+      "verdictBasis": "gemini",
+      "checks": {
+        "exif_present": true,
+        "optics_source": "exif",
+        "declared_device_given": true,
+        "declared_matches_user_agent": true,
+        "exposure_consistent_with_local": true,
+        "sharpness_consistent_with_local": true,
+        "warnings": []
+      }
+    },
+    "microphone": {
+      "status": "pass",
+      "peakDb": -12.3,
+      "avgDb": -35.1,
+      "noiseFloorDb": -58.7,
+      "peakRms": 0.2427,
+      "sampleRate": 48000,
+      "label": "iPhone Microphone",
+      "settings": {
+        "sampleRate": 48000,
+        "channelCount": 1
+      }
+    },
+    "speaker": {
+      "status": "pass",
+      "userConfirmed": true,
+      "sampleRate": 48000,
+      "baseLatencyMs": 10.7,
+      "outputLatencyMs": null,
+      "tone": "440→1760Hz sweep 1.5s"
+    },
+    "touch": {
+      "status": "pass",
+      "cellsHit": 12,
+      "cellsTotal": 12,
+      "maxSimultaneousTouches": 3,
+      "multiTouchDetected": true,
+      "pointerTypes": [
+        "touch"
+      ],
+      "maxTouchPoints": 5,
+      "touchEventSupported": true
+    },
+    "gyro": {
+      "status": "pass",
+      "permission": {
+        "orientation": "granted",
+        "motion": "granted"
+      },
+      "orientationEvents": 310,
+      "motionEvents": 305,
+      "orientation": {
+        "alpha": {
+          "min": 12.1,
+          "max": 301.4,
+          "range": 289.3
+        },
+        "beta": {
+          "min": -41.2,
+          "max": 63.8,
+          "range": 105
+        },
+        "gamma": {
+          "min": -52.6,
+          "max": 48.9,
+          "range": 101.5
+        }
+      },
+      "accelerationIncludingGravity": {
+        "x": {
+          "min": -5.1,
+          "max": 6.2,
+          "range": 11.3
+        },
+        "y": {
+          "min": -9.8,
+          "max": 3.4,
+          "range": 13.2
+        },
+        "z": {
+          "min": -4.7,
+          "max": 9.9,
+          "range": 14.6
+        }
+      },
+      "rotationRate": {
+        "alpha": {
+          "min": -110.2,
+          "max": 95.4,
+          "range": 205.6
+        },
+        "beta": {
+          "min": -80.1,
+          "max": 88.3,
+          "range": 168.4
+        },
+        "gamma": {
+          "min": -92.7,
+          "max": 70.5,
+          "range": 163.2
+        }
+      },
+      "maxOrientationRangeDeg": 289.3,
+      "maxAccelRange": 14.6
+    }
+  },
+  "summary": {
+    "camera": "pass",
+    "microphone": "pass",
+    "speaker": "pass",
+    "touch": "pass",
+    "gyro": "pass",
+    "completed": true,
+    "allPassed": true
+  }
+}

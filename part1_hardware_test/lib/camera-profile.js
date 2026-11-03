@@ -161,6 +161,22 @@ function applyChecks(metadata, qa, profile) {
     if (declaredMatchesUa === false) warnings.push('사용자가 고른 기종과 접속한 기기(User-Agent)가 다릅니다');
   }
 
+  // 밝은 메인 사진만으로는 저조도 성능을 알 수 없으므로, 모델이 '야간·저조도'를 근거 없이 붙였으면 떼어 냅니다.
+  // (저조도는 index.html 의 '어두운 곳 테스트' 사진으로 따로 잽니다. capture_context.purpose === 'low_light')
+  const purpose = (md.capture_context && md.capture_context.purpose) || 'main';
+  let lowLightClaimRemoved = false;
+  if (purpose === 'main' && local && typeof local.meanBrightness === 'number' && local.meanBrightness >= 90) {
+    if (profile.not_ideal_for.includes('night_lowlight')) {
+      profile.not_ideal_for = profile.not_ideal_for.filter((u) => u !== 'night_lowlight');
+      lowLightClaimRemoved = true;
+    }
+    if (profile.best_for.some((b) => b.use === 'night_lowlight')) {
+      profile.best_for = profile.best_for.filter((b) => b.use !== 'night_lowlight');
+      lowLightClaimRemoved = true;
+    }
+    profile.scores.low_light_potential = null;
+  }
+
   if (warnings.length) {
     profile.confidence = 'low';
     profile.caveats_ko = [...warnings, ...profile.caveats_ko].slice(0, 5);
@@ -175,6 +191,8 @@ function applyChecks(metadata, qa, profile) {
     declared_matches_user_agent: declaredMatchesUa,
     exposure_consistent_with_local: exposureConsistent,
     sharpness_consistent_with_local: sharpnessConsistent,
+    capture_purpose: purpose,
+    lowlight_claim_removed: lowLightClaimRemoved,
     warnings,
   };
 }

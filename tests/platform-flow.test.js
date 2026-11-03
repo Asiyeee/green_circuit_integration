@@ -41,6 +41,9 @@ test('점검 JSON 저장 → 추가 입력 → 참고가/희망가 분리 → �
   assert.equal(quote.data.price.status, 'ok');
   assert.equal(quote.data.disposal.action, 'sell');
   assert.ok(quote.data.disposal.manual.some(x => x.title.includes('데이터 삭제')));
+  const manual = await api('/api/public/manual?type=recycled&brand=Apple', { auth: false });
+  assert.equal(manual.data.sections.length,3);
+  assert.equal(manual.data.type,'recycled');
   const issued = await api('/api/certificates', { method: 'POST', body: { ...makeBody(), report: undefined, resultFile: saved.data.jsonFile } });
   assert.equal(issued.status, 200);
   const { id, ownerToken, certificate: cert } = issued.data;

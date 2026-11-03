@@ -29,8 +29,19 @@ console.log('\n[항목별 결과]');
 for (const k of ['camera', 'microphone', 'speaker', 'touch', 'gyro']) {
   line(k, `${icon[r.results?.[k]?.status] || '?'} ${r.results?.[k]?.status}`);
 }
+// 정밀 측정 결과 (2026-11 피드백 반영 이후 결과에만 있음)
+const mq = r.results?.microphone?.quality;
+if (mq) line('  마이크 음질', `${mq.grade}등급 · SNR ${mq.snrDb}dB · 클리핑 ${mq.clippingPct}%${mq.issues?.length ? ' · ' + mq.issues.join(', ') : ''}${mq.userPlayback ? ' · 녹음확인 ' + mq.userPlayback : ''}`);
+const sp = r.results?.speaker;
+if (sp?.countTest) line('  스피커 횟수', `재생 ${sp.countTest.played}번 / 응답 ${sp.countTest.answered}번 (${sp.countTest.correct ? '정답' : '오답'}, 시도 ${sp.countTest.attempts})`);
+if (sp?.loopback?.status === 'ok') line('  스피커 음역', `${sp.loopback.grade}등급 · ${sp.loopback.detectedCount}/${sp.loopback.total}개 음 감지`);
+const tc = r.results?.touch;
+if (tc?.mode === 'fullscreen-grid') line('  터치 전체화면', `${tc.cellsHit}/${tc.cellsTotal}칸 (${tc.grid.cols}x${tc.grid.rows})${tc.missedCells?.length ? ` · 못 누른 칸 ${tc.missedCells.length} (가장자리 ${tc.missedEdgeCells})` : ''}`);
+const ll = r.results?.camera?.lowLight;
+if (ll?.score != null) line('  저조도 사진', `${ll.score}/10 (${ll.scoreSource})`);
+
 const s = r.summary || {};
-console.log(`\n  전체 완료: ${s.completed ? '예' : '아니오'} · 전부 통과: ${s.allPassed ? '예' : '아니오'}`);
+console.log(`\n  전체 완료:${s.completed ? '예' : '아니오'} · 전부 통과: ${s.allPassed ? '예' : '아니오'}`);
 
 const cam = r.results?.camera;
 const p = cam?.profile;

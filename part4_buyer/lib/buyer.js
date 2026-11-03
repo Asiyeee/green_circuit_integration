@@ -40,7 +40,7 @@ function toListing(c, temperature) {
     knownFault: c.condition.knownFault,
     knownFaultLabel: c.condition.knownFaultLabel_ko,
     price: c.askingPriceKrw, // 판매 희망가. 없으면 null
-    reference: c.price.status === 'ok' ? { minKrw: c.price.minKrw, maxKrw: c.price.maxKrw, label_ko: c.price.label_ko, vendorCount: c.price.vendorCount } : null,
+    reference: c.price.status === 'ok' ? { minKrw: c.price.minKrw, maxKrw: c.price.maxKrw, label_ko: c.price.label_ko, estimated: c.price.estimated, faultAdjusted: c.price.faultAdjusted, vendorCount: c.price.vendorCount } : null,
     battery: c.battery,
     trust: c.trust,
     seller: c.seller,

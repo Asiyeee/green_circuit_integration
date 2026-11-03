@@ -35,6 +35,7 @@
   #qr{display:inline-block;background:#fff;padding:12px;border-radius:12px;margin:8px 0 4px;box-shadow:inset 0 0 0 1px var(--line)}
   #link{word-break:break-all;font-size:13px;color:var(--ink-3)}
   #incomplete{margin-top:12px}
+  @media(max-width:520px){.quote-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -63,6 +64,7 @@
       <span class="status" id="result-status"></span>
     </div>
     <div class="test-list" id="result-tests"></div>
+    <div id="result-measurements"></div>
     <div class="upload">목록에 없나요? <label>결과 파일 직접 올리기<input type="file" id="upload" accept="application/json,.json"></label></div>
   </section>
 
@@ -83,18 +85,19 @@
       <div class="choices" id="conditions"></div>
     </div>
     <div class="field">
-      <span class="field-label">알고 있는 고장</span>
+      <span class="field-label">알고 있는 기능 고장</span>
       <div class="seg" id="fault">
         <label><input type="radio" name="fault" value="none">없음</label>
         <label><input type="radio" name="fault" value="yes">있음</label>
         <label><input type="radio" name="fault" value="unknown" checked>모름</label>
       </div>
+      <textarea class="input" id="fault-detail" maxlength="200" rows="2" placeholder="어떤 고장인지 적어 주세요 (예: 페이스ID 안 됨, 충전 단자 접촉 불량). AI가 감가를 추정할 수 있어요. 직접 진단·확정 수리비가 아니에요" style="display:none;margin-top:8px;resize:vertical"></textarea>
     </div>
   </section>
 
   <section class="section">
     <div class="step-no">3</div>
-    <h2 class="section-title">업체 매입 참고가와 탄소 감축</h2>
+    <h2 class="section-title">업체 원문 참고가 · AI 추정과 탄소 감축</h2>
     <div id="quote" class="muted" style="margin-top:10px">용량과 상태를 고르면 보여요.</div>
   </section>
 
@@ -146,6 +149,8 @@
 <div class="cta"><div class="cta-in"><button class="btn btn-primary btn-block" id="issue" disabled>보증서 연결 매물 등록하기</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/assets/price-reference.js"></script>
+<script src="/assets/hardware-details.js"></script>
 <script>
 const $ = (s) => document.querySelector(s);
 const T = new URLSearchParams(location.search).get('t') || '';
@@ -162,7 +167,7 @@ const md = (t) => esc(t)
   .replace(/\n/g, '<br>');
 const when = (d) => d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-let report = null, resultFile = null;
+let report = null, resultFile = null, quoteSeq = 0;
 const photos = {};
 let batteryShot = null, assessId = null, aiCode = null;
 
@@ -206,8 +211,9 @@ function setReport(rep) {
   $('#result-status').textContent = `${passed}/5 통과`;
   $('#result-tests').innerHTML = Object.keys(LABEL).map((k) => {
     const s = (rep.results[k] || {}).status || 'pending';
-    return `<div><b>${LABEL[k]}</b><span class="${s}">${STATUS[s] || s}</span></div>`;
+    return `<div><b>${LABEL[k]}</b><span class="${esc(s)}">${esc(STATUS[s] || s)}</span></div>`;
   }).join('');
+  $('#result-measurements').innerHTML = '<details><summary>측정값 자세히 보기</summary>' + Object.keys(LABEL).map(k => '<p>' + LABEL[k] + ': ' + esc(hardwareDetails(k, rep.results[k])) + '</p>').join('') + '<p class="muted">측정 환경·권한의 영향을 받습니다. 실패·미완료·미지원은 서로 다르며 직접 고장 진단이나 일정 감가액을 뜻하지 않습니다.</p></details>';
   if (!rep.summary || !rep.summary.completed) {
     $('#result-tests').insertAdjacentHTML('afterend', '<div class="notice" id="incomplete">끝내지 않은 점검이 있으면 보증서 신뢰도가 낮게 표시돼요. 가능하면 5가지를 모두 마친 결과를 골라 주세요.</div>');
   }
@@ -222,7 +228,7 @@ async function loadOptions() {
   const r = await api(`/api/price/options?brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}`);
   const o = await r.json();
   $('#model-note').style.display = o.found ? 'none' : 'block';
-  $('#model-note').textContent = '시세 자료에 없는 기종이에요. 보증서는 만들 수 있지만 시세는 비어 있어요.';
+  $('#model-note').textContent = '업체 시세 자료에 없는 기종이에요. 근거가 있으면 별도 AI 추정을 제공하며, 결과가 없어도 직접 희망가를 정해 등록할 수 있어요.';
   const st = $('#storage'), prev = st.value;
   st.innerHTML = '<option value="">선택</option>';
   [...new Set([...o.storages, ...FALLBACK_STORAGES, '2TB'])].forEach((s) => st.append(new Option(s, s)));
@@ -235,27 +241,27 @@ async function loadOptions() {
       <span><span class="choice-title">${esc(c.label_ko)}${c.code === aiCode ? '<span class="ai-badge">AI 제안</span>' : ''}</span><span class="choice-desc">${esc(c.hint_ko)}${o.found && !c.available ? ' · 이 기종은 시세 없음' : ''}</span></span>
     </label>`).join('');
   quote();
+  updateAiSuggestion();
 }
 
 async function quote() {
   const body = form();
   validate();
+  const seq = ++quoteSeq;
   if (!body.storage || !body.conditionCode) { $('#quote').textContent = '용량과 상태를 고르면 보여요.'; return; }
-  const r = await api('/api/price/quote', { method: 'POST', body: JSON.stringify({ ...body, assessId, testSummary: report && report.summary }) });
-  const { price: p, carbon: c, disposal: dp } = await r.json();
-  const priceHtml = p.status === 'ok'
-    ? `<div><div class="k">${esc(p.label_ko)}</div><div class="v">${p.singleAmount ? won(p.minKrw) : won(p.minKrw) + ' ~ ' + won(p.maxKrw)}</div><div class="s">업체 ${p.vendorCount}곳 · 자료 확인일 ${esc(p.checkedOn)} (원문 가격 기준일과 다름, 실시간 아님)</div><p class="s">업체 검수·조건에 따라 실제 매입가가 달라져요. 개인 간 실거래가·보장가가 아니에요.</p><p class="s">${esc(p.notice_ko)}</p><details><summary>업체·원래 등급·조건·출처</summary>${p.quotes.map(q => `<p class="s"><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.vendor)}</a> · ${esc(q.grade)} · ${won(q.minKrw)}~${won(q.maxKrw)}<br>${esc(q.conditions_ko)}<br>원문 기준일: ${esc(q.priceDate || q.priceDateSource || '미표시')}</p>`).join('')}<p class="s">업체별 등급을 서비스 상태로 연결했으며 업체 평가 조건은 서로 달라요. 배터리별 정밀 보정 가격이 아니에요.</p></details></div>`
-    : `<div><div class="k">업체 매입 참고가</div><div class="v" style="font-size:15px;font-weight:600;color:var(--ink-2)">${esc(p.message_ko)}</div><p class="s">가격을 추정하지 않아요. 상태 공개 후 희망가를 정해 등록할 수 있어요.</p></div>`;
-  $('#quote').className = '';
-  $('#quote').innerHTML = `<div class="quote-grid">${priceHtml}
-    <div><div class="k">재사용 시 탄소 감축${c.basis === 'estimate' ? ' (추정)' : ''}</div><div class="v">${c.avoidedKg}kg</div><div class="s">나무 ${c.equivalence.oakTreesYear}그루가 1년간 흡수하는 양</div></div></div>
-    ${p.latestCollectedAt ? `<p class="muted">공개 출처 수집 시각: ${esc(new Date(p.latestCollectedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }))} KST. ${p.partiallyRefreshed ? '일부 출처는 이전 자료를 유지합니다.' : '각 원문 가격 기준일은 업체별 상세를 확인하세요.'} 조회할 때마다 실시간 수집하는 가격이 아닙니다.</p>` : ''}
-    ${p.dataWarning ? `<p class="notice">${esc(p.dataWarning)}</p>` : ''}
-    ${p.status === 'ok' && p.latestCollectedAt ? `<details><summary>수집 원문의 모델·등급·조건·시각</summary>${p.quotes.map(q => `<p class="muted">${esc(q.vendor)} · ${esc(q.sourceModel)} · ${esc(q.sourceGrade)}<br>수집: ${esc(q.collectedAt || '이전 조사 자료 유지')}<br>${esc(q.sourceConditions_ko || q.conditions_ko)}</p>`).join('')}</details>` : ''}
-    ${dp ? `<div class="notice info manual" style="margin-top:12px"><b>추천 처리: ${esc(dp.label_ko)}</b>
-      <ul style="margin:6px 0 0;padding-left:18px">${dp.reasons_ko.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <p class="muted" style="margin:6px 0 0">판매하려면 아래 희망가 입력 후 매물 등록을 누르세요. 기부·배출은 별도의 선택이에요. 안내 열람만으로 완료되지 않으며 매물 상세에서 실제 처리 후 완료를 기록해요.</p>
-      ${dp.manual.map((m) => `<details><summary>${esc(m.title)}</summary><div class="md">${md(m.markdown)}</div></details>`).join('')}</div>` : ''}`;
+  $('#quote').textContent = '시세 확인 중… AI 추정·감가가 필요한 경우 시간이 걸릴 수 있어요. 등록은 직접 희망가로 진행할 수 있어요.';
+  try {
+    const r = await api('/api/price/quote', { method: 'POST', body: JSON.stringify({ ...body, assessId, testSummary: report && report.summary }) });
+    const j = await r.json();
+    if (seq !== quoteSeq) return;
+    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+    const { price: p, carbon: c, disposal: dp } = j;
+    $('#quote').className = '';
+    $('#quote').innerHTML = '<div class="quote-grid"><div>' + renderPriceReference(p) + '</div><div><div class="k">재사용 시 탄소 감축' + (c.basis === 'estimate' ? ' (추정)' : '') + '</div><div class="v">' + c.avoidedKg + 'kg</div><div class="s">나무 ' + c.equivalence.oakTreesYear + '그루가 1년간 흡수하는 양</div></div></div>' +
+      (dp ? '<div class="notice info manual" style="margin-top:12px"><b>추천 처리: ' + esc(dp.label_ko) + '</b><p>' + dp.reasons_ko.map(esc).join(' · ') + '</p><p>희망가를 정해 우리 플랫폼에 등록할 수 있어요. 안내를 읽는 것과 완료 처리는 별도예요.</p>' + dp.manual.map(m => '<details><summary>' + esc(m.title) + '</summary><div class="md">' + md(m.markdown) + '</div></details>').join('') + '</div>' : '');
+  } catch (e) {
+    if (seq === quoteSeq) $('#quote').textContent = '참고가 조회 실패: ' + e.message + '. 수동 상태·희망가 입력 후 플랫폼 등록은 계속할 수 있어요.';
+  }
 }
 
 function form() {
@@ -265,6 +271,7 @@ function form() {
     storage: $('#storage').value,
     conditionCode: (document.querySelector('input[name=cond]:checked') || {}).value || '',
     knownFault: (document.querySelector('input[name=fault]:checked') || {}).value || 'unknown',
+    faultDetail: $('#fault-detail').value.trim(),
   };
 }
 
@@ -298,7 +305,7 @@ document.querySelectorAll('.photo').forEach((el) => {
     const dataUrl = await resize(f, el.dataset.kind === 'battery' ? 2000 : 1280); // 캡처 글씨가 뭉개지지 않게 크게
     if (el.dataset.kind === 'battery') batteryShot = dataUrl; else photos[el.dataset.kind] = dataUrl;
     assessSeq++; // 새 판별 대기 중에도 이전 사진의 응답을 적용하지 않음
-    assessId = null; // 사진이 바뀌면 다시 판별
+    assessId = null; aiCode = null; $('#ai').textContent = '사진이 바뀌어 다시 판별합니다.'; // 이전 사진 판별 보존 금지
     $('#assess').disabled = false;
     // 여러 장을 연달아 올리면 마지막 사진 뒤 1.2초에 한 번만 판별
     clearTimeout(assessTimer);
@@ -319,7 +326,11 @@ $('#upload').addEventListener('change', async (e) => {
 });
 ['#brand', '#model'].forEach((s) => $(s).addEventListener('input', () => { clearTimeout(optTimer); optTimer = setTimeout(loadOptions, 400); }));
 $('#storage').addEventListener('change', quote);
-document.addEventListener('change', (e) => { if (e.target.name === 'cond' || e.target.name === 'fault') quote(); });
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'fault') $('#fault-detail').style.display = e.target.value === 'yes' ? 'block' : 'none';
+  if (e.target.name === 'cond' || e.target.name === 'fault') { quote(); updateAiSuggestion(); }
+});
+$('#fault-detail').addEventListener('change', quote); // 고장 내용이 AI 추정에 반영됨
 $('#nickname').addEventListener('input', validate);
 $('#asking').addEventListener('input', validate);
 
@@ -356,6 +367,16 @@ $('#issue').addEventListener('click', async () => {
 });
 const CONF = { high: '높음', medium: '보통', low: '낮음' };
 let assessTimer, assessSeq = 0;
+function updateAiSuggestion() {
+  const holder = $('#ai-choice');
+  if (!holder) return;
+  holder.textContent = '';
+  const picked = (document.querySelector('input[name=cond]:checked') || {}).value;
+  const option = aiCode && document.querySelector(`input[name=cond][value=${aiCode}]`);
+  if (!option || picked === aiCode) return;
+  holder.innerHTML = '<p>사용자 외관 선택과 AI 제안이 달라요. 실제 상태를 확인한 후 선택하세요.</p><button class="btn btn-secondary" id="apply-ai">상태를 확인했고 AI 제안 적용</button>';
+  $('#apply-ai').onclick = () => { option.checked = true; updateAiSuggestion(); loadOptions(); };
+}
 async function runAssess() {
   clearTimeout(assessTimer);
   const seq = ++assessSeq;
@@ -382,14 +403,14 @@ async function runAssess() {
       <b>외관 AI 판별:</b> ${c.code ? `${esc(c.label_ko)} (확신 ${CONF[c.confidence]})` : '판단 어려움'}${c.evidence_ko ? ` · ${esc(c.evidence_ko)}` : ''}
       ${c.damages.length ? `<br>보이는 손상: ${c.damages.map(esc).join(', ')}` : ''}
       ${c.caveats_ko.length ? `<br><span class="muted">${c.caveats_ko.map(esc).join(' · ')}</span>` : ''}
-      ${c.code && picked !== c.code ? `<br><button class="btn btn-secondary" id="apply-ai" style="padding:2px 10px;margin-top:4px">상태를 확인했고 AI 제안 적용</button>` : ''}
+      <div id="ai-choice"></div>
       <br><b>배터리:</b> ${bat}
       <br><span class="muted">AI 판별은 참고용이에요. 사진으로 내부 기능 정상 여부는 판단하지 않아요. 최종 상태는 직접 골라 주세요. 배터리는 판매자 캡처 판독이며 직접 측정이 아니에요.</span></div>`;
-    const ap = $('#apply-ai');
-    if (ap) ap.addEventListener('click', () => { document.querySelector(`input[name=cond][value=${c.code}]`).checked = true; ap.remove(); loadOptions(); });
+    updateAiSuggestion();
     loadOptions(); // 배지 표시 + 시세·추천 다시 계산
   } catch (e) {
     if (seq !== assessSeq) return;
+    assessId = null; aiCode = null;
     $('#ai').innerHTML = `<div class="notice">AI 판별 실패: ${esc(e.message)}</div>`;
   }
   btn.disabled = false; btn.textContent = 'AI로 다시 판별';

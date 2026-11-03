@@ -3,6 +3,7 @@
 window.renderMarketControls = async ({ certificate: c, expired, token, reload }) => {
   const box = document.getElementById('market-controls');
   const escape = (v) => String(v ?? '').replace(/[&<>"']/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]));
+  const markdown = s => escape(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
   const getKey = (key) => { try { return localStorage.getItem(key) || ''; } catch { return ''; } };
   const saveKey = (key, value) => { localStorage.setItem(key, value); };
   let ownerKey = getKey('gc-owner-' + c.id);
@@ -30,9 +31,21 @@ window.renderMarketControls = async ({ certificate: c, expired, token, reload })
       <label class="field-label" for="access-key">서버 접속 토큰</label><input class="input" type="password" id="access-key" autocomplete="off" value="${escape(token)}">
       <button class="btn btn-secondary" id="load-inbox">관리키 저장 · 받은 요청 확인</button><div id="inbox"></div>
       ${c.status === 'listed' ? `<div class="field"><label class="field-label" for="outcome-type">실제로 완료한 처리</label><select class="select" id="outcome-type"><option value="sold">판매 완료</option><option value="donated">기부 완료</option><option value="recycled">재활용·배출 완료</option></select>
-      <label><input type="checkbox" id="outcome-confirm"> 실제 처리를 마쳤으며 판매 목록에서 제외됨을 확인합니다.</label><button class="btn btn-primary" id="record-outcome">선택한 완료 결과 기록</button></div>` : `<p>이미 완료 처리됨: ${escape(c.status)}</p>`}
+      <div id="outcome-guide"></div><label><input type="checkbox" id="outcome-confirm"> 실제 처리를 마쳤으며 판매 목록에서 제외됨을 확인합니다.</label><button class="btn btn-primary" id="record-outcome">선택한 완료 결과 기록</button></div>` : `<p>이미 완료 처리됨: ${escape(c.status)}</p><div id="outcome-guide"></div>`}
       <p class="err" id="owner-message" role="status"></p></details>`;
   const el = (id) => box.querySelector('#' + id);
+  const loadOutcomeGuide = async () => {
+    const type = el('outcome-type')?.value || c.outcome?.type;
+    if (!type) return;
+    el('outcome-guide').textContent = '처리 안내 불러오는 중';
+    try {
+      const j = await api('/api/public/manual?type=' + encodeURIComponent(type) + '&brand=' + encodeURIComponent(c.device.brand));
+      const e = c.ecoPreview?.[type];
+      el('outcome-guide').innerHTML = j.sections.map(s => `<details><summary>${escape(s.title)}</summary><p style="white-space:pre-wrap">${markdown(s.markdown)}</p></details>`).join('') + (c.status === 'listed' && e ? `<p>실제 완료 기록 시 환경 온도 ${e.before}°C → ${e.after}°C. 안내 열람·방법 선택만으로 완료되지 않습니다.</p>` : '');
+    } catch (e) { el('outcome-guide').textContent = e.message; }
+  };
+  el('outcome-type')?.addEventListener('change', () => { el('outcome-confirm').checked = false; loadOutcomeGuide(); });
+  loadOutcomeGuide();
   // 토큰 입력 시 closure에 반영. URL에 관리키를 붙이지 않음.
   const credentials = () => {
     ownerKey = el('manage-key').value.trim(); token = el('access-key').value.trim();
@@ -89,7 +102,6 @@ window.renderMarketControls = async ({ certificate: c, expired, token, reload })
   showMine();
   try {
     const j = await api('/api/public/manual?brand=' + encodeURIComponent(c.device.brand));
-    const markdown = (s) => escape(s).replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
     el('manual-guide').innerHTML = j.items.map(m => `<details><summary>${escape(m.title)}</summary><p style="white-space:pre-wrap">${markdown(m.markdown)}</p></details>`).join('');
   } catch (e) { el('manual-guide').textContent = e.message; }
 };
