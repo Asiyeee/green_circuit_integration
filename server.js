@@ -306,7 +306,11 @@ async function geminiJson(cfg, state, { system, schema, text, images = [] }) {
 async function handle(req, res, cfg, state) {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
-
+    // 토큰 없이 들어오면 토큰을 붙여서 다시 보냄 (데모용)
+  if (req.method === 'GET' && ['/', '/index.html', '/seller'].includes(p) && !url.searchParams.get('t')) {
+    res.writeHead(302, { Location: `${p}?t=${cfg.token}` });
+    return res.end();
+  }
   // 시작 화면 (common/home.html). 팀 합의 후 루트(/)로 바꿀 수 있음
   if (req.method === 'GET' && (p === '/start' || p === '/home')) {
     const html = fs.readFileSync(path.join(ROOT, 'common', 'home.html'));
