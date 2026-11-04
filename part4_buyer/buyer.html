@@ -44,6 +44,17 @@
   .eco-chip{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;background:var(--eco-weak);color:var(--eco);font-size:13px;font-weight:700;white-space:nowrap}
   .eco-chip svg{width:14px;height:14px}
   @media (prefers-reduced-motion:no-preference){.fill{transition:width .5s ease}}
+  /* 판매 중 매물 카드 */
+  #all-listings{display:grid;gap:10px;margin-top:12px}
+  .listing{background:var(--surface-2);border-radius:16px;padding:16px}
+  .listing-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .listing h3{margin:0;font-size:16px;font-weight:700;letter-spacing:-.02em}
+  .listing h3 span{font-weight:500;color:var(--ink-3)}
+  .listing-price{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .listing .tags{margin:10px 0 0}
+  .listing-ref{margin:10px 0 12px;font-size:12.5px;color:var(--ink-3)}
+  .explain summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink-2)}
+  .explain p{margin:8px 0 0}
 </style>
 </head>
 <body>
@@ -60,7 +71,7 @@
     <p class="eyebrow">보증서 있는 중고폰</p>
     <h1 class="title">내게 맞는 중고 스마트폰 찾기</h1>
     <p class="lead">판매 중 매물을 살펴보고 보증서 상세에서 문의·거래 요청을 남기세요. 추천은 선택한 성능과 환경온도를 비교해요.</p>
-    <p class="muted">검증된 개인 거래 가격 자료가 없어 가격 점수는 제외해요. 성능 61.5% · 환경온도 38.5%로 환산하며 환경온도 기준은 데모용이에요. 중요 성능 중 미확인·미통과 항목이 있으면 추천에서 빠지지만 아래 전체 목록에는 표시돼요. 업체 매입 참고가는 개인 간 적정가가 아니며 검수·조건에 따라 달라져요.</p>
+    <details class="explain"><summary>추천 점수는 어떻게 계산하나요?</summary><p class="muted">검증된 개인 거래 가격 자료가 없어 가격 점수는 제외해요. 성능 61.5% · 환경온도 38.5%로 환산하며 환경온도 기준은 데모용이에요. 중요 성능 중 미확인·미통과 항목이 있으면 추천에서 빠지지만 아래 전체 목록에는 표시돼요. 업체 매입 참고가는 개인 간 적정가가 아니며 검수·조건에 따라 달라져요.</p></details>
   </div>
 
   <section class="section">
@@ -97,6 +108,29 @@ const go = document.getElementById("go");
 const msg = document.getElementById("msg");
 const results = document.getElementById("results");
 const modelInput = document.getElementById("model");
+
+// 판매 중 매물 카드 (디자인: 가격 강조 · 상태 배지 · 참고 시세는 작게)
+function listingCard(c) {
+  const allOk = c.test.passedCount === c.test.totalCount;
+  const ref = c.price.status === 'ok'
+    ? `${esc(c.price.label_ko)} · ${won(c.price.minKrw)}~${won(c.price.maxKrw)}`
+    : '참고 시세 없음';
+  return `<article class="listing">
+    <div class="listing-top">
+      <div>
+        <h3>${esc(c.device.model)} <span>${esc(c.device.storage)}</span></h3>
+        <div class="listing-price">${c.askingPriceKrw ? won(c.askingPriceKrw) : '가격 미정'}</div>
+      </div>
+      <span class="tag ${allOk ? 'good' : 'warn'}">점검 ${c.test.passedCount}/${c.test.totalCount}</span>
+    </div>
+    <div class="tags">
+      <span class="tag">${esc(c.condition.label_ko)}</span>
+      <span class="tag">기능 이상 ${esc(c.condition.knownFaultLabel_ko)}</span>
+    </div>
+    <p class="listing-ref">업체 매입 참고 · ${ref}</p>
+    <a class="btn btn-secondary btn-block" href="${esc(c.url)}">상세 · 보증서 · 문의</a>
+  </article>`;
+}
 
 function renderChips() {
   chips.innerHTML = "";
@@ -193,7 +227,7 @@ async function loadAllListings() {
     const r = await fetch('/api/public/certificates');
     if (!r.ok) throw new Error('목록을 불러오지 못했어요');
     const { items } = await r.json();
-    el.innerHTML = items.length ? items.map(c => `<article class="result"><h3>${esc(c.device.model)} ${esc(c.device.storage)}</h3><p>판매 희망가 ${c.askingPriceKrw ? won(c.askingPriceKrw) : '미정'}</p><p>${esc(c.condition.label_ko)} · 기능 이상 ${esc(c.condition.knownFaultLabel_ko)} · 점검 ${c.test.passedCount}/${c.test.totalCount}</p><p class="muted">${c.price.status === 'ok' ? esc(c.price.label_ko) + (c.price.estimated ? ' · 해당 조합 업체 자료 없음 · ' : ' · 업체 ' + c.price.vendorCount + '곳 기준 · ') + won(c.price.minKrw) + '~' + won(c.price.maxKrw) + ' (검수·조건에 따라 상이)' : '시세 정보 없음 또는 조회 제한'}</p><a class="btn btn-secondary" href="${esc(c.url)}">상세 · 보증서 · 문의</a></article>`).join('') : '<p>판매 중 매물이 없어요.</p>';
+    el.innerHTML = items.length ? items.map(listingCard).join('') : '<p class="muted">판매 중 매물이 없어요.</p>';
   } catch (e) { el.textContent = e.message; }
 }
 document.getElementById('refresh-listings').onclick = loadAllListings;

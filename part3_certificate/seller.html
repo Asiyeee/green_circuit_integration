@@ -31,7 +31,24 @@
   .photo .plus{display:block;font-size:26px;font-weight:300;line-height:1;margin-bottom:6px;text-align:center}
   .err{color:var(--danger);font-size:14px;white-space:pre-wrap;margin:12px 0 0}
   .err:empty{display:none}
-  #done{display:none;text-align:center}
+  #done{display:none;text-align:center;scroll-margin-top:96px}
+  /* 디자인 개선: 사진 버튼 세로 배치, 데모 안내 접기, 완료 화면 정리 */
+  .photo-actions label{padding:7px 0;white-space:nowrap;font-size:12.5px}
+  .photo{place-items:start center;padding-top:16px;font-size:13px;text-align:center}
+  #done .btn-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .demo-note summary{cursor:pointer;font-weight:700;list-style:none}
+  .demo-note summary::-webkit-details-marker{display:none}
+  .demo-note summary::after{content:" ▾";font-weight:400}
+  .demo-note[open] summary::after{content:" ▴"}
+  .demo-note p{margin:8px 0 0}
+  .key-note{text-align:left;margin:12px 0}
+  .key-note p{margin:4px 0 0}
+  .key-row{display:flex;gap:8px;align-items:stretch}
+  .key-row .input{flex:1;min-width:0}
+  .key-row .btn{flex:none;white-space:nowrap}
+  .copied{min-height:20px;margin:6px 0 0;font-size:13px;font-weight:700;color:var(--primary)}
+  .next-steps{text-align:left;margin:14px 0 6px;padding-left:20px;font-size:14px;color:var(--ink-2);line-height:1.7}
+  .btn.is-done{background:var(--primary-weak);color:var(--primary)}
   #qr{display:inline-block;background:#fff;padding:12px;border-radius:12px;margin:8px 0 4px;box-shadow:inset 0 0 0 1px var(--line)}
   #link{word-break:break-all;font-size:13px;color:var(--ink-3)}
   #incomplete{margin-top:12px}
@@ -49,7 +66,7 @@
     <p class="eyebrow">점검 결과로 만드는 보증서</p>
     <h1 class="title">구매자가 믿을 수 있는<br>보증서를 만들어요</h1>
     <p class="lead">점검 결과에 용량·상태를 더하고 희망가를 정해 우리 플랫폼에 등록하세요. 파손·미확인 기기도 공개하고 등록할 수 있어요.</p>
-    <p class="notice">해커톤 데모: 공용 접속 토큰과 매물별 관리키를 사용해요. 닉네임은 계정 인증이 아니며, 관리키를 보관한 브라우저에서 문의와 완료 처리를 관리해요. 결제·배송·에스크로·실시간 채팅은 제공하지 않아요.</p>
+    <details class="notice demo-note"><summary>데모 이용 안내</summary><p>공용 접속 토큰과 매물별 관리키를 사용해요. 닉네임은 계정 인증이 아니며, 관리키를 보관한 브라우저에서 문의와 완료 처리를 관리해요. 결제·배송·에스크로·실시간 채팅은 제공하지 않아요.</p></details>
     <div id="my-listings" class="btn-row"></div>
   </div>
 
@@ -107,9 +124,9 @@
     <h2 class="section-title">외관 사진 · 배터리 캡처 (선택)</h2>
     <p class="section-sub">점검 때 찍은 사진은 자동으로 들어가요. 화면을 켠 채로 찍으면 잔상·화면 불량도 봐요. 판매하는 폰으로 직접 찍기 어려우면 다른 기기로 찍어 갤러리에서 올려도 돼요. 배터리 캡처는 '사용량' 화면이 아니라 최대 용량이 보이는 화면이어야 해요: 아이폰 '설정 → 배터리 → 배터리 성능 상태', 갤럭시 '설정 → 배터리 → 배터리 정보'. 개인정보가 보이지 않게 해 주세요.</p>
     <div class="photos" style="margin-top:14px">
-      <div class="photo" data-kind="front"><span><span class="plus">+</span>앞면</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
-      <div class="photo" data-kind="back"><span><span class="plus">+</span>뒷면</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
-      <div class="photo" data-kind="battery"><span><span class="plus">+</span>배터리 캡처</span><div class="photo-actions"><label>갤러리<input type="file" accept="image/*"></label></div></div>
+      <div class="photo" data-kind="front"><span><span class="plus">+</span>앞면</span><div class="photo-actions"><label>앨범<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
+      <div class="photo" data-kind="back"><span><span class="plus">+</span>뒷면</span><div class="photo-actions"><label>앨범<input type="file" accept="image/*"></label><label>촬영<input type="file" accept="image/*" capture="environment"></label></div></div>
+      <div class="photo" data-kind="battery"><span><span class="plus">+</span>배터리 캡처</span><div class="photo-actions"><label>앨범<input type="file" accept="image/*"></label></div></div>
     </div>
     <p class="muted" style="margin:12px 0 0">사진을 올리면 AI가 자동으로 외관 상태와 배터리를 판별해요.</p>
     <div class="btn-row" style="margin-top:8px"><button class="btn btn-secondary" id="assess" disabled>AI로 다시 판별</button></div>
@@ -133,9 +150,18 @@
   <section class="section" id="done">
     <p class="eyebrow">발급 완료</p>
     <h2 class="section-title">보증서와 매물이 등록됐어요</h2>
-    <p class="section-sub">구매자 목록에 공개됐어요. 상세 페이지에서 문의를 확인하고 판매 완료를 처리하세요. 중요: 관리키는 링크에 포함되지 않으며 이 브라우저에 저장돼요. 아래 키를 별도로 안전하게 보관하세요.</p>
-    <input class="input" id="owner-key" type="password" readonly aria-label="판매자 관리키">
-    <button class="btn btn-secondary" id="copy-owner">관리키 복사</button>
+    <p class="section-sub">구매자 목록에 공개됐어요.</p>
+    <div class="notice key-note"><b>관리키를 꼭 따로 보관하세요</b><p>문의 확인과 판매 완료 처리에 필요해요. 링크에는 포함되지 않고 이 브라우저에만 저장돼요.</p></div>
+    <div class="key-row">
+      <input class="input" id="owner-key" type="password" readonly aria-label="판매자 관리키">
+      <button class="btn btn-secondary" id="copy-owner">관리키 복사</button>
+    </div>
+    <p class="copied" id="copy-owner-msg" role="status" aria-live="polite"></p>
+    <ol class="next-steps">
+      <li><b>관리키 복사</b> 후 메모 앱 등에 저장</li>
+      <li><b>내 매물 · 문의 관리</b>에서 구매자 문의 확인</li>
+      <li>거래가 끝나면 <b>판매 완료</b> 처리 → 환경 온도 상승</li>
+    </ol>
     <div id="qr"></div>
     <p id="link"></p>
     <div class="btn-row">
@@ -359,6 +385,7 @@ $('#issue').addEventListener('click', async () => {
     if (window.QRCode) new QRCode($('#qr'), { text: full, width: 168, height: 168 });
     $('#done').scrollIntoView({ behavior: 'smooth' });
     btn.textContent = '등록 완료';
+    document.querySelector('.cta').style.display = 'none'; // 완료 후 비활성 버튼 숨김
   } catch (e) {
     $('#err').textContent = '발급하지 못했어요: ' + e.message;
     btn.textContent = '보증서 연결 매물 등록하기';
@@ -416,8 +443,24 @@ async function runAssess() {
   btn.disabled = false; btn.textContent = 'AI로 다시 판별';
 }
 $('#assess').addEventListener('click', runAssess);
-$('#copy').addEventListener('click', () => navigator.clipboard.writeText($('#link').textContent));
-$('#copy-owner').addEventListener('click', () => navigator.clipboard.writeText($('#owner-key').value));
+// 복사 버튼: 성공하면 버튼과 안내 문구로 바로 알려 줌
+async function copyWithFeedback(btn, text, label, msgEl) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch {
+    // 클립보드 권한이 없으면 입력칸을 선택해 직접 복사하도록 안내
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch {}
+    ta.remove();
+  }
+  btn.textContent = ok ? '복사됐어요 ✓' : '복사 실패';
+  btn.classList.toggle('is-done', ok);
+  if (msgEl) msgEl.textContent = ok ? '클립보드에 복사됐어요. 메모 앱에 붙여 넣어 보관하세요.' : '자동 복사가 안 돼요. 키를 길게 눌러 직접 복사해 주세요.';
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => { btn.textContent = label; btn.classList.remove('is-done'); }, 2500);
+}
+$('#copy').addEventListener('click', e => copyWithFeedback(e.currentTarget, $('#link').textContent, '링크 복사'));
+$('#copy-owner').addEventListener('click', e => copyWithFeedback(e.currentTarget, $('#owner-key').value, '관리키 복사', $('#copy-owner-msg')));
 function renderMine() {
   try {
     const n = Object.keys(localStorage).filter(k => /^gc-owner-[A-Za-z0-9]+$/.test(k)).length;

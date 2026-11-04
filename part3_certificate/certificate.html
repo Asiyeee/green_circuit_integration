@@ -83,6 +83,7 @@
   <span class="appbar-meta" id="bar-no"></span>
 </div></header>
 <main class="page" id="app"><p class="muted" style="padding:40px 0">보증서 불러오는 중</p></main>
+<div class="cta" id="cert-cta" hidden><div class="cta-in btn-row"><button class="btn btn-secondary" id="cta-copy">링크 복사</button><a class="btn btn-primary" id="cta-ask" href="#market-controls">구매 문의하기</a></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="/assets/price-reference.js"></script>
 <script src="/assets/hardware-details.js"></script>
@@ -246,6 +247,18 @@ function render({ certificate: c, verified, expired, seller }) {
   if (window.QRCode) new QRCode($('#qr'), { text: share, width: 96, height: 96 });
   $('#copy').onclick = () => navigator.clipboard.writeText(share).then(() => { $('#copy').textContent = '복사됨'; });
   window.renderMarketControls({ certificate: c, expired, token: T, reload: load });
+  // 하단 고정 바: 공유와 문의를 어디서든 바로
+  const cta = document.getElementById('cert-cta');
+  const mc = document.getElementById('market-controls');
+  const askBtn = document.getElementById('cta-ask');
+  if (new URLSearchParams(location.search).has('manage')) askBtn.textContent = '문의 · 판매 관리';
+  askBtn.hidden = !(mc && mc.innerHTML.trim());
+  if (mc) mc.style.scrollMarginTop = '96px';
+  document.getElementById('cta-copy').onclick = e => navigator.clipboard.writeText(share).then(() => {
+    e.currentTarget.textContent = '복사됐어요 ✓';
+    setTimeout(() => { document.getElementById('cta-copy').textContent = '링크 복사'; }, 2500);
+  });
+  cta.hidden = false;
 }
 
 async function load() {

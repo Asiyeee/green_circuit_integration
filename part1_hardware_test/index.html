@@ -239,7 +239,7 @@
     <div class="detail" id="d-out"></div>
   </section>
 
-  <section class="section">
+  <section class="section" id="dev-info" hidden>
     <details>
       <summary>개발자 정보</summary>
       <div id="server-card" style="margin-top:14px">
@@ -1286,5 +1286,9 @@ refreshJson();
 initServer();
 </script>
 <script src="/assets/nav.js"></script>
+<script>
+  // 개발자 정보: 주소에 ?debug=1 을 붙였을 때만 표시 (데모 화면 정리)
+  if (new URLSearchParams(location.search).has('debug')) document.getElementById('dev-info').hidden = false;
+</script>
 </body>
 </html>
